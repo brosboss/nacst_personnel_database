@@ -26,7 +26,7 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 app_include_css = "/assets/nacstnew/css/workspace_desktop.css"
-app_include_js = "/assets/nacstnew/js/workspace_style_loader.js"
+# app_include_js = "/assets/nacstnew/js/nacstnew.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/nacstnew/css/nacstnew.css"
@@ -94,7 +94,7 @@ page_js = {
 # 	"filters": "nacstnew.utils.jinja_filters"
 # }
 
-# Installation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
+# Installation
 # ------------
 
 # before_install = "nacstnew.install.before_install"
