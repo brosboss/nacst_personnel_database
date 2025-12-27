@@ -1,0 +1,1164 @@
+/* Custom Workspace Desktop Styling for NACST */
+
+/* Workspace Container Styling */
+[data-page-route="Workspaces"] {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	min-height: 100vh;
+}
+
+[data-page-route="Workspaces"] .layout-main {
+	background: transparent;
+}
+
+[data-page-route="Workspaces"] .layout-main-section-wrapper {
+	background: transparent;
+	padding: 20px;
+}
+
+/* Main Workspace Section */
+[data-page-route="Workspaces"] .layout-main-section {
+	background: rgba(255, 255, 255, 0.95);
+	backdrop-filter: blur(10px);
+	border-radius: 20px;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	padding: 30px;
+	transition: all 0.3s ease;
+}
+
+[data-page-route="Workspaces"] .layout-main-section:hover {
+	box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+	transform: translateY(-2px);
+}
+
+/* Workspace Sidebar */
+[data-page-route="Workspaces"] .desk-sidebar {
+	background: rgba(255, 255, 255, 0.95);
+	backdrop-filter: blur(10px);
+	border-radius: 15px;
+	padding: 20px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	margin-bottom: 20px;
+}
+
+[data-page-route="Workspaces"] .standard-sidebar-label {
+	color: #667eea;
+	font-weight: 700;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	font-size: 12px;
+	margin-bottom: 15px;
+	padding-bottom: 10px;
+	border-bottom: 2px solid #667eea;
+}
+
+[data-page-route="Workspaces"] .standard-sidebar-item {
+	padding: 12px 15px;
+	margin-bottom: 8px;
+	border-radius: 10px;
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+
+[data-page-route="Workspaces"] .standard-sidebar-item:hover {
+	background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+	transform: translateX(5px);
+	box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+[data-page-route="Workspaces"] .standard-sidebar-item.active {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+[data-page-route="Workspaces"] .standard-sidebar-item.active a {
+	color: white;
+}
+
+/* Widget Styling */
+[data-page-route="Workspaces"] .widget {
+	background: white;
+	border-radius: 15px;
+	padding: 20px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	border: 1px solid rgba(102, 126, 234, 0.1);
+	transition: all 0.3s ease;
+	overflow: hidden;
+	position: relative;
+}
+
+[data-page-route="Workspaces"] .widget::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+[data-page-route="Workspaces"] .widget:hover {
+	box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+	transform: translateY(-5px);
+	border-color: rgba(102, 126, 234, 0.3);
+}
+
+[data-page-route="Workspaces"] .widget:hover::before {
+	opacity: 1;
+}
+
+[data-page-route="Workspaces"] .widget-head {
+	border-bottom: 2px solid #f0f0f0;
+	padding-bottom: 15px;
+	margin-bottom: 15px;
+}
+
+[data-page-route="Workspaces"] .widget-title {
+	color: #2c3e50;
+	font-weight: 700;
+	font-size: 16px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+[data-page-route="Workspaces"] .widget-title svg {
+	color: #667eea;
+}
+
+/* Widget Groups */
+[data-page-route="Workspaces"] .widget-group {
+	margin-bottom: 30px;
+}
+
+[data-page-route="Workspaces"] .widget-group-title {
+	color: #2c3e50;
+	font-weight: 700;
+	font-size: 20px;
+	margin-bottom: 20px;
+	padding-bottom: 10px;
+	border-bottom: 3px solid #667eea;
+	display: inline-block;
+}
+
+/* Grid Layouts */
+[data-page-route="Workspaces"] .grid-col-3,
+[data-page-route="Workspaces"] .grid-col-2,
+[data-page-route="Workspaces"] .grid-col-1 {
+	gap: 20px;
+}
+
+/* Links Widget */
+[data-page-route="Workspaces"] .links-widget-box {
+	background: white;
+	border-radius: 15px;
+	padding: 20px;
+}
+
+[data-page-route="Workspaces"] .links-widget-box .link-item {
+	padding: 15px;
+	margin-bottom: 10px;
+	border-radius: 10px;
+	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+	transition: all 0.2s ease;
+	border-left: 4px solid transparent;
+}
+
+[data-page-route="Workspaces"] .links-widget-box .link-item:hover {
+	background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+	border-left-color: #667eea;
+	transform: translateX(5px);
+	box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+/* Number Cards */
+[data-page-route="Workspaces"] .number-card {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	border-radius: 15px;
+	padding: 25px;
+	text-align: center;
+	box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+	transition: all 0.3s ease;
+}
+
+[data-page-route="Workspaces"] .number-card:hover {
+	transform: translateY(-5px) scale(1.02);
+	box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+}
+
+[data-page-route="Workspaces"] .number-card .number {
+	font-size: 36px;
+	font-weight: 700;
+	margin-bottom: 10px;
+}
+
+[data-page-route="Workspaces"] .number-card .label {
+	font-size: 14px;
+	opacity: 0.9;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+/* Charts */
+[data-page-route="Workspaces"] .widget-charts {
+	background: white;
+}
+
+/* Shortcuts */
+[data-page-route="Workspaces"] .shortcut-widget-box {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	gap: 15px;
+	align-items: stretch;
+}
+
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link {
+	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+	border-radius: 12px;
+	padding: 20px 15px;
+	text-align: center;
+	transition: all 0.2s ease;
+	border: 2px solid transparent;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 100px;
+	word-wrap: break-word;
+	overflow: visible;
+	position: relative;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link * {
+	overflow: visible;
+	text-overflow: clip;
+	white-space: normal;
+	word-break: break-word;
+	max-width: 100%;
+}
+
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link svg,
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link i {
+	margin-bottom: 10px;
+	flex-shrink: 0;
+}
+
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link span,
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link .shortcut-label,
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link .indicator-pill {
+	display: block;
+	width: 100%;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.4;
+	color: #2c3e50;
+	text-align: center;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	hyphens: auto;
+	margin: 0;
+	padding: 0;
+	white-space: normal;
+	overflow: visible;
+	text-overflow: clip;
+}
+
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link:hover {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	transform: translateY(-5px);
+	box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+	border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link:hover svg,
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link:hover i {
+	color: white;
+}
+
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link:hover span,
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link:hover .shortcut-label,
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link:hover .indicator-pill {
+	color: white;
+}
+
+/* Fix for ellipsis truncation */
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link .ellipsis {
+	white-space: normal !important;
+	overflow: visible !important;
+	text-overflow: clip !important;
+	display: block;
+	width: 100%;
+}
+
+/* Ensure widget body doesn't constrain */
+[data-page-route="Workspaces"] .shortcut-widget-box .widget-body {
+	overflow: visible;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+	align-items: stretch;
+}
+
+[data-page-route="Workspaces"] .shortcut-widget-box .widget-body > * {
+	flex: 1 1 auto;
+	min-width: 160px;
+}
+
+/* Workspace Footer */
+[data-page-route="Workspaces"] .workspace-footer {
+	background: rgba(255, 255, 255, 0.95);
+	backdrop-filter: blur(10px);
+	border-radius: 15px;
+	padding: 15px 25px;
+	margin-top: 30px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(102, 126, 234, 0.2);
+	display: flex;
+	gap: 15px;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+/* Edit and New Buttons - Enhanced Styling */
+[data-page-route="Workspaces"] .workspace-footer .btn-new-workspace,
+[data-page-route="Workspaces"] .workspace-footer .btn-edit-workspace {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	border: none;
+	border-radius: 12px;
+	padding: 12px 24px;
+	font-weight: 600;
+	font-size: 14px;
+	letter-spacing: 0.5px;
+	box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	min-height: 44px;
+}
+
+[data-page-route="Workspaces"] .workspace-footer .btn-new-workspace:hover,
+[data-page-route="Workspaces"] .workspace-footer .btn-edit-workspace:hover {
+	background: linear-gradient(135deg, #5568d3 0%, #6a3d8f 100%);
+	box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+	transform: translateY(-2px);
+}
+
+[data-page-route="Workspaces"] .workspace-footer .btn-new-workspace:active,
+[data-page-route="Workspaces"] .workspace-footer .btn-edit-workspace:active {
+	transform: translateY(0);
+	box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+[data-page-route="Workspaces"] .workspace-footer .btn-new-workspace svg,
+[data-page-route="Workspaces"] .workspace-footer .btn-edit-workspace svg {
+	width: 18px;
+	height: 18px;
+	fill: white;
+	stroke: white;
+}
+
+[data-page-route="Workspaces"] .workspace-footer .btn-new-workspace span,
+[data-page-route="Workspaces"] .workspace-footer .btn-edit-workspace span {
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.8px;
+}
+
+/* Edit Button Specific Styling */
+[data-page-route="Workspaces"] .workspace-footer .btn-edit-workspace {
+	background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+	box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+[data-page-route="Workspaces"] .workspace-footer .btn-edit-workspace:hover {
+	background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+	box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+}
+
+/* Edit Mode */
+[data-page-route="Workspaces"] .layout-main-section.edit-mode {
+	background: rgba(255, 255, 255, 0.98);
+	border: 2px dashed #667eea;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	[data-page-route="Workspaces"] .layout-main-section {
+		padding: 20px;
+		border-radius: 15px;
+	}
+	
+	[data-page-route="Workspaces"] .widget {
+		padding: 15px;
+	}
+}
+
+/* Scrollbar Styling */
+[data-page-route="Workspaces"] .layout-side-section::-webkit-scrollbar,
+[data-page-route="Workspaces"] .layout-main-section-wrapper::-webkit-scrollbar {
+	width: 8px;
+}
+
+[data-page-route="Workspaces"] .layout-side-section::-webkit-scrollbar-track,
+[data-page-route="Workspaces"] .layout-main-section-wrapper::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 10px;
+}
+
+[data-page-route="Workspaces"] .layout-side-section::-webkit-scrollbar-thumb,
+[data-page-route="Workspaces"] .layout-main-section-wrapper::-webkit-scrollbar-thumb {
+	background: rgba(102, 126, 234, 0.5);
+	border-radius: 10px;
+}
+
+[data-page-route="Workspaces"] .layout-side-section::-webkit-scrollbar-thumb:hover,
+[data-page-route="Workspaces"] .layout-main-section-wrapper::-webkit-scrollbar-thumb:hover {
+	background: rgba(102, 126, 234, 0.7);
+}
+
+/* Animation for widgets on load */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+[data-page-route="Workspaces"] .widget {
+	animation: fadeInUp 0.5s ease-out;
+}
+
+[data-page-route="Workspaces"] .widget:nth-child(1) { animation-delay: 0.1s; }
+[data-page-route="Workspaces"] .widget:nth-child(2) { animation-delay: 0.2s; }
+[data-page-route="Workspaces"] .widget:nth-child(3) { animation-delay: 0.3s; }
+[data-page-route="Workspaces"] .widget:nth-child(4) { animation-delay: 0.4s; }
+[data-page-route="Workspaces"] .widget:nth-child(5) { animation-delay: 0.5s; }
+
+/* Page Header Styling */
+[data-page-route="Workspaces"] .page-header {
+	background: transparent;
+	border: none;
+	padding: 20px 0;
+}
+
+[data-page-route="Workspaces"] .page-title {
+	color: white;
+	font-weight: 700;
+	font-size: 28px;
+	text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Block Menu Items */
+[data-page-route="Workspaces"] .block-menu-item {
+	background: white;
+	border-radius: 12px;
+	padding: 15px;
+	margin-bottom: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	transition: all 0.2s ease;
+}
+
+[data-page-route="Workspaces"] .block-menu-item:hover {
+	box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+	transform: translateX(5px);
+}
+
+[data-page-route="Workspaces"] .block-menu-item-icon {
+	color: #667eea;
+}
+
+/* Enhanced Typography for Widget Content - Making text more legible */
+[data-page-route="Workspaces"] .widget-body,
+[data-page-route="Workspaces"] .widget-content {
+	font-size: 15px;
+	line-height: 1.7;
+	color: #2c3e50;
+	font-weight: 400;
+}
+
+/* Widget Text Content - Labels and Values */
+[data-page-route="Workspaces"] .widget p,
+[data-page-route="Workspaces"] .widget div,
+[data-page-route="Workspaces"] .widget span {
+	font-size: 15px;
+	line-height: 1.7;
+	color: #2c3e50;
+}
+
+/* Links and Labels in Widgets */
+[data-page-route="Workspaces"] .links-widget-box a,
+[data-page-route="Workspaces"] .widget a {
+	font-size: 15px;
+	font-weight: 500;
+	color: #667eea;
+	text-decoration: none;
+	transition: all 0.2s ease;
+}
+
+[data-page-route="Workspaces"] .links-widget-box a:hover,
+[data-page-route="Workspaces"] .widget a:hover {
+	color: #5568d3;
+	text-decoration: underline;
+}
+
+/* Specific styling for common dashboard text elements */
+[data-page-route="Workspaces"] .widget .label,
+[data-page-route="Workspaces"] .widget label {
+	font-size: 13px;
+	font-weight: 600;
+	color: #667eea;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 5px;
+	display: block;
+}
+
+[data-page-route="Workspaces"] .widget .value,
+[data-page-route="Workspaces"] .widget .text {
+	font-size: 16px;
+	font-weight: 500;
+	color: #2c3e50;
+	margin-bottom: 12px;
+	line-height: 1.6;
+}
+
+/* Unit, Rank, Course Name and similar text - Enhanced */
+[data-page-route="Workspaces"] .widget [class*="unit"],
+[data-page-route="Workspaces"] .widget [class*="rank"],
+[data-page-route="Workspaces"] .widget [class*="course"],
+[data-page-route="Workspaces"] .widget [class*="name"],
+[data-page-route="Workspaces"] .widget [class*="title"] {
+	font-size: 16px;
+	font-weight: 600;
+	color: #1a252f;
+	line-height: 1.6;
+	margin-bottom: 8px;
+}
+
+/* Number Card Text */
+[data-page-route="Workspaces"] .number-card .number {
+	font-size: 42px;
+	font-weight: 800;
+	line-height: 1.2;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+[data-page-route="Workspaces"] .number-card .label {
+	font-size: 15px;
+	font-weight: 600;
+	opacity: 0.95;
+	letter-spacing: 0.8px;
+}
+
+/* Table Content in Widgets */
+[data-page-route="Workspaces"] .widget table,
+[data-page-route="Workspaces"] .widget .table {
+	font-size: 14px;
+}
+
+[data-page-route="Workspaces"] .widget table th {
+	font-size: 13px;
+	font-weight: 700;
+	color: #2c3e50;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+[data-page-route="Workspaces"] .widget table td {
+	font-size: 14px;
+	font-weight: 500;
+	color: #2c3e50;
+	line-height: 1.6;
+}
+
+/* List Items */
+[data-page-route="Workspaces"] .widget ul,
+[data-page-route="Workspaces"] .widget ol {
+	font-size: 15px;
+	line-height: 1.8;
+	color: #2c3e50;
+}
+
+[data-page-route="Workspaces"] .widget li {
+	margin-bottom: 8px;
+	font-weight: 400;
+}
+
+[data-page-route="Workspaces"] .widget li strong,
+[data-page-route="Workspaces"] .widget li b {
+	font-weight: 600;
+	color: #1a252f;
+}
+
+/* Headers in Widgets */
+[data-page-route="Workspaces"] .widget h1,
+[data-page-route="Workspaces"] .widget h2,
+[data-page-route="Workspaces"] .widget h3,
+[data-page-route="Workspaces"] .widget h4,
+[data-page-route="Workspaces"] .widget h5,
+[data-page-route="Workspaces"] .widget h6 {
+	color: #1a252f;
+	font-weight: 700;
+	line-height: 1.4;
+	margin-bottom: 12px;
+}
+
+[data-page-route="Workspaces"] .widget h1 { font-size: 24px; }
+[data-page-route="Workspaces"] .widget h2 { font-size: 20px; }
+[data-page-route="Workspaces"] .widget h3 { font-size: 18px; }
+[data-page-route="Workspaces"] .widget h4 { font-size: 16px; }
+[data-page-route="Workspaces"] .widget h5 { font-size: 15px; }
+[data-page-route="Workspaces"] .widget h6 { font-size: 14px; }
+
+/* Improve contrast and readability for all text */
+[data-page-route="Workspaces"] .widget * {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Shortcut Links Text - Additional Overrides */
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link a {
+	font-size: 13px;
+	font-weight: 500;
+	color: #2c3e50;
+	text-decoration: none;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	white-space: normal;
+	overflow: visible;
+	text-overflow: clip;
+}
+
+[data-page-route="Workspaces"] .shortcut-widget-box .shortcut-link:hover a {
+	color: white;
+}
+
+/* Override any ellipsis classes on shortcut text */
+[data-page-route="Workspaces"] .shortcut-widget-box .ellipsis,
+[data-page-route="Workspaces"] .shortcut-widget-box [class*="ellipsis"] {
+	white-space: normal !important;
+	overflow: visible !important;
+	text-overflow: clip !important;
+	display: block;
+	width: 100%;
+	max-width: 100%;
+}
+
+/* Block Content Text */
+[data-page-route="Workspaces"] .ce-block__content,
+[data-page-route="Workspaces"] .ce-paragraph {
+	font-size: 15px;
+	line-height: 1.7;
+	color: #2c3e50;
+	font-weight: 400;
+}
+
+[data-page-route="Workspaces"] .ce-header {
+	font-weight: 700;
+	color: #1a252f;
+	line-height: 1.4;
+}
+
+[data-page-route="Workspaces"] .ce-header[data-level="1"] { font-size: 28px; }
+[data-page-route="Workspaces"] .ce-header[data-level="2"] { font-size: 24px; }
+[data-page-route="Workspaces"] .ce-header[data-level="3"] { font-size: 20px; }
+[data-page-route="Workspaces"] .ce-header[data-level="4"] { font-size: 18px; }
+
+/* ============================================
+   DESK/TABLE STYLING - Comprehensive
+   ============================================ */
+
+/* General Desk Background */
+body.desk-body {
+	background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+	min-height: 100vh;
+}
+
+/* Frappe DataTable Styling */
+.datatable {
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	overflow: hidden;
+	border: 1px solid rgba(102, 126, 234, 0.1);
+	margin: 20px 0;
+}
+
+.datatable .dt-header {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.datatable .dt-row-header {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.datatable .dt-cell--header .dt-cell__content {
+	background: transparent !important;
+	color: white !important;
+	font-weight: 600 !important;
+	font-size: 13px !important;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	padding: 12px 15px !important;
+}
+
+.datatable .dt-row {
+	height: 45px;
+	border-bottom: 1px solid #f0f0f0;
+	transition: all 0.2s ease;
+}
+
+.datatable .dt-row:hover {
+	background-color: #f8f9ff !important;
+	transform: scale(1.001);
+	box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.datatable .dt-cell {
+	color: #2c3e50 !important;
+	font-size: 14px !important;
+	font-weight: 400;
+	padding: 12px 15px !important;
+	line-height: 1.6;
+}
+
+.datatable .dt-cell__content {
+	font-size: 14px !important;
+	color: #2c3e50 !important;
+	font-weight: 400;
+}
+
+.datatable .dt-scrollable {
+	border-top: 0 !important;
+	max-height: calc(100vh - 300px);
+}
+
+/* List View Styling */
+.list-container {
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	overflow: hidden;
+	border: 1px solid rgba(102, 126, 234, 0.1);
+	margin: 20px 0;
+}
+
+.list-row {
+	padding: 15px 20px;
+	border-bottom: 1px solid #f0f0f0;
+	transition: all 0.2s ease;
+	border-radius: 0;
+}
+
+.list-row:hover {
+	background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%) !important;
+	transform: translateX(3px);
+	box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.list-row-head {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+	color: white;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	font-size: 12px;
+	border-radius: 0;
+	margin: 0;
+	padding: 12px 20px;
+}
+
+.list-row-head .list-subject,
+.list-row-head .list-row-col {
+	color: white !important;
+	font-weight: 600;
+}
+
+.list-subject a {
+	color: #2c3e50;
+	font-weight: 500;
+	font-size: 14px;
+	transition: color 0.2s ease;
+}
+
+.list-subject a:hover {
+	color: #667eea;
+	text-decoration: none;
+}
+
+.list-row-col {
+	font-size: 14px;
+	color: #2c3e50;
+}
+
+/* General Table Styling */
+table {
+	width: 100%;
+	border-collapse: collapse;
+	background: white;
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	margin: 20px 0;
+}
+
+table thead {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+table th {
+	padding: 15px 20px;
+	text-align: left;
+	color: white;
+	font-weight: 600;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	border: none;
+}
+
+table td {
+	padding: 15px 20px;
+	border-bottom: 1px solid #f0f0f0;
+	font-size: 14px;
+	color: #2c3e50;
+	font-weight: 400;
+	line-height: 1.6;
+}
+
+table tbody tr {
+	transition: all 0.2s ease;
+}
+
+table tbody tr:hover {
+	background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+	transform: scale(1.001);
+}
+
+table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+/* Frappe Card Styling */
+.frappe-card {
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	border: 1px solid rgba(102, 126, 234, 0.1);
+	margin: 20px 0;
+	overflow: hidden;
+}
+
+.frappe-card .card-header {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	padding: 15px 20px;
+	font-weight: 600;
+	font-size: 16px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.frappe-card .card-body {
+	padding: 20px;
+}
+
+/* Page Layout Styling */
+.layout-main {
+	background: transparent;
+}
+
+.layout-main-section {
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	border: 1px solid rgba(102, 126, 234, 0.1);
+	padding: 25px;
+	margin: 20px 0;
+}
+
+.page-header {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border-radius: 12px;
+	padding: 20px 25px;
+	margin-bottom: 20px;
+	box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.page-header .page-title {
+	color: white;
+	font-weight: 700;
+	font-size: 24px;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.page-header .indicator {
+	background: rgba(255, 255, 255, 0.2);
+	color: white;
+	padding: 5px 12px;
+	border-radius: 20px;
+	font-size: 12px;
+	font-weight: 600;
+}
+
+/* Form Styling */
+.form-section {
+	background: white;
+	border-radius: 12px;
+	padding: 20px;
+	margin-bottom: 20px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.section-head {
+	background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+	padding: 12px 20px;
+	margin: -20px -20px 20px -20px;
+	border-radius: 12px 12px 0 0;
+	border-bottom: 2px solid #667eea;
+	font-weight: 600;
+	color: #667eea;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	font-size: 13px;
+}
+
+/* Control Styling */
+.form-control,
+.frappe-control {
+	border-radius: 8px;
+	border: 1px solid #e0e0e0;
+	padding: 10px 15px;
+	font-size: 14px;
+	transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.frappe-control:focus {
+	border-color: #667eea;
+	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+	outline: none;
+}
+
+/* Button Styling in Desk */
+.btn {
+	border-radius: 8px;
+	padding: 10px 20px;
+	font-weight: 600;
+	font-size: 14px;
+	transition: all 0.3s ease;
+	border: none;
+}
+
+.btn-primary {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+	background: linear-gradient(135deg, #5568d3 0%, #6a3d8f 100%);
+	box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+	transform: translateY(-2px);
+}
+
+.btn-secondary {
+	background: #e9ecef;
+	color: #2c3e50;
+}
+
+.btn-secondary:hover {
+	background: #dee2e6;
+	transform: translateY(-2px);
+}
+
+/* Sidebar Styling */
+.layout-side-section {
+	background: white;
+	border-radius: 12px;
+	padding: 20px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	border: 1px solid rgba(102, 126, 234, 0.1);
+	margin: 20px 0;
+}
+
+.sidebar-label {
+	color: #667eea;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	font-size: 12px;
+	margin-bottom: 15px;
+	padding-bottom: 10px;
+	border-bottom: 2px solid #667eea;
+}
+
+/* Filter Section */
+.filter-section {
+	background: white;
+	border-radius: 12px;
+	padding: 20px;
+	margin-bottom: 20px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+	border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+/* Pagination Styling */
+.list-paging-area,
+.footnote-area {
+	background: white;
+	padding: 15px 20px;
+	border-top: 1px solid #f0f0f0;
+	border-radius: 0 0 12px 12px;
+}
+
+.btn-paging {
+	border-radius: 8px;
+	padding: 8px 16px;
+	font-weight: 500;
+	transition: all 0.2s ease;
+}
+
+.btn-paging:hover {
+	background: #667eea;
+	color: white;
+	transform: translateY(-2px);
+}
+
+/* Search and Filter Inputs */
+.search-input,
+.filter-input {
+	border-radius: 8px;
+	border: 1px solid #e0e0e0;
+	padding: 10px 15px;
+	font-size: 14px;
+	transition: all 0.2s ease;
+}
+
+.search-input:focus,
+.filter-input:focus {
+	border-color: #667eea;
+	box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+	outline: none;
+}
+
+/* Badge and Tag Styling */
+.badge,
+.tag {
+	border-radius: 12px;
+	padding: 4px 10px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+/* Empty State */
+.empty-state {
+	text-align: center;
+	padding: 60px 20px;
+	color: #6c757d;
+}
+
+.empty-state i {
+	font-size: 64px;
+	margin-bottom: 20px;
+	opacity: 0.3;
+}
+
+.empty-state h4 {
+	color: #2c3e50;
+	font-weight: 600;
+	margin-bottom: 10px;
+}
+
+/* Loading State */
+.loading-state {
+	text-align: center;
+	padding: 60px 20px;
+}
+
+.loading-state i {
+	font-size: 48px;
+	color: #667eea;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+
+/* Scrollbar Styling for Tables */
+.datatable .dt-scrollable::-webkit-scrollbar,
+.list-container::-webkit-scrollbar,
+table::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.datatable .dt-scrollable::-webkit-scrollbar-track,
+.list-container::-webkit-scrollbar-track,
+table::-webkit-scrollbar-track {
+	background: #f5f5f5;
+	border-radius: 10px;
+}
+
+.datatable .dt-scrollable::-webkit-scrollbar-thumb,
+.list-container::-webkit-scrollbar-thumb,
+table::-webkit-scrollbar-thumb {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border-radius: 10px;
+}
+
+.datatable .dt-scrollable::-webkit-scrollbar-thumb:hover,
+.list-container::-webkit-scrollbar-thumb:hover,
+table::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(135deg, #5568d3 0%, #6a3d8f 100%);
+}
+
+/* Responsive Table Design */
+@media (max-width: 768px) {
+	.datatable,
+	table,
+	.list-container {
+		border-radius: 8px;
+		margin: 10px 0;
+	}
+	
+	.datatable .dt-cell,
+	table td,
+	.list-row {
+		padding: 10px 12px;
+		font-size: 13px;
+	}
+	
+	.datatable .dt-cell--header .dt-cell__content,
+	table th {
+		padding: 10px 12px;
+		font-size: 11px;
+	}
+}
+

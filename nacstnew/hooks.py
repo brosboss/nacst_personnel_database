@@ -5,6 +5,11 @@ app_description = "!!"
 app_email = "brossboss123@gmail.com"
 app_license = "mit"
 
+
+
+
+# app_include_css = "/assets/nacstnew/css/workspace_desktop.css"
+
 # Apps
 # ------------------
 
@@ -25,7 +30,7 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/nacstnew/css/nacstnew.css"
+
 # app_include_js = "/assets/nacstnew/js/nacstnew.js"
 
 # include js, css files in header of web template
@@ -40,7 +45,22 @@ app_license = "mit"
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
-# page_js = {"page" : "public/js/file.js"}
+page_js = {
+	"personnel-view" : [
+		"public/js/navigation_sidebar.js",
+		"public/js/personnel_view.js"
+	],
+	"personnel-record" : [
+		"public/js/navigation_sidebar.js",
+		"public/js/personnel_record.js"
+	],
+	"personnel-list" : [
+		"public/js/navigation_sidebar.js"
+	],
+	"units-view" : [
+		"public/js/navigation_sidebar.js"
+	]
+}
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
@@ -83,7 +103,7 @@ app_license = "mit"
 # ------------
 
 # before_install = "nacstnew.install.before_install"
-# after_install = "nacstnew.install.after_install"
+after_install = "nacstnew.nacstnew.utils.create_personnel_view_page"
 
 # Uninstallation
 # ------------

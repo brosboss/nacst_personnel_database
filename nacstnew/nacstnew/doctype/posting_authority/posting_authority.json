@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:posting_authority",
+ "creation": "2025-12-25 18:47:30.119572",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_authority",
+  "section_break_dmwg",
+  "posting_document",
+  "column_break_slhq",
+  "reference",
+  "column_break_mvwb",
+  "date",
+  "section_break_afjp",
+  "posting_authority_details",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "posting_authority",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Authority",
+   "placeholder": "AHQMS/G1/077",
+   "read_only": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "posting_document",
+   "fieldtype": "Attach",
+   "label": "Posting Document"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "posting_authority_details",
+   "fieldtype": "Table",
+   "label": "Posting Authority Details",
+   "options": "Posting Authority Details"
+  },
+  {
+   "fieldname": "section_break_dmwg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_slhq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "label": "Reference",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_mvwb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "section_break_afjp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Posting Authority",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-26 18:00:24.779222",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Posting Authority",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

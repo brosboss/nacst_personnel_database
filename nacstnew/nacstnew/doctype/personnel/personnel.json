@@ -1,0 +1,224 @@
+{
+ "actions": [],
+ "autoname": "field:service_number",
+ "creation": "2025-12-25 17:12:12.851712",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "personal_information_tab",
+  "image",
+  "category",
+  "type_of_commission",
+  "course",
+  "personnel_image",
+  "column_break_ayhz",
+  "service_number",
+  "first_name",
+  "last_name",
+  "surname",
+  "personnel_name",
+  "column_break_wwsz",
+  "current_rank",
+  "date_of_last_promotion",
+  "current_unit",
+  "current_unit_location",
+  "current_deployment",
+  "column_break_aubc",
+  "phone_number",
+  "remarks",
+  "posting_history_tab",
+  "personnel_posting_history_html",
+  "promotion_history_tab",
+  "personnel_promotion_history",
+  "courses_attended_tab",
+  "courses_attended",
+  "brief_tab",
+  "personnel_brief"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_number",
+   "fieldtype": "Data",
+   "label": "Service Number",
+   "unique": 1
+  },
+  {
+   "default": "Personnel Category",
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Personnel Category"
+  },
+  {
+   "fieldname": "personal_information_tab",
+   "fieldtype": "Tab Break",
+   "label": "Personal Information"
+  },
+  {
+   "fieldname": "type_of_commission",
+   "fieldtype": "Link",
+   "label": "Type of Commission",
+   "options": "Type of Commission"
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Link",
+   "label": "Course",
+   "options": "Course"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "surname",
+   "fieldtype": "Data",
+   "label": "Surname"
+  },
+  {
+   "fieldname": "personnel_name",
+   "fieldtype": "Data",
+   "label": "Personnel Name"
+  },
+  {
+   "fieldname": "column_break_ayhz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_of_last_promotion",
+   "fieldtype": "Date",
+   "label": "Date of Last Promotion",
+   "read_only": 1
+  },
+  {
+   "fieldname": "current_unit",
+   "fieldtype": "Link",
+   "label": "Current Unit",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "current_unit.unit_location",
+   "fieldname": "current_unit_location",
+   "fieldtype": "Data",
+   "label": "Current Unit Location",
+   "read_only": 1
+  },
+  {
+   "fieldname": "current_deployment",
+   "fieldtype": "Data",
+   "label": "Current Deployment"
+  },
+  {
+   "fieldname": "column_break_wwsz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "posting_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Posting History"
+  },
+  {
+   "fieldname": "courses_attended_tab",
+   "fieldtype": "Tab Break",
+   "label": "Courses Attended"
+  },
+  {
+   "fieldname": "personnel_image",
+   "fieldtype": "Attach Image",
+   "label": "Personnel Image"
+  },
+  {
+   "fieldname": "promotion_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Promotion History"
+  },
+  {
+   "fieldname": "brief_tab",
+   "fieldtype": "Tab Break",
+   "label": "Brief"
+  },
+  {
+   "fieldname": "personnel_posting_history_html",
+   "fieldtype": "HTML",
+   "label": "Personnel Posting History HTML"
+  },
+  {
+   "fieldname": "personnel_promotion_history",
+   "fieldtype": "HTML",
+   "label": "Personnel Promotion History"
+  },
+  {
+   "fieldname": "courses_attended",
+   "fieldtype": "HTML",
+   "label": "Courses Attended"
+  },
+  {
+   "fieldname": "column_break_aubc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "current_rank",
+   "fieldtype": "Link",
+   "label": "Current Rank",
+   "options": "Rank",
+   "read_only": 1
+  },
+  {
+   "fieldname": "personnel_brief",
+   "fieldtype": "HTML",
+   "label": "Personnel Brief"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "HTML",
+   "label": "Image"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "image_field": "personnel_image",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-12-27 10:18:58.050210",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "Personnel",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
