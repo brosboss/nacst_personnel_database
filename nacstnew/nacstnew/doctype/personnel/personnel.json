@@ -7,10 +7,12 @@
  "field_order": [
   "personal_information_tab",
   "image",
+  "personnel_image",
+  "personnel_full_picture",
+  "column_break_tvrr",
   "category",
   "type_of_commission",
   "course",
-  "personnel_image",
   "column_break_ayhz",
   "service_number",
   "first_name",
@@ -22,6 +24,7 @@
   "date_of_last_promotion",
   "current_unit",
   "current_unit_location",
+  "current_unit_geopolitical_zone",
   "current_deployment",
   "column_break_aubc",
   "phone_number",
@@ -46,6 +49,7 @@
    "default": "Personnel Category",
    "fieldname": "category",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Category",
    "options": "Personnel Category"
   },
@@ -84,6 +88,7 @@
   {
    "fieldname": "personnel_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Personnel Name"
   },
   {
@@ -99,6 +104,7 @@
   {
    "fieldname": "current_unit",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Current Unit",
    "options": "Unit",
    "read_only": 1
@@ -106,8 +112,9 @@
   {
    "fetch_from": "current_unit.unit_location",
    "fieldname": "current_unit_location",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Current Unit Location",
+   "options": "State",
    "read_only": 1
   },
   {
@@ -140,6 +147,7 @@
    "label": "Courses Attended"
   },
   {
+   "description": "Attach personnel passport here.",
    "fieldname": "personnel_image",
    "fieldtype": "Attach Image",
    "label": "Personnel Image"
@@ -176,6 +184,7 @@
   {
    "fieldname": "current_rank",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Current Rank",
    "options": "Rank",
    "read_only": 1
@@ -189,6 +198,23 @@
    "fieldname": "image",
    "fieldtype": "HTML",
    "label": "Image"
+  },
+  {
+   "fieldname": "column_break_tvrr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Attach personnel full picture here.",
+   "fieldname": "personnel_full_picture",
+   "fieldtype": "Attach",
+   "label": "Personnel Full Picture"
+  },
+  {
+   "fetch_from": "current_unit_location.geopolitical_zone_abbrev",
+   "fieldname": "current_unit_geopolitical_zone",
+   "fieldtype": "Link",
+   "label": "Current Unit Geopolitical Zone",
+   "options": "Geopolitical Zone"
   }
  ],
  "grid_page_length": 50,
@@ -196,7 +222,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-27 10:18:58.050210",
+ "modified": "2025-12-27 23:42:49.952796",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",

@@ -8,6 +8,10 @@
  "field_order": [
   "section_break_bvxc",
   "promotion_authority",
+  "column_break_nhmm",
+  "attach",
+  "section_break_wftm",
+  "document_view",
   "promotion_list",
   "amended_from"
  ],
@@ -21,6 +25,26 @@
    "fieldtype": "Data",
    "label": "Promotion Authority",
    "unique": 1
+  },
+  {
+   "fieldname": "column_break_nhmm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Only PDF documents are allowed",
+   "fieldname": "attach",
+   "fieldtype": "Attach",
+   "label": "Attach"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_wftm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "document_view",
+   "fieldtype": "HTML",
+   "label": "Document View"
   },
   {
    "fieldname": "promotion_list",
@@ -40,10 +64,11 @@
   }
  ],
  "grid_page_length": 50,
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-26 12:09:21.435729",
+ "modified": "2025-12-27 21:41:37.612437",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Promotion",

@@ -3,6 +3,9 @@
 
 frappe.ui.form.on("Personnel", {
 	refresh(frm) {
+		// Load personnel image
+		load_personnel_image(frm);
+		
 		// Generate posting history HTML table on document load/refresh
 		if (frm.doc.service_number) {
 			load_posting_history(frm);
@@ -19,6 +22,10 @@ frappe.ui.form.on("Personnel", {
 			frm.set_value("personnel_brief", "");
 			frm.refresh_field("personnel_brief");
 		}
+	},
+	personnel_image: function(frm) {
+		// Update image when personnel_image field changes
+		load_personnel_image(frm);
 	},
 	service_number: function(frm) {
 		// Regenerate posting history, courses attended, promotion history, and brief when service number changes
@@ -39,6 +46,58 @@ frappe.ui.form.on("Personnel", {
 		}
 	}
 });
+
+function load_personnel_image(frm) {
+	// Get the image HTML field
+	let image_field = frm.get_field("image");
+	if (!image_field) {
+		return;
+	}
+	
+	let personnel_image = frm.doc.personnel_image;
+	
+	if (!personnel_image) {
+		// No image attached, show placeholder
+		let placeholder_html = `
+			<div style="text-align: center; padding: 40px 20px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;">
+				<i class="fa fa-user-circle" style="font-size: 80px; color: #adb5bd; margin-bottom: 15px;"></i>
+				<p style="color: #6c757d; font-size: 14px; margin: 0;">No image attached. Please attach an image in the "Personnel Image" field.</p>
+			</div>
+		`;
+		image_field.df.options = placeholder_html;
+		image_field.set_value(placeholder_html);
+		return;
+	}
+	
+	// Get the file URL - handle Frappe file paths
+	let image_url = personnel_image;
+	if (image_url.startsWith('/files/') || image_url.startsWith('/private/files/')) {
+		image_url = window.location.origin + image_url;
+	} else if (!image_url.startsWith('http')) {
+		// If it's just a filename, construct the path
+		image_url = window.location.origin + '/files/' + image_url;
+	}
+	
+	// Create image HTML with styling
+	let image_html = `
+		<div style="text-align: center; padding: 20px;">
+			<img src="${image_url}" 
+				 alt="Personnel Image" 
+				 style="max-width: 100%; 
+				        max-height: 500px; 
+				        border-radius: 8px; 
+				        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+				        object-fit: contain;
+				        background: #f8f9fa;
+				        padding: 10px;" 
+				 onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<div style=\\'text-align: center; padding: 40px 20px; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;\\'><i class=\\'fa fa-exclamation-triangle\\' style=\\'font-size: 48px; color: #ffc107; margin-bottom: 15px;\\'></i><p style=\\'color: #6c757d; font-size: 14px; margin: 0;\\'>Error loading image. Please check the image file.</p></div>';" />
+		</div>
+	`;
+	
+	// Set the HTML content
+	image_field.df.options = image_html;
+	image_field.set_value(image_html);
+}
 
 function load_posting_history(frm) {
 	// Call server method to generate posting history HTML

@@ -22,10 +22,10 @@
   },
   {
    "fieldname": "unit_location",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Unit Location",
-   "options": "Lagos\nAnambra",
+   "options": "State",
    "reqd": 1
   },
   {
@@ -49,16 +49,17 @@
    "read_only": 1
   },
   {
+   "fetch_from": "unit_location.geopolitical_zone",
    "fieldname": "region",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Region",
-   "options": "NE\nNW\nSE\nSW\nNN\nSS"
+   "options": "Geopolitical Zone"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-26 07:03:25.055601",
+ "modified": "2025-12-27 23:15:05.707208",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Unit",

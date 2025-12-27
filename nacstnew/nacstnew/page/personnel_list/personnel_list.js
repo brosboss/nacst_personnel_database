@@ -106,17 +106,48 @@ function build_personnel_list_page(page) {
 			
 			.pl-header {
 				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-				padding: 20px;
-				border-radius: 12px;
-				margin-bottom: 20px;
-				box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+				padding: 12px 15px;
+				border-radius: 8px;
+				margin-bottom: 12px;
+				box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+			}
+			
+			.pl-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
 			}
 			
 			.pl-header h2 {
 				color: white;
 				margin: 0;
-				font-size: 24px;
+				font-size: 18px;
 				font-weight: 700;
+			}
+			
+			.pl-export-btn {
+				background: rgba(255, 255, 255, 0.2);
+				color: white;
+				border: 1px solid rgba(255, 255, 255, 0.3);
+				border-radius: 6px;
+				padding: 8px 16px;
+				cursor: pointer;
+				font-size: 12px;
+				font-weight: 600;
+				transition: all 0.2s ease;
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			
+			.pl-export-btn:hover {
+				background: rgba(255, 255, 255, 0.3);
+				border-color: rgba(255, 255, 255, 0.5);
+				transform: translateY(-1px);
+			}
+			
+			.pl-export-btn i {
+				font-size: 14px;
 			}
 			
 			.pl-table-wrapper {
@@ -136,19 +167,19 @@ function build_personnel_list_page(page) {
 			}
 			
 			.pl-table th {
-				padding: 15px;
+				padding: 8px 10px;
 				text-align: left;
 				color: white;
 				font-weight: 600;
-				font-size: 13px;
+				font-size: 11px;
 				text-transform: uppercase;
 				letter-spacing: 0.5px;
 			}
 			
 			.pl-table td {
-				padding: 15px;
+				padding: 8px 10px;
 				border-bottom: 1px solid #e0e0e0;
-				font-size: 14px;
+				font-size: 12px;
 			}
 			
 			.pl-table tbody tr:hover {
@@ -166,39 +197,43 @@ function build_personnel_list_page(page) {
 			
 			.pl-table .pl-service-number {
 				color: #667eea;
+				font-size: 10px;
+				margin-top: 2px;
+			}
+			
+			.pl-table .pl-name-cell {
 				font-size: 12px;
-				margin-top: 3px;
 			}
 			
 			.pl-pagination-container {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				padding: 20px;
+				padding: 10px 15px;
 				background: white;
 				border-top: 1px solid #e0e0e0;
-				margin-top: 20px;
-				border-radius: 0 0 12px 12px;
+				margin-top: 10px;
+				border-radius: 0 0 8px 8px;
 			}
 			
 			.pl-pagination-info {
 				color: #6c757d;
-				font-size: 14px;
+				font-size: 12px;
 			}
 			
 			.pl-pagination-controls {
 				display: flex;
-				gap: 10px;
+				gap: 8px;
 				align-items: center;
 			}
 			
 			.pl-pagination-btn {
-				padding: 8px 16px;
+				padding: 6px 12px;
 				border: 1px solid #ddd;
 				background: white;
 				border-radius: 6px;
 				cursor: pointer;
-				font-size: 14px;
+				font-size: 12px;
 				transition: all 0.2s ease;
 			}
 			
@@ -214,12 +249,12 @@ function build_personnel_list_page(page) {
 			}
 			
 			.pl-page-number-input {
-				width: 60px;
-				padding: 8px;
+				width: 50px;
+				padding: 6px;
 				border: 1px solid #ddd;
-				border-radius: 6px;
+				border-radius: 4px;
 				text-align: center;
-				font-size: 14px;
+				font-size: 12px;
 			}
 			
 			.pl-loading-state {
@@ -254,10 +289,10 @@ function build_personnel_list_page(page) {
 			
 			.pl-filter-section {
 				background: white;
-				border-radius: 12px;
-				padding: 20px;
-				margin-bottom: 20px;
-				box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+				border-radius: 8px;
+				padding: 10px 12px;
+				margin-bottom: 12px;
+				box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 				transition: all 0.3s ease;
 			}
 			
@@ -265,10 +300,10 @@ function build_personnel_list_page(page) {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				margin-bottom: 15px;
+				margin-bottom: 0;
 				cursor: pointer;
-				padding: 10px;
-				border-radius: 8px;
+				padding: 6px 8px;
+				border-radius: 6px;
 				transition: background-color 0.2s ease;
 			}
 			
@@ -277,12 +312,12 @@ function build_personnel_list_page(page) {
 			}
 			
 			.pl-filter-section-title {
-				font-size: 16px;
+				font-size: 13px;
 				font-weight: 600;
 				color: #2c3e50;
 				display: flex;
 				align-items: center;
-				gap: 10px;
+				gap: 8px;
 			}
 			
 			.pl-filter-toggle-btn {
@@ -318,9 +353,10 @@ function build_personnel_list_page(page) {
 			
 			.pl-filter-row {
 				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-				gap: 15px;
-				margin-bottom: 15px;
+				grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+				gap: 10px;
+				margin-bottom: 10px;
+				margin-top: 10px;
 			}
 			
 			.pl-filter-group {
@@ -329,19 +365,19 @@ function build_personnel_list_page(page) {
 			}
 			
 			.pl-filter-label {
-				font-size: 12px;
+				font-size: 10px;
 				font-weight: 600;
 				color: #667eea;
-				margin-bottom: 5px;
+				margin-bottom: 4px;
 				text-transform: uppercase;
 				letter-spacing: 0.5px;
 			}
 			
 			.pl-filter-input, .pl-filter-select {
-				padding: 10px;
+				padding: 6px 8px;
 				border: 1px solid #ddd;
-				border-radius: 6px;
-				font-size: 14px;
+				border-radius: 4px;
+				font-size: 12px;
 				transition: border-color 0.2s ease;
 			}
 			
@@ -579,6 +615,9 @@ function build_personnel_list_page(page) {
 			<div class="pl-main-content-wrapper">
 				<div class="pl-header">
 					<h2><i class="fa fa-users"></i> Personnel List</h2>
+					<button class="pl-export-btn" onclick="exportToExcel()" title="Export to Excel">
+						<i class="fa fa-file-excel-o"></i> Export to Excel
+					</button>
 				</div>
 				
 				<div class="pl-filter-section">
@@ -587,10 +626,10 @@ function build_personnel_list_page(page) {
 							<i class="fa fa-filter"></i> Filters & Period Highlights
 						</div>
 						<button class="pl-filter-toggle-btn" id="filter_toggle_btn" onclick="event.stopPropagation(); toggleFilterSection();">
-							<i class="fa fa-chevron-up" id="filter_toggle_icon"></i> <span id="filter_toggle_text">Hide</span>
+							<i class="fa fa-chevron-down" id="filter_toggle_icon"></i> <span id="filter_toggle_text">Show</span>
 						</button>
 					</div>
-					<div class="pl-filter-section-content expanded" id="filter_section_content">
+					<div class="pl-filter-section-content collapsed" id="filter_section_content">
 				<div class="pl-filter-row">
 					<div class="pl-filter-group">
 						<label class="pl-filter-label">Category</label>
@@ -782,7 +821,7 @@ function build_personnel_list_page(page) {
 	renderPeriodRanges();
 	
 	// Initialize filter section state (expanded by default)
-	let filterSectionExpanded = true;
+	let filterSectionExpanded = false;
 	
 	window.toggleFilterSection = function() {
 		filterSectionExpanded = !filterSectionExpanded;
@@ -1258,6 +1297,39 @@ function build_personnel_list_page(page) {
 			b: parseInt(result[3], 16)
 		} : null;
 	}
+	
+	// Export to Excel function
+	window.exportToExcel = function() {
+		// Show loading indicator
+		frappe.show_alert({
+			message: __('Preparing export...'),
+			indicator: 'blue'
+		});
+		
+		// Get current filters
+		let filters = {
+			category: window.currentFilters.category || null,
+			current_unit: window.currentFilters.current_unit || null,
+			rank: window.currentFilters.rank || null,
+			date_tos: window.currentFilters.date_tos || null,
+			personnel_name: window.currentFilters.personnel_name || null
+		};
+		
+		// Build URL for export
+		let url = frappe.urllib.get_full_url('/api/method/nacstnew.nacstnew.doctype.personnel.personnel.export_personnel_list_to_excel');
+		url += '?' + $.param(filters);
+		
+		// Open in new window to trigger download
+		window.open(url, '_blank');
+		
+		// Show success message after a short delay
+		setTimeout(function() {
+			frappe.show_alert({
+				message: __('Export started. File will download shortly.'),
+				indicator: 'green'
+			});
+		}, 500);
+	};
 	
 	function updatePagination() {
 		// Update page number input

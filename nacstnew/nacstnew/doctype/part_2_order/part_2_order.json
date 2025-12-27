@@ -14,8 +14,11 @@
   "reference",
   "column_break_nnup",
   "date",
+  "section_break_wftm",
+  "document_view",
   "section_break_rcae",
-  "unit_tos_record"
+  "unit_tos_record",
+  "amended_from"
  ],
  "fields": [
   {
@@ -35,9 +38,20 @@
    "unique": 1
   },
   {
+   "description": "Only PDF documents are allowed",
    "fieldname": "attach",
    "fieldtype": "Attach",
    "label": "Attach"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_wftm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "document_view",
+   "fieldtype": "HTML",
+   "label": "Document View"
   },
   {
    "fieldname": "column_break_nnup",
@@ -58,8 +72,7 @@
   {
    "fieldname": "reference",
    "fieldtype": "Data",
-   "label": "Reference",
-   "read_only": 1
+   "label": "Reference"
   },
   {
    "fieldname": "date",
@@ -70,6 +83,16 @@
   {
    "fieldname": "column_break_nhmm",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Part 2 Order",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
@@ -77,7 +100,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-26 18:18:07.852814",
+ "modified": "2025-12-27 23:50:38.323847",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Part 2 Order",

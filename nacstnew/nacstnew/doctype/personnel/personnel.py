@@ -884,11 +884,79 @@ def get_units_with_personnel(category=None, page=1, page_length=10):
 			person["period_in_unit"] = period_spent
 			personnel_with_period.append(person)
 		
+		# Get commander for this unit
+		# Commander is personnel whose current_unit matches and appointment is in Commander Appointment doctype
+		commander = frappe.db.sql("""
+			SELECT 
+				p.service_number,
+				p.personnel_name,
+				p.phone_number,
+				p.current_rank,
+				pad.appointment
+			FROM `tabPersonnel` p
+			INNER JOIN `tabPosting Authority Details` pad ON p.service_number = pad.service_number
+			INNER JOIN `tabCommander Appointment` ca ON pad.appointment = ca.appointment
+			WHERE p.current_unit = %s
+				AND pad.to_unit = %s
+			ORDER BY pad.wef_date DESC, pad.creation DESC
+			LIMIT 1
+		""", (unit_name, unit_name), as_dict=True)
+		
+		commander_info = None
+		if commander and len(commander) > 0:
+			commander_info = {
+				"name": commander[0].get("personnel_name") or "",
+				"phone_number": commander[0].get("phone_number") or "",
+				"rank": commander[0].get("current_rank") or "",
+				"service_number": commander[0].get("service_number") or "",
+				"appointment": commander[0].get("appointment") or ""
+			}
+		
 		units_data.append({
 			"unit_name": unit_name,
 			"unit_location": unit.get("unit_location") or "",
 			"personnel_count": len(personnel_with_period),
-			"personnel": personnel_with_period
+			"personnel": personnel_with_period,
+			"commander": commander_info
+		})
+	
+	# Add "No Unit Assigned" group for personnel without current_unit
+	# Use SQL to get personnel where current_unit is NULL or empty
+	category_sql = ""
+	category_params = []
+	if category and category in ['Officer', 'Soldier']:
+		category_sql = "AND p.category = %s"
+		category_params.append(category)
+	
+	no_unit_sql = """
+		SELECT 
+			p.service_number,
+			p.personnel_name,
+			p.current_rank,
+			p.personnel_image,
+			p.phone_number,
+			p.category
+		FROM `tabPersonnel` p
+		WHERE (p.current_unit IS NULL OR p.current_unit = '')
+		""" + category_sql + """
+		ORDER BY p.personnel_name
+	"""
+	
+	no_unit_personnel_list = frappe.db.sql(no_unit_sql, tuple(category_params), as_dict=True)
+	
+	# Add period as "N/A" for personnel without unit
+	no_unit_personnel_with_period = []
+	for person in no_unit_personnel_list:
+		person["period_in_unit"] = "N/A"
+		no_unit_personnel_with_period.append(person)
+	
+	# Add "No Unit Assigned" group if there are personnel without unit
+	if no_unit_personnel_with_period:
+		units_data.append({
+			"unit_name": "No Unit Assigned",
+			"unit_location": "",
+			"personnel_count": len(no_unit_personnel_with_period),
+			"personnel": no_unit_personnel_with_period
 		})
 	
 	# Create summary data for ALL units (regardless of filter) - get counts for all units
@@ -926,6 +994,30 @@ def get_units_with_personnel(category=None, page=1, page_length=10):
 			"soldiers_count": soldiers_count,
 			"total_count": total_count
 		})
+	
+	# Add "No Unit Assigned" to summary
+	no_unit_summary_sql = """
+		SELECT category
+		FROM `tabPersonnel`
+		WHERE (current_unit IS NULL OR current_unit = '')
+	"""
+	no_unit_all_personnel = frappe.db.sql(no_unit_summary_sql, as_dict=True)
+	
+	if no_unit_all_personnel:
+		no_unit_officers_count = sum(1 for p in no_unit_all_personnel if p.get("category") == "Officer")
+		no_unit_soldiers_count = sum(1 for p in no_unit_all_personnel if p.get("category") == "Soldier")
+		no_unit_total_count = len(no_unit_all_personnel)
+		
+		units_summary.append({
+			"unit_name": "No Unit Assigned",
+			"unit_location": "",
+			"officers_count": no_unit_officers_count,
+			"soldiers_count": no_unit_soldiers_count,
+			"total_count": no_unit_total_count
+		})
+	
+	# Sort units: regular units first (alphabetically), then "No Unit Assigned" at the end
+	units_data.sort(key=lambda x: (x["unit_name"] == "No Unit Assigned", x["unit_name"]))
 	
 	# Pagination
 	total_units = len(units_data)
@@ -1077,3 +1169,129 @@ def get_personnel_list(page=1, page_length=20, current_unit=None, rank=None, dat
 		"page_length": page_length,
 		"total_pages": (total_count + page_length - 1) // page_length if total_count > 0 else 1
 	}
+
+@frappe.whitelist()
+def export_personnel_list_to_excel(current_unit=None, rank=None, date_tos=None, personnel_name=None, category=None):
+	"""Export all filtered personnel list to Excel"""
+	from frappe.utils import getdate, date_diff, today
+	from frappe.utils.xlsxutils import make_xlsx
+	from frappe.desk.utils import provide_binary_file
+	
+	# Build filters (same as get_personnel_list)
+	filters = {}
+	if current_unit:
+		filters["current_unit"] = current_unit
+	if rank:
+		filters["current_rank"] = rank
+	if personnel_name:
+		filters["personnel_name"] = ["like", f"%{personnel_name}%"]
+	if category:
+		filters["category"] = category
+	
+	# Parse date_tos filter
+	date_tos_filter = None
+	if date_tos:
+		try:
+			date_tos_filter = getdate(date_tos)
+		except:
+			date_tos_filter = None
+	
+	# Get all personnel records with filters (no pagination)
+	personnel_list = frappe.db.get_all(
+		"Personnel",
+		filters=filters,
+		fields=[
+			"service_number",
+			"personnel_name",
+			"current_unit",
+			"current_rank",
+			"category"
+		],
+		order_by="personnel_name"
+	)
+	
+	# Prepare data for export
+	data = []
+	headers = ["Service Number", "Personnel Name", "Category", "Current Unit", "Current Rank", "Date TOS", "Period Spent"]
+	data.append(headers)
+	
+	for personnel in personnel_list:
+		service_number = personnel.service_number
+		
+		# Get the latest Date TOS from Unit TOS Record (from submitted Part 2 Orders only)
+		latest_tos_sql = frappe.db.sql("""
+			SELECT utr.date_tos, utr.to_unit
+			FROM `tabUnit TOS Record` utr
+			INNER JOIN `tabPart 2 Order` p2o ON utr.parent = p2o.name
+			WHERE utr.service_number = %s
+				AND utr.parenttype = 'Part 2 Order'
+				AND p2o.docstatus = 1
+			ORDER BY utr.date_tos DESC
+			LIMIT 1
+		""", (service_number,), as_dict=True)
+		
+		latest_tos = latest_tos_sql if latest_tos_sql else None
+		
+		date_tos = None
+		period_spent = "N/A"
+		
+		if latest_tos and latest_tos[0].get("date_tos"):
+			date_tos = latest_tos[0].get("date_tos")
+			date_tos_formatted = frappe.format_value(date_tos, {"fieldtype": "Date"})
+			
+			# Calculate period spent
+			today_date = getdate(today())
+			tos_date = getdate(date_tos)
+			days_diff = date_diff(today_date, tos_date)
+			
+			# Convert to years, months, days
+			years = days_diff // 365
+			remaining_days = days_diff % 365
+			months = remaining_days // 30
+			days = remaining_days % 30
+			
+			# Format period string
+			period_parts = []
+			if years > 0:
+				period_parts.append(f"{years} year{'s' if years != 1 else ''}")
+			if months > 0:
+				period_parts.append(f"{months} month{'s' if months != 1 else ''}")
+			if days > 0 or len(period_parts) == 0:
+				period_parts.append(f"{days} day{'s' if days != 1 else ''}")
+			
+			period_spent = ", ".join(period_parts)
+		else:
+			date_tos_formatted = "N/A"
+			period_spent = "N/A"
+		
+		# Filter by date_tos if provided
+		if date_tos_filter:
+			if date_tos_formatted == "N/A" or not date_tos:
+				continue  # Skip records without date_tos when filter is set
+			filter_date = getdate(date_tos_filter)
+			tos_date_check = getdate(date_tos)
+			if filter_date != tos_date_check:
+				continue  # Skip this record if date doesn't match
+		
+		# Add row to data
+		data.append([
+			personnel.service_number or "",
+			personnel.personnel_name or "N/A",
+			personnel.category or "N/A",
+			personnel.current_unit or "N/A",
+			personnel.current_rank or "N/A",
+			date_tos_formatted,
+			period_spent
+		])
+	
+	# Create Excel file
+	xlsx_file = make_xlsx(data, "Personnel List")
+	file_content = xlsx_file.getvalue()
+	
+	# Generate filename with timestamp
+	from frappe.utils import now_datetime
+	timestamp = now_datetime().strftime("%Y%m%d_%H%M%S")
+	file_name = f"Personnel_List_Export_{timestamp}.xlsx"
+	
+	# Use provide_binary_file to download directly
+	provide_binary_file(file_name, "xlsx", file_content)

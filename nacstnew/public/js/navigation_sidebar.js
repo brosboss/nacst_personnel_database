@@ -23,14 +23,9 @@ if (typeof window.NAVIGATION_ITEMS === 'undefined') {
 			icon: 'fa-list'
 		},
 		{
-			route: 'personnel-view',
-			label: 'Personnel View',
-			icon: 'fa-id-card'
-		},
-		{
-			route: 'units-view',
-			label: 'Units View',
-			icon: 'fa-building'
+			route: 'units-view2',
+			label: 'Units View 2 (Compact)',
+			icon: 'fa-building-o'
 		},
 		{
 			route: '#',
@@ -66,72 +61,79 @@ function getNavigationSidebarCSS(pagePrefix) {
 	const style = document.createElement('style');
 	style.id = styleId;
 	style.textContent = `
+		/* Scoped sidebar styles - only affect elements with ${prefix}-nav- prefix */
 		.${prefix}-nav-sidebar {
-			width: 250px;
-			background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-			border-radius: 12px;
-			padding: 20px;
-			box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-			overflow-y: auto;
-			flex-shrink: 0;
+			width: 250px !important;
+			background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%) !important;
+			border-radius: 12px !important;
+			padding: 20px !important;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+			overflow-y: auto !important;
+			flex-shrink: 0 !important;
+			position: relative !important;
+			z-index: 1 !important;
+		}
+		
+		.${prefix}-nav-sidebar * {
+			box-sizing: border-box;
 		}
 		
 		.${prefix}-nav-sidebar-title {
-			color: #fff;
-			font-size: 18px;
-			font-weight: 700;
-			margin-bottom: 30px;
-			padding-bottom: 15px;
-			border-bottom: 2px solid rgba(255,255,255,0.1);
+			color: #fff !important;
+			font-size: 18px !important;
+			font-weight: 700 !important;
+			margin-bottom: 30px !important;
+			padding-bottom: 15px !important;
+			border-bottom: 2px solid rgba(255,255,255,0.1) !important;
 		}
 		
 		.${prefix}-nav-sidebar .${prefix}-nav-item {
-			display: block;
-			padding: 12px 15px;
-			margin-bottom: 8px;
-			color: rgba(255,255,255,0.8);
-			text-decoration: none;
-			border-radius: 8px;
-			transition: all 0.3s ease;
-			cursor: pointer;
-			border-left: 3px solid transparent;
+			display: block !important;
+			padding: 12px 15px !important;
+			margin-bottom: 8px !important;
+			color: rgba(255,255,255,0.8) !important;
+			text-decoration: none !important;
+			border-radius: 8px !important;
+			transition: all 0.3s ease !important;
+			cursor: pointer !important;
+			border-left: 3px solid transparent !important;
 		}
 		
 		.${prefix}-nav-sidebar .${prefix}-nav-item:hover {
-			background: rgba(255,255,255,0.1);
-			color: #fff;
-			border-left-color: #667eea;
-			transform: translateX(5px);
+			background: rgba(255,255,255,0.1) !important;
+			color: #fff !important;
+			border-left-color: #667eea !important;
+			transform: translateX(5px) !important;
 		}
 		
 		.${prefix}-nav-sidebar .${prefix}-nav-item.active {
-			background: rgba(102, 126, 234, 0.2);
-			color: #fff;
-			border-left-color: #667eea;
+			background: rgba(102, 126, 234, 0.2) !important;
+			color: #fff !important;
+			border-left-color: #667eea !important;
 		}
 		
 		.${prefix}-nav-sidebar .${prefix}-nav-item i {
-			margin-right: 10px;
-			width: 20px;
+			margin-right: 10px !important;
+			width: 20px !important;
 		}
 		
-		/* Scrollbar styling for sidebar */
+		/* Scrollbar styling for sidebar - scoped to sidebar only */
 		.${prefix}-nav-sidebar::-webkit-scrollbar {
-			width: 6px;
+			width: 6px !important;
 		}
 		
 		.${prefix}-nav-sidebar::-webkit-scrollbar-track {
-			background: rgba(255,255,255,0.1);
-			border-radius: 10px;
+			background: rgba(255,255,255,0.1) !important;
+			border-radius: 10px !important;
 		}
 		
 		.${prefix}-nav-sidebar::-webkit-scrollbar-thumb {
-			background: rgba(255,255,255,0.3);
-			border-radius: 10px;
+			background: rgba(255,255,255,0.3) !important;
+			border-radius: 10px !important;
 		}
 		
 		.${prefix}-nav-sidebar::-webkit-scrollbar-thumb:hover {
-			background: rgba(255,255,255,0.5);
+			background: rgba(255,255,255,0.5) !important;
 		}
 	`;
 	document.head.appendChild(style);
