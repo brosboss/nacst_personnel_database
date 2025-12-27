@@ -4,7 +4,7 @@
  "creation": "2025-12-26 11:06:12.373183",
  "doctype": "DocType",
  "engine": "InnoDB",
- "field_order": [
+  "field_order": [
   "course_reference",
   "section_break_mibt",
   "service_number",
@@ -15,6 +15,8 @@
   "column_break_ejco",
   "course_report",
   "grade",
+  "section_break_wftm",
+  "document_view",
   "amended_from"
  ],
  "fields": [
@@ -55,9 +57,20 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Only PDF documents are allowed",
    "fieldname": "course_report",
    "fieldtype": "Attach",
    "label": "Course Report"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_wftm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "document_view",
+   "fieldtype": "HTML",
+   "label": "Document View"
   },
   {
    "fieldname": "grade",

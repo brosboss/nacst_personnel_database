@@ -1,0 +1,622 @@
+/**
+ * Futuristic Modern Theme for Frappe Desk
+ * Comment out the app_include_css entry in hooks.py to disable this theme
+ */
+
+/* ============================================
+   ROOT VARIABLES & BASE STYLES
+   ============================================ */
+
+:root {
+	/* Futuristic Color Palette */
+	--futur-primary: #00d9ff;
+	--futur-secondary: #7c3aed;
+	--futur-accent: #ff00ff;
+	--futur-bg-dark: #0a0e27;
+	--futur-bg-darker: #050811;
+	--futur-bg-card: rgba(15, 23, 42, 0.8);
+	--futur-text-primary: #e2e8f0;
+	--futur-text-secondary: #94a3b8;
+	--futur-border: rgba(0, 217, 255, 0.2);
+	--futur-shadow-glow: 0 0 20px rgba(0, 217, 255, 0.3);
+	--futur-shadow-glow-strong: 0 0 30px rgba(124, 58, 237, 0.5);
+}
+
+/* ============================================
+   NAVBAR & TOP BAR
+   ============================================ */
+
+.navbar {
+	background: linear-gradient(135deg, #0a0e27 0%, #1e1b4b 100%) !important;
+	border-bottom: 1px solid var(--futur-border) !important;
+	box-shadow: var(--futur-shadow-glow) !important;
+	backdrop-filter: blur(10px);
+}
+
+.navbar-brand,
+.navbar .navbar-brand {
+	color: var(--futur-primary) !important;
+	font-weight: 700;
+	text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+	letter-spacing: 1px;
+}
+
+.navbar .navbar-nav .nav-link {
+	color: var(--futur-text-primary) !important;
+	transition: all 0.3s ease;
+	position: relative;
+}
+
+.navbar .navbar-nav .nav-link:hover {
+	color: var(--futur-primary) !important;
+	text-shadow: 0 0 8px rgba(0, 217, 255, 0.6);
+}
+
+.navbar .navbar-nav .nav-link::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	width: 0;
+	height: 2px;
+	background: linear-gradient(90deg, var(--futur-primary), var(--futur-secondary));
+	transition: all 0.3s ease;
+	transform: translateX(-50%);
+}
+
+.navbar .navbar-nav .nav-link:hover::after {
+	width: 80%;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+
+.sidebar {
+	background: linear-gradient(180deg, #0a0e27 0%, #1e1b4b 100%) !important;
+	border-right: 1px solid var(--futur-border) !important;
+	box-shadow: var(--futur-shadow-glow);
+}
+
+.sidebar .nav-link {
+	color: var(--futur-text-secondary) !important;
+	border-radius: 8px;
+	margin: 4px 8px;
+	transition: all 0.3s ease;
+	padding: 10px 15px !important;
+}
+
+.sidebar .nav-link:hover {
+	background: rgba(0, 217, 255, 0.1) !important;
+	color: var(--futur-primary) !important;
+	transform: translateX(5px);
+	box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+}
+
+.sidebar .nav-link.active {
+	background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(124, 58, 237, 0.2)) !important;
+	color: var(--futur-primary) !important;
+	border-left: 3px solid var(--futur-primary);
+	box-shadow: var(--futur-shadow-glow);
+}
+
+/* ============================================
+   MAIN CONTENT AREA
+   ============================================ */
+
+.layout-main-section,
+.page-content {
+	background: var(--futur-bg-darker) !important;
+	color: var(--futur-text-primary);
+}
+
+.layout-main-section-wrapper {
+	background: linear-gradient(135deg, #050811 0%, #0a0e27 50%, #050811 100%);
+	background-attachment: fixed;
+}
+
+/* ============================================
+   CARDS & PANELS
+   ============================================ */
+
+.card,
+.form-section,
+.list-container {
+	background: var(--futur-bg-card) !important;
+	border: 1px solid var(--futur-border) !important;
+	border-radius: 12px !important;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), var(--futur-shadow-glow) !important;
+	backdrop-filter: blur(10px);
+	transition: all 0.3s ease;
+}
+
+.card:hover,
+.form-section:hover {
+	box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), var(--futur-shadow-glow-strong) !important;
+	transform: translateY(-2px);
+}
+
+.card-header {
+	background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(124, 58, 237, 0.1)) !important;
+	border-bottom: 1px solid var(--futur-border) !important;
+	color: var(--futur-primary) !important;
+	font-weight: 600;
+	padding: 15px 20px;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn-primary,
+.btn-primary:hover {
+	background: linear-gradient(135deg, var(--futur-primary), var(--futur-secondary)) !important;
+	border: none !important;
+	color: #fff !important;
+	border-radius: 8px;
+	padding: 10px 24px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+	transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+	box-shadow: 0 6px 25px rgba(124, 58, 237, 0.6);
+	transform: translateY(-2px);
+}
+
+.btn-secondary {
+	background: rgba(124, 58, 237, 0.2) !important;
+	border: 1px solid var(--futur-secondary) !important;
+	color: var(--futur-secondary) !important;
+	border-radius: 8px;
+	transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+	background: rgba(124, 58, 237, 0.3) !important;
+	box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+	transform: translateY(-2px);
+}
+
+/* ============================================
+   FORMS & INPUTS
+   ============================================ */
+
+.form-control,
+.form-select,
+.select2-container--default .select2-selection--single {
+	background: rgba(15, 23, 42, 0.6) !important;
+	border: 1px solid var(--futur-border) !important;
+	color: var(--futur-text-primary) !important;
+	border-radius: 8px;
+	padding: 10px 15px;
+	transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus,
+.select2-container--default.select2-container--focus .select2-selection--single {
+	background: rgba(15, 23, 42, 0.8) !important;
+	border-color: var(--futur-primary) !important;
+	box-shadow: 0 0 20px rgba(0, 217, 255, 0.3), inset 0 0 10px rgba(0, 217, 255, 0.1) !important;
+	outline: none;
+}
+
+.form-label,
+.control-label {
+	color: var(--futur-text-primary) !important;
+	font-weight: 600;
+	margin-bottom: 8px;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+.table {
+	color: var(--futur-text-primary) !important;
+	background: transparent;
+}
+
+.table thead {
+	background: linear-gradient(135deg, rgba(0, 217, 255, 0.15), rgba(124, 58, 237, 0.15)) !important;
+	border-bottom: 2px solid var(--futur-primary) !important;
+}
+
+.table thead th {
+	color: var(--futur-primary) !important;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	border-bottom: 2px solid var(--futur-primary) !important;
+	padding: 15px;
+}
+
+.table tbody tr {
+	border-bottom: 1px solid var(--futur-border) !important;
+	transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+	background: rgba(0, 217, 255, 0.1) !important;
+	box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+	transform: scale(1.01);
+}
+
+.table td {
+	padding: 12px 15px;
+	border-color: var(--futur-border) !important;
+}
+
+/* ============================================
+   MODALS
+   ============================================ */
+
+.modal-content {
+	background: var(--futur-bg-card) !important;
+	border: 1px solid var(--futur-border) !important;
+	border-radius: 16px !important;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), var(--futur-shadow-glow-strong) !important;
+	backdrop-filter: blur(20px);
+}
+
+.modal-header {
+	border-bottom: 1px solid var(--futur-border) !important;
+	background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(124, 58, 237, 0.1)) !important;
+	color: var(--futur-primary) !important;
+	border-radius: 16px 16px 0 0;
+}
+
+.modal-title {
+	color: var(--futur-primary) !important;
+	font-weight: 700;
+	text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+}
+
+.modal-footer {
+	border-top: 1px solid var(--futur-border) !important;
+	background: rgba(15, 23, 42, 0.5) !important;
+	border-radius: 0 0 16px 16px;
+}
+
+/* ============================================
+   BADGES & TAGS
+   ============================================ */
+
+.badge {
+	border-radius: 6px;
+	padding: 6px 12px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+}
+
+.badge-primary,
+.badge.badge-primary {
+	background: linear-gradient(135deg, var(--futur-primary), var(--futur-secondary)) !important;
+	color: #fff !important;
+	box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+}
+
+.badge-success {
+	background: linear-gradient(135deg, #10b981, #059669) !important;
+	box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.badge-danger {
+	background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+	box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+/* ============================================
+   LINKS
+   ============================================ */
+
+a {
+	color: var(--futur-primary) !important;
+	transition: all 0.3s ease;
+	text-decoration: none;
+}
+
+a:hover {
+	color: var(--futur-secondary) !important;
+	text-shadow: 0 0 8px rgba(124, 58, 237, 0.6);
+}
+
+/* ============================================
+   ALERTS & NOTIFICATIONS
+   ============================================ */
+
+.alert {
+	border-radius: 12px;
+	border: 1px solid;
+	backdrop-filter: blur(10px);
+	padding: 15px 20px;
+	font-weight: 500;
+}
+
+.alert-primary {
+	background: rgba(0, 217, 255, 0.15) !important;
+	border-color: var(--futur-primary) !important;
+	color: var(--futur-primary) !important;
+	box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+}
+
+.alert-success {
+	background: rgba(16, 185, 129, 0.15) !important;
+	border-color: #10b981 !important;
+	color: #10b981 !important;
+	box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.alert-warning {
+	background: rgba(251, 191, 36, 0.15) !important;
+	border-color: #fbbf24 !important;
+	color: #fbbf24 !important;
+	box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+}
+
+.alert-danger {
+	background: rgba(239, 68, 68, 0.15) !important;
+	border-color: #ef4444 !important;
+	color: #ef4444 !important;
+	box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================
+   DROPDOWNS
+   ============================================ */
+
+.dropdown-menu {
+	background: var(--futur-bg-card) !important;
+	border: 1px solid var(--futur-border) !important;
+	border-radius: 12px !important;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), var(--futur-shadow-glow) !important;
+	backdrop-filter: blur(10px);
+	padding: 8px;
+}
+
+.dropdown-item {
+	color: var(--futur-text-primary) !important;
+	border-radius: 8px;
+	padding: 10px 15px;
+	transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+	background: rgba(0, 217, 255, 0.2) !important;
+	color: var(--futur-primary) !important;
+	transform: translateX(5px);
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.pagination .page-link {
+	background: rgba(15, 23, 42, 0.6) !important;
+	border: 1px solid var(--futur-border) !important;
+	color: var(--futur-text-primary) !important;
+	padding: 10px 15px;
+	margin: 0 4px;
+	border-radius: 8px;
+	transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+	background: rgba(0, 217, 255, 0.2) !important;
+	border-color: var(--futur-primary) !important;
+	color: var(--futur-primary) !important;
+	box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+	transform: translateY(-2px);
+}
+
+.pagination .page-item.active .page-link {
+	background: linear-gradient(135deg, var(--futur-primary), var(--futur-secondary)) !important;
+	border-color: var(--futur-primary) !important;
+	box-shadow: var(--futur-shadow-glow);
+}
+
+/* ============================================
+   PROGRESS BARS
+   ============================================ */
+
+.progress {
+	background: rgba(15, 23, 42, 0.6) !important;
+	border-radius: 10px;
+	height: 10px;
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.progress-bar {
+	background: linear-gradient(90deg, var(--futur-primary), var(--futur-secondary)) !important;
+	box-shadow: 0 0 15px rgba(0, 217, 255, 0.6);
+	border-radius: 10px;
+	animation: progress-glow 2s ease-in-out infinite;
+}
+
+@keyframes progress-glow {
+	0%, 100% {
+		box-shadow: 0 0 15px rgba(0, 217, 255, 0.6);
+	}
+	50% {
+		box-shadow: 0 0 25px rgba(124, 58, 237, 0.8);
+	}
+}
+
+/* ============================================
+   TOOLTIPS
+   ============================================ */
+
+.tooltip .tooltip-inner {
+	background: var(--futur-bg-card) !important;
+	border: 1px solid var(--futur-primary) !important;
+	color: var(--futur-primary) !important;
+	box-shadow: var(--futur-shadow-glow);
+}
+
+.tooltip .arrow::before {
+	border-top-color: var(--futur-primary) !important;
+}
+
+/* ============================================
+   SCROLLBARS (Webkit browsers)
+   ============================================ */
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--futur-bg-darker);
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: linear-gradient(180deg, var(--futur-primary), var(--futur-secondary));
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(180deg, var(--futur-secondary), var(--futur-primary));
+	box-shadow: 0 0 15px rgba(124, 58, 237, 0.6);
+}
+
+/* ============================================
+   SELECT2 DROPDOWNS
+   ============================================ */
+
+.select2-dropdown {
+	background: var(--futur-bg-card) !important;
+	border: 1px solid var(--futur-border) !important;
+	border-radius: 12px !important;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), var(--futur-shadow-glow) !important;
+}
+
+.select2-results__option {
+	color: var(--futur-text-primary) !important;
+	padding: 10px 15px;
+	transition: all 0.3s ease;
+}
+
+.select2-results__option--highlighted {
+	background: rgba(0, 217, 255, 0.2) !important;
+	color: var(--futur-primary) !important;
+}
+
+/* ============================================
+   DATEPICKER
+   ============================================ */
+
+.datepicker {
+	background: var(--futur-bg-card) !important;
+	border: 1px solid var(--futur-border) !important;
+	border-radius: 12px !important;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), var(--futur-shadow-glow) !important;
+}
+
+.datepicker table tr td.active,
+.datepicker table tr td.active:hover {
+	background: linear-gradient(135deg, var(--futur-primary), var(--futur-secondary)) !important;
+	box-shadow: var(--futur-shadow-glow);
+}
+
+/* ============================================
+   CHECKBOXES & RADIO BUTTONS
+   ============================================ */
+
+.form-check-input:checked {
+	background-color: var(--futur-primary) !important;
+	border-color: var(--futur-primary) !important;
+	box-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+}
+
+.form-check-input:focus {
+	border-color: var(--futur-primary) !important;
+	box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+}
+
+/* ============================================
+   LOADING SPINNERS
+   ============================================ */
+
+.spinner-border {
+	border-color: var(--futur-border);
+	border-right-color: var(--futur-primary);
+}
+
+/* ============================================
+   BREADCRUMBS
+   ============================================ */
+
+.breadcrumb {
+	background: rgba(15, 23, 42, 0.5) !important;
+	border-radius: 8px;
+	padding: 10px 15px;
+}
+
+.breadcrumb-item a {
+	color: var(--futur-text-secondary) !important;
+}
+
+.breadcrumb-item.active {
+	color: var(--futur-primary) !important;
+}
+
+/* ============================================
+   LIST VIEW
+   ============================================ */
+
+.list-row {
+	border: 1px solid var(--futur-border) !important;
+	border-radius: 8px;
+	margin-bottom: 8px;
+	background: rgba(15, 23, 42, 0.4) !important;
+	transition: all 0.3s ease;
+}
+
+.list-row:hover {
+	background: rgba(0, 217, 255, 0.1) !important;
+	border-color: var(--futur-primary) !important;
+	box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+	transform: translateX(5px);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.card,
+.form-section {
+	animation: fadeIn 0.5s ease-out;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+	.sidebar {
+		box-shadow: var(--futur-shadow-glow);
+	}
+	
+	.navbar {
+		padding: 10px 15px;
+	}
+}
+

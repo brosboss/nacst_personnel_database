@@ -1,0 +1,825 @@
+# Copyright (c) 2025, !! and contributors
+# For license information, please see license.txt
+
+"""
+Fixtures module for inserting initial data into doctypes when the app is installed.
+This module contains all the data that should be populated automatically during app installation.
+"""
+
+import frappe
+
+
+def install_fixtures():
+	"""
+	Main function to install all fixtures.
+	This function is called after app installation via the after_install hook.
+	"""
+	try:
+		print("Installing initial data fixtures...")
+		insert_geopolitical_zones()
+		insert_nigeria_states()
+		ensure_personnel_categories()
+		insert_ranks()
+		insert_types_of_commission()
+		insert_courses()
+		insert_course_names()
+		insert_appointments()
+		insert_commander_appointments()
+		insert_all_units()
+		frappe.db.commit()
+		print("Initial data fixtures installed successfully")
+	except Exception as e:
+		frappe.log_error(f"Error installing fixtures: {str(e)}", "Fixtures Installation Error")
+		# Don't raise during installation to avoid breaking the install process
+		# The error is logged for debugging
+		print(f"Warning: Error installing fixtures: {str(e)}")
+
+
+def insert_geopolitical_zones():
+	"""Insert all 6 Nigerian geopolitical zones"""
+	
+	geopolitical_zones = [
+		"North West",
+		"North East",
+		"North Central",
+		"South West",
+		"South East",
+		"South South"
+	]
+	
+	inserted_count = 0
+	
+	for zone_name in geopolitical_zones:
+		if not frappe.db.exists("Geopolitical Zone", zone_name):
+			zone_doc = frappe.get_doc({
+				"doctype": "Geopolitical Zone",
+				"geopolitical_zone": zone_name
+			})
+			zone_doc.insert(ignore_permissions=True)
+			inserted_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} geopolitical zones")
+
+
+def insert_nigeria_states():
+	"""Insert all 37 Nigerian states (36 states + FCT) with their geopolitical zones"""
+	
+	# Define all states with their geopolitical zones
+	states_data = [
+		# North West (7 states)
+		{"state": "Jigawa", "geopolitical_zone": "North West"},
+		{"state": "Kaduna", "geopolitical_zone": "North West"},
+		{"state": "Kano", "geopolitical_zone": "North West"},
+		{"state": "Katsina", "geopolitical_zone": "North West"},
+		{"state": "Kebbi", "geopolitical_zone": "North West"},
+		{"state": "Sokoto", "geopolitical_zone": "North West"},
+		{"state": "Zamfara", "geopolitical_zone": "North West"},
+		
+		# North East (6 states)
+		{"state": "Adamawa", "geopolitical_zone": "North East"},
+		{"state": "Bauchi", "geopolitical_zone": "North East"},
+		{"state": "Borno", "geopolitical_zone": "North East"},
+		{"state": "Gombe", "geopolitical_zone": "North East"},
+		{"state": "Taraba", "geopolitical_zone": "North East"},
+		{"state": "Yobe", "geopolitical_zone": "North East"},
+		
+		# North Central (7 states including FCT)
+		{"state": "Benue", "geopolitical_zone": "North Central"},
+		{"state": "Kogi", "geopolitical_zone": "North Central"},
+		{"state": "Kwara", "geopolitical_zone": "North Central"},
+		{"state": "Nasarawa", "geopolitical_zone": "North Central"},
+		{"state": "Niger", "geopolitical_zone": "North Central"},
+		{"state": "Plateau", "geopolitical_zone": "North Central"},
+		{"state": "Federal Capital Territory", "geopolitical_zone": "North Central"},
+		
+		# South West (6 states)
+		{"state": "Ekiti", "geopolitical_zone": "South West"},
+		{"state": "Lagos", "geopolitical_zone": "South West"},
+		{"state": "Ogun", "geopolitical_zone": "South West"},
+		{"state": "Ondo", "geopolitical_zone": "South West"},
+		{"state": "Osun", "geopolitical_zone": "South West"},
+		{"state": "Oyo", "geopolitical_zone": "South West"},
+		
+		# South East (5 states)
+		{"state": "Abia", "geopolitical_zone": "South East"},
+		{"state": "Anambra", "geopolitical_zone": "South East"},
+		{"state": "Ebonyi", "geopolitical_zone": "South East"},
+		{"state": "Enugu", "geopolitical_zone": "South East"},
+		{"state": "Imo", "geopolitical_zone": "South East"},
+		
+		# South South (6 states)
+		{"state": "Akwa Ibom", "geopolitical_zone": "South South"},
+		{"state": "Bayelsa", "geopolitical_zone": "South South"},
+		{"state": "Cross River", "geopolitical_zone": "South South"},
+		{"state": "Delta", "geopolitical_zone": "South South"},
+		{"state": "Edo", "geopolitical_zone": "South South"},
+		{"state": "Rivers", "geopolitical_zone": "South South"}
+	]
+	
+	inserted_count = 0
+	skipped_count = 0
+	
+	for state_info in states_data:
+		state_name = state_info["state"]
+		zone_name = state_info["geopolitical_zone"]
+		
+		# Check if state already exists
+		if frappe.db.exists("State", state_name):
+			skipped_count += 1
+			continue
+		
+		# Create state document
+		# The before_save hook will automatically populate the abbreviation
+		state_doc = frappe.get_doc({
+			"doctype": "State",
+			"state": state_name,
+			"geopolitical_zone": zone_name
+		})
+		state_doc.save(ignore_permissions=True)  # Use save to trigger before_save hook
+		inserted_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} states. {skipped_count} states already existed.")
+
+
+def ensure_personnel_categories():
+	"""Ensure Officer and Soldier personnel categories exist"""
+	
+	categories = [
+		{"name": "Officer", "category": "Officer"},
+		{"name": "Soldier", "category": "Soldier"}
+	]
+	
+	inserted_count = 0
+	
+	for cat_info in categories:
+		if not frappe.db.exists("Personnel Category", cat_info["name"]):
+			try:
+				category_doc = frappe.get_doc({
+					"doctype": "Personnel Category",
+					"personnel_category": cat_info["category"]
+				})
+				category_doc.insert(ignore_permissions=True)
+				inserted_count += 1
+			except Exception as e:
+				print(f"Warning: Could not create Personnel Category {cat_info['name']}: {str(e)}")
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} personnel categories")
+
+
+def insert_ranks():
+	"""Insert all ranks for officers and soldiers"""
+	
+	# Ensure personnel categories exist first
+	ensure_personnel_categories()
+	
+	# Officer ranks
+	officer_ranks = [
+		{"rank": "FM", "rank_in_full": "Field Marshal", "personnel_category": "Officer"},
+		{"rank": "GEN", "rank_in_full": "General", "personnel_category": "Officer"},
+		{"rank": "LT GEN", "rank_in_full": "Lieutenant General", "personnel_category": "Officer"},
+		{"rank": "MAJ GEN", "rank_in_full": "Major General", "personnel_category": "Officer"},
+		{"rank": "BRIG GEN", "rank_in_full": "Brigadier General", "personnel_category": "Officer"},
+		{"rank": "COL", "rank_in_full": "Colonel", "personnel_category": "Officer"},
+		{"rank": "LT COL", "rank_in_full": "Lieutenant Colonel", "personnel_category": "Officer"},
+		{"rank": "MAJ", "rank_in_full": "Major", "personnel_category": "Officer"},
+		{"rank": "CAPT", "rank_in_full": "Captain", "personnel_category": "Officer"},
+		{"rank": "LT", "rank_in_full": "Lieutenant", "personnel_category": "Officer"},
+		{"rank": "2LT", "rank_in_full": "Second Lieutenant", "personnel_category": "Officer"},
+		{"rank": "OCDT", "rank_in_full": "Officer Cadet", "personnel_category": "Officer"}
+	]
+	
+	# Soldier ranks
+	soldier_ranks = [
+		{"rank": "AWO", "rank_in_full": "Army Warrant Officer", "personnel_category": "Soldier"},
+		{"rank": "MWO", "rank_in_full": "Master Warrant Officer", "personnel_category": "Soldier"},
+		{"rank": "WO", "rank_in_full": "Warrant Officer", "personnel_category": "Soldier"},
+		{"rank": "SSGT", "rank_in_full": "Staff Sergeant", "personnel_category": "Soldier"},
+		{"rank": "SGT", "rank_in_full": "Sergeant", "personnel_category": "Soldier"},
+		{"rank": "CPL", "rank_in_full": "Corporal", "personnel_category": "Soldier"},
+		{"rank": "LCPL", "rank_in_full": "Lance Corporal", "personnel_category": "Soldier"},
+		{"rank": "PTE", "rank_in_full": "Private", "personnel_category": "Soldier"},
+		{"rank": "REC", "rank_in_full": "Recruit", "personnel_category": "Soldier"}
+	]
+	
+	all_ranks = officer_ranks + soldier_ranks
+	
+	inserted_count = 0
+	skipped_count = 0
+	
+	for rank_info in all_ranks:
+		rank_abbrev = rank_info["rank"]
+		
+		# Check if rank already exists
+		if frappe.db.exists("Rank", rank_abbrev):
+			skipped_count += 1
+			continue
+		
+		# Verify personnel category exists
+		if not frappe.db.exists("Personnel Category", rank_info["personnel_category"]):
+			print(f"Warning: Personnel Category '{rank_info['personnel_category']}' does not exist. Skipping rank {rank_abbrev}")
+			skipped_count += 1
+			continue
+		
+		# Create rank document
+		rank_doc = frappe.get_doc({
+			"doctype": "Rank",
+			"rank": rank_abbrev,
+			"rank_in_full": rank_info["rank_in_full"],
+			"personnel_category": rank_info["personnel_category"]
+		})
+		rank_doc.insert(ignore_permissions=True)
+		inserted_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} ranks. {skipped_count} ranks already existed.")
+
+
+def insert_types_of_commission():
+	"""Insert all types of commission"""
+	
+	commission_types = [
+		"RC",
+		"SSC",
+		"DSSC",
+		"EC"
+	]
+	
+	inserted_count = 0
+	skipped_count = 0
+	
+	for commission_type in commission_types:
+		# Check if commission type already exists
+		if frappe.db.exists("Type of Commission", commission_type):
+			skipped_count += 1
+			continue
+		
+		# Create commission type document
+		commission_doc = frappe.get_doc({
+			"doctype": "Type of Commission",
+			"type_of_commission": commission_type
+		})
+		commission_doc.insert(ignore_permissions=True)
+		inserted_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} types of commission. {skipped_count} already existed.")
+
+
+def insert_courses():
+	"""Insert courses from 1RC to 100RC"""
+	
+	inserted_count = 0
+	skipped_count = 0
+	
+	for i in range(1, 101):  # 1 to 100
+		course_name = f"{i}RC"
+		
+		# Check if course already exists
+		if frappe.db.exists("Course", course_name):
+			skipped_count += 1
+			continue
+		
+		# Create course document
+		course_doc = frappe.get_doc({
+			"doctype": "Course",
+			"course": course_name
+		})
+		course_doc.insert(ignore_permissions=True)
+		inserted_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} courses. {skipped_count} courses already existed.")
+
+
+def insert_course_names():
+	"""Insert course names with their abbreviations"""
+	
+	course_names_data = [
+		{"course_name": "Driving Basic Course", "course_abbreviation": "Dvr B3"},
+		{"course_name": "Driving Upgrading B2 Course", "course_abbreviation": "Dvr B2"},
+		{"course_name": "Driving Upgrading B1 Course", "course_abbreviation": "Dvr B1"},
+		{"course_name": "Catering Basic Course", "course_abbreviation": "Cat B3"},
+		{"course_name": "Catering Upgrading B2 Course", "course_abbreviation": "Cat B2"},
+		{"course_name": "Catering Upgrading B1 Course", "course_abbreviation": "Cat B1"},
+		{"course_name": "Supply/Storeman Basic Course", "course_abbreviation": "Sup/Stmn B3"},
+		{"course_name": "Supply/Storeman Upgrading B2 Course", "course_abbreviation": "Sup/Stmn B2"},
+		{"course_name": "Supply/Storeman Upgrading B1 Course", "course_abbreviation": "Sup/Stmn B1"},
+		{"course_name": "Fire and Safety Basic Course", "course_abbreviation": "FS X2"},
+		{"course_name": "Fire and Safety Intermediate Course", "course_abbreviation": "FS X1"},
+		{"course_name": "Tank Transporter Course", "course_abbreviation": "Tk Tptr X1"},
+		{"course_name": "Instructors Course", "course_abbreviation": "Instr Cse"},
+		{"course_name": "Supply and Transport Combat Cook Course", "course_abbreviation": "ST Combat Cook X1"}
+	]
+	
+	inserted_count = 0
+	skipped_count = 0
+	
+	for course_info in course_names_data:
+		course_name = course_info["course_name"]
+		course_abbrev = course_info.get("course_abbreviation", "")
+		
+		# Check if course name already exists
+		if frappe.db.exists("Course Name", course_name):
+			skipped_count += 1
+			continue
+		
+		# Create course name document
+		course_name_doc = frappe.get_doc({
+			"doctype": "Course Name",
+			"course_name": course_name,
+			"course_abbreviation": course_abbrev
+		})
+		course_name_doc.insert(ignore_permissions=True)
+		inserted_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} course names. {skipped_count} course names already existed.")
+
+
+@frappe.whitelist()
+def verify_course_names():
+	"""Verify that all course names were inserted correctly"""
+	course_names = frappe.get_all("Course Name", fields=["course_name", "course_abbreviation"], order_by="course_name")
+	
+	return {
+		"total": len(course_names),
+		"course_names": [
+			{
+				"course_name": cn.course_name,
+				"course_abbreviation": cn.course_abbreviation
+			}
+			for cn in course_names
+		]
+	}
+
+
+def insert_appointments():
+	"""Insert all appointments"""
+	
+	appointments = [
+		"Instructor",
+		"Platoon Trainer",
+		"Company Trainer",
+		"Directing Staff (DS)",
+		"Senior Directing Staff (SDS)",
+		"Chief Instructor",
+		"Commandant (Training Institution)",
+		"Deputy Commandant",
+		"Operations Officer",
+		"Intelligence Officer",
+		"Plans Officer",
+		"Training Officer",
+		"Logistics Officer",
+		"Civil–Military Cooperation (CIMIC) Officer",
+		"Public Relations Officer",
+		"Staff Officer Grade 3 (SO3)",
+		"Staff Officer Grade 2 (SO2)",
+		"Staff Officer Grade 1 (SO1)",
+		"Director (at Army HQ level)",
+		"Section Commander",
+		"Platoon Commander",
+		"Company Commander",
+		"Battalion Commander",
+		"Brigade Commander",
+		"Garrison Commander",
+		"Divisional Commander",
+		"Corps Commander",
+		"Theatre Commander",
+		"General Officer Commanding (GOC)",
+		"Chief of Army Staff (COAS)"
+	]
+	
+	inserted_count = 0
+	skipped_count = 0
+	
+	for appointment_name in appointments:
+		# Check if appointment already exists
+		if frappe.db.exists("Appointment", appointment_name):
+			skipped_count += 1
+			continue
+		
+		# Create appointment document
+		appointment_doc = frappe.get_doc({
+			"doctype": "Appointment",
+			"appointment": appointment_name
+		})
+		appointment_doc.insert(ignore_permissions=True)
+		inserted_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} appointments. {skipped_count} appointments already existed.")
+
+
+def insert_commander_appointments():
+	"""Insert commander appointments - appointments that are categorized as commanders"""
+	
+	# Commander appointments that should be marked as commanders
+	commander_appointments = [
+		"Battalion Commander",
+		"Brigade Commander",
+		"Garrison Commander"
+	]
+	
+	inserted_count = 0
+	skipped_count = 0
+	
+	for appointment_name in commander_appointments:
+		# Check if the appointment exists first, if not create it
+		if not frappe.db.exists("Appointment", appointment_name):
+			try:
+				appointment_doc = frappe.get_doc({
+					"doctype": "Appointment",
+					"appointment": appointment_name
+				})
+				appointment_doc.insert(ignore_permissions=True)
+				frappe.db.commit()
+				print(f"Created appointment '{appointment_name}'")
+			except Exception as e:
+				print(f"Warning: Could not create appointment '{appointment_name}': {str(e)}")
+				skipped_count += 1
+				continue
+		
+		# Check if commander appointment already exists
+		if frappe.db.exists("Commander Appointment", appointment_name):
+			skipped_count += 1
+			continue
+		
+		# Create commander appointment document
+		commander_appointment_doc = frappe.get_doc({
+			"doctype": "Commander Appointment",
+			"appointment": appointment_name
+		})
+		commander_appointment_doc.insert(ignore_permissions=True)
+		inserted_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} commander appointments. {skipped_count} already existed or appointments not found.")
+
+
+@frappe.whitelist()
+def verify_appointments():
+	"""Verify that all appointments were inserted correctly"""
+	appointments = frappe.get_all("Appointment", fields=["appointment"], order_by="appointment")
+	
+	return {
+		"total": len(appointments),
+		"appointments": [a.appointment for a in appointments]
+	}
+
+
+@frappe.whitelist()
+def verify_courses():
+	"""Verify that all courses were inserted correctly"""
+	courses = frappe.get_all("Course", fields=["course"], order_by="course")
+	
+	# Get first 5 and last 5 for verification
+	first_five = [c.course for c in courses[:5]]
+	last_five = [c.course for c in courses[-5:]] if len(courses) >= 5 else []
+	
+	return {
+		"total": len(courses),
+		"first_five": first_five,
+		"last_five": last_five,
+		"all_courses": [c.course for c in courses]
+	}
+
+
+@frappe.whitelist()
+def verify_types_of_commission():
+	"""Verify that all types of commission were inserted correctly"""
+	commissions = frappe.get_all("Type of Commission", fields=["type_of_commission"], order_by="type_of_commission")
+	
+	return {
+		"total": len(commissions),
+		"types": [c.type_of_commission for c in commissions]
+	}
+
+
+@frappe.whitelist()
+def verify_ranks():
+	"""Verify that all ranks were inserted correctly"""
+	ranks = frappe.get_all("Rank", fields=["rank", "rank_in_full", "personnel_category"], order_by="personnel_category, rank")
+	
+	officer_ranks = [r for r in ranks if r.personnel_category == "Officer"]
+	soldier_ranks = [r for r in ranks if r.personnel_category == "Soldier"]
+	
+	return {
+		"total": len(ranks),
+		"officers": len(officer_ranks),
+		"soldiers": len(soldier_ranks),
+		"officer_ranks": [{"rank": r.rank, "rank_in_full": r.rank_in_full} for r in officer_ranks],
+		"soldier_ranks": [{"rank": r.rank, "rank_in_full": r.rank_in_full} for r in soldier_ranks]
+	}
+
+
+def get_state_from_location(location):
+	"""
+	Map a location (city or state name) to its corresponding Nigerian state.
+	Returns the state name if found, otherwise returns the location as-is.
+	"""
+	# Nigerian states list
+	nigerian_states = [
+		"Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa",
+		"Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo",
+		"Ekiti", "Enugu", "Federal Capital Territory", "Gombe", "Imo",
+		"Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara",
+		"Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo",
+		"Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"
+	]
+	
+	# If location is already a state, return it
+	if location in nigerian_states:
+		return location
+	
+	# Map of major cities to their states
+	city_to_state = {
+		# Major cities
+		"Abuja": "Federal Capital Territory",
+		"Lagos": "Lagos",
+		"Kano": "Kano",
+		"Ibadan": "Oyo",
+		"Port Harcourt": "Rivers",
+		"Benin City": "Edo",
+		"Kaduna": "Kaduna",
+		"Aba": "Abia",
+		"Maiduguri": "Borno",
+		"Zaria": "Kaduna",
+		"Ilorin": "Kwara",
+		"Jos": "Plateau",
+		"Warri": "Delta",
+		"Onitsha": "Anambra",
+		"Akure": "Ondo",
+		"Enugu": "Enugu",
+		"Abeokuta": "Ogun",
+		"Calabar": "Cross River",
+		"Uyo": "Akwa Ibom",
+		"Owerri": "Imo",
+		"Minna": "Niger",
+		"Lokoja": "Kogi",
+		"Ado Ekiti": "Ekiti",
+		"Osogbo": "Osun",
+		"Makurdi": "Benue",
+		"Bauchi": "Bauchi",
+		"Gombe": "Gombe",
+		"Yola": "Adamawa",
+		"Jalingo": "Taraba",
+		"Sokoto": "Sokoto",
+		"Birnin Kebbi": "Kebbi",
+		"Gusau": "Zamfara",
+		"Dutse": "Jigawa",
+		"Damaturu": "Yobe",
+		"Asaba": "Delta",
+		"Yenagoa": "Bayelsa",
+		"Abakaliki": "Ebonyi",
+		"Umuahia": "Abia",
+		"Awka": "Anambra",
+		"Ogoja": "Cross River",
+		"Katsina": "Katsina",
+		"Keffi": "Nasarawa"
+	}
+	
+	# Check if location is a known city
+	if location in city_to_state:
+		return city_to_state[location]
+	
+	# If not found, return the location as-is (user will need to correct it)
+	return location
+
+
+def insert_units(units_data):
+	"""
+	Insert units into the Unit doctype.
+	
+	Args:
+		units_data: List of dictionaries, each containing:
+			- "unit": Unit name (required)
+			- "location": Location (city or state name) (required)
+	
+	Example:
+		units_data = [
+			{"unit": "1st Division", "location": "Kaduna"},
+			{"unit": "2nd Division", "location": "Ibadan"},
+			{"unit": "3rd Armoured Division", "location": "Jos"}
+		]
+	"""
+	inserted_count = 0
+	skipped_count = 0
+	error_count = 0
+	
+	for unit_info in units_data:
+		unit_name = unit_info.get("unit")
+		location = unit_info.get("location")
+		
+		if not unit_name:
+			print(f"Warning: Skipping unit with missing name: {unit_info}")
+			error_count += 1
+			continue
+		
+		# Skip units with "Not stated" location
+		if not location or location.strip() == "Not stated":
+			print(f"Warning: Skipping unit '{unit_name}' with 'Not stated' location")
+			error_count += 1
+			continue
+		
+		# Check if unit already exists
+		if frappe.db.exists("Unit", unit_name):
+			skipped_count += 1
+			continue
+		
+		# Get state from location - ensure it matches exactly with State doctype
+		state = get_state_from_location(location.strip())
+		
+		# Verify state exists in database
+		if not frappe.db.exists("State", state):
+			print(f"Warning: State '{state}' not found in database for unit '{unit_name}'. Skipping.")
+			error_count += 1
+			continue
+		
+		# Create unit document
+		# The region field will be auto-populated via fetch_from from the state's geopolitical zone
+		try:
+			unit_doc = frappe.get_doc({
+				"doctype": "Unit",
+				"unit": unit_name,
+				"unit_location": state
+			})
+			unit_doc.insert(ignore_permissions=True)
+			inserted_count += 1
+		except Exception as e:
+			print(f"Error inserting unit '{unit_name}': {str(e)}")
+			error_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} units. {skipped_count} units already existed. {error_count} errors.")
+	
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count
+	}
+
+
+def insert_all_units():
+	"""Insert all NACST units into the Unit doctype"""
+	
+	units_data = [
+		{"unit": "Office of the COAS ST Bn", "location": "Federal Capital Territory"},
+		{"unit": "AHQ Gar ST Bde", "location": "Federal Capital Territory"},
+		{"unit": "AHQ Gar Tpt Bn", "location": "Federal Capital Territory"},
+		{"unit": "HQ NACST", "location": "Lagos"},
+		{"unit": "HQ NACST – Dir of Tpt", "location": "Lagos"},
+		{"unit": "HQ NACST – Dir of Sup/Utilities", "location": "Lagos"},
+		{"unit": "HQ NACST – Dir of Fire and Safety", "location": "Lagos"},
+		{"unit": "HQ NACST – Dir of Inspection", "location": "Lagos"},
+		{"unit": "HQ NACST – Directorate of Cat and Hosp Svcs", "location": "Lagos"},
+		{"unit": "HQ NACST Admin Bn", "location": "Lagos"},
+		{"unit": "NASST", "location": "Edo"},
+		{"unit": "NASST Demo Bn", "location": "Edo"},
+		{"unit": "NAFRL ST", "location": "Federal Capital Territory"},
+		{"unit": "NAPEX", "location": "Lagos"},
+		{"unit": "STDS", "location": "Federal Capital Territory"},
+		{"unit": "ST Foods Ltd", "location": "Federal Capital Territory"},
+		{"unit": "70 Comd ST", "location": "Lagos"},
+		{"unit": "701 Tpt Bn", "location": "Lagos"},
+		{"unit": "702 Tpt", "location": "Federal Capital Territory"},
+		{"unit": "703 ST PC Bn", "location": "Lagos"},
+		{"unit": "704 ST Boat Bn", "location": "Cross River"},
+		{"unit": "70 ST Admin Bn", "location": "Lagos"},
+		{"unit": "71 ST Bde", "location": "Kaduna"},
+		{"unit": "71 PRD", "location": "Kaduna"},
+		{"unit": "710 Tpt Bn", "location": "Kaduna"},
+		{"unit": "711 ST Bn", "location": "Kano"},
+		{"unit": "712 ST Bn", "location": "Niger"},
+		{"unit": "713 ST Bn", "location": "Jigawa"},
+		{"unit": "72 ST Bde", "location": "Oyo"},
+		{"unit": "72 PRD", "location": "Oyo"},
+		{"unit": "720 Tpt Bn", "location": "Oyo"},
+		{"unit": "721 ST Bn", "location": "Edo"},
+		{"unit": "722 ST Bn", "location": "Kwara"},
+		{"unit": "723 ST Bn", "location": "Kogi"},
+		{"unit": "73 ST Bde", "location": "Plateau"},
+		{"unit": "73 PRD", "location": "Plateau"},
+		{"unit": "730 Tpt Bn", "location": "Plateau"},
+		{"unit": "731 ST Bn", "location": "Adamawa"},
+		{"unit": "732 ST Bn", "location": "Taraba"},
+		{"unit": "733 ST Bn", "location": "Yobe"},
+		{"unit": "74 ST Bde", "location": "Enugu"},
+		{"unit": "74 PRD", "location": "Ebonyi"},
+		{"unit": "740 Tpt Bn", "location": "Enugu"},
+		{"unit": "741 ST Bn", "location": "Cross River"},
+		{"unit": "742 ST Bn", "location": "Abia"},
+		{"unit": "743 ST Bn", "location": "Not stated"},
+		{"unit": "75 ST Bde", "location": "Lagos"},
+		{"unit": "750 Tpt Bn", "location": "Lagos"},
+		{"unit": "751 ST Bn", "location": "Lagos"},
+		{"unit": "753 ST Bn", "location": "Borno"},
+		{"unit": "76 ST Bde", "location": "Rivers"},
+		{"unit": "760 Tpt Bn", "location": "Rivers"},
+		{"unit": "761 ST Bn", "location": "Akwa Ibom"},
+		{"unit": "762 ST Bn", "location": "Bayelsa"},
+		{"unit": "763 ST Bn", "location": "Delta"},
+		{"unit": "764 ST Bn", "location": "Borno"},
+		{"unit": "77 ST Bde", "location": "Borno"},
+		{"unit": "770 Tpt Bn", "location": "Borno"},
+		{"unit": "771 ST Bn", "location": "Borno"},
+		{"unit": "772 ST Bn", "location": "Borno"},
+		{"unit": "773 ST Bn", "location": "Borno"},
+		{"unit": "78 ST Bde", "location": "Sokoto"},
+		{"unit": "780 Tpt Bn", "location": "Sokoto"},
+		{"unit": "781 ST Bn", "location": "Zamfara"},
+		{"unit": "782 ST Bn", "location": "Katsina"},
+		{"unit": "783 ST Bn", "location": "Not stated"},
+		{"unit": "79 ST Bde", "location": "Nasarawa"},
+		{"unit": "79 Tpt Bn", "location": "Nasarawa"},
+		{"unit": "791 ST Bn", "location": "Benue"},
+		{"unit": "792 ST Bn", "location": "Borno"},
+		{"unit": "403 Amph Bde ST", "location": "Borno"},
+		{"unit": "Gds Bde ST Bn", "location": "Federal Capital Territory"},
+		{"unit": "Sect 2 ST Bde OPHK", "location": "Yobe"},
+		{"unit": "Sect 3 ST Bde OPHK", "location": "Borno"},
+		{"unit": "25 TF ST Bn", "location": "Borno"},
+		{"unit": "26 TF ST Bn", "location": "Borno"},
+		{"unit": "27 TF ST Bn", "location": "Yobe"},
+		{"unit": "28 TF ST Bn", "location": "Borno"},
+		{"unit": "29 TF ST Bn", "location": "Borno"},
+		{"unit": "AHQ Log Base I ST", "location": "Borno"},
+		{"unit": "AHQ Log Base II ST", "location": "Yobe"},
+		{"unit": "AHQ Log Base III ST", "location": "Adamawa"},
+		{"unit": "AHQ Log Base IV ST", "location": "Borno"},
+		{"unit": "SF Log Base ST", "location": "Not stated"},
+		{"unit": "DHQ ST", "location": "Federal Capital Territory"},
+		{"unit": "NDA ST Bn", "location": "Kaduna"},
+		{"unit": "AFCSC ST", "location": "Kaduna"},
+		{"unit": "NDC ST", "location": "Federal Capital Territory"},
+		{"unit": "JTF (OPDS) ST", "location": "Bayelsa"},
+		{"unit": "DIA ST", "location": "Federal Capital Territory"},
+		{"unit": "DSA ST", "location": "Federal Capital Territory"},
+		{"unit": "NAFRC ST", "location": "Lagos"},
+		{"unit": "DICON ST", "location": "Kaduna"},
+		{"unit": "DEPOT NA ST", "location": "Kaduna"},
+		{"unit": "DEPOT NA ST (Osun)", "location": "Osun"},
+		{"unit": "NATRAC ST", "location": "Niger"},
+		{"unit": "MLAILPKC ST", "location": "Kaduna"},
+		{"unit": "NACOLM ST", "location": "Lagos"},
+		{"unit": "TRADOC ST", "location": "Niger"},
+		{"unit": "DPM ST", "location": "Federal Capital Territory"},
+		{"unit": "NMS ST", "location": "Kaduna"},
+		{"unit": "ICC/NASI ST", "location": "Kaduna"},
+		{"unit": "NAAS ST", "location": "Bauchi"},
+		{"unit": "NASA ST", "location": "Kaduna"},
+		{"unit": "NASME ST", "location": "Benue"},
+		{"unit": "NASS ST", "location": "Lagos"},
+		{"unit": "NASMP ST", "location": "Kaduna"},
+		{"unit": "NACOE ST", "location": "Kwara"},
+		{"unit": "NASLS ST", "location": "Kaduna"},
+		{"unit": "NACON ST", "location": "Lagos"},
+		{"unit": "WOA ST", "location": "Kaduna"},
+		{"unit": "NASFA ST", "location": "Lagos"},
+		{"unit": "NADC ST", "location": "Lagos"},
+		{"unit": "NALI ST", "location": "Abia"},
+		{"unit": "AWCN ST", "location": "Federal Capital Territory"},
+		{"unit": "NARC ST", "location": "Federal Capital Territory"},
+		{"unit": "NAWC ST", "location": "Federal Capital Territory"},
+		{"unit": "PMTL", "location": "Lagos"},
+		{"unit": "CSS Suleja ST", "location": "Niger"},
+		{"unit": "CSS Mbiri ST", "location": "Delta"},
+		{"unit": "CSS Lafiya ST", "location": "Nasarawa"},
+		{"unit": "CSSS Boys Jega ST", "location": "Kebbi"},
+		{"unit": "CSSS Girls Sokoto ST", "location": "Sokoto"},
+		{"unit": "CSSS Girls Gusau ST", "location": "Zamfara"},
+		{"unit": "CSSS Boys Mafara ST", "location": "Zamfara"},
+		{"unit": "CSSS Orlu ST", "location": "Imo"},
+		{"unit": "CSSS Girls Barkiya ST", "location": "Katsina"},
+		{"unit": "CSSS Girls Miriga ST", "location": "Niger"},
+		{"unit": "CSSS Boys Auno ST", "location": "Borno"},
+		{"unit": "CSSS Anbursa ST", "location": "Kebbi"},
+		{"unit": "CSSS Shagari ST", "location": "Sokoto"},
+		{"unit": "CSSS Numan ST", "location": "Adamawa"},
+		{"unit": "CSSS Effa-Etenen ST", "location": "Akwa Ibom"},
+		{"unit": "CSSS Akada ST", "location": "Nasarawa"},
+		{"unit": "CTSS Akwanga ST", "location": "Nasarawa"},
+		{"unit": "CSS Ipaja ST", "location": "Lagos"},
+		{"unit": "CSS Kaduna ST", "location": "Kaduna"},
+		{"unit": "CSS Jos ST", "location": "Plateau"},
+		{"unit": "CSS Apata Ibadan ST", "location": "Oyo"},
+		{"unit": "CSS Abakaliki ST", "location": "Ebonyi"}
+	]
+	
+	return insert_units(units_data)
+
+
+# Add more fixture functions here as needed
+

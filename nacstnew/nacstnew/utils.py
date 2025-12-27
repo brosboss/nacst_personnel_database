@@ -4,12 +4,8 @@
 import frappe
 
 def create_personnel_view_page():
-	"""Create Personnel View, Personnel Record, and Personnel List pages if they don't exist"""
+	"""Create Personnel Record and Personnel List pages if they don't exist"""
 	pages = [
-		{
-			"page_name": "personnel-view",
-			"title": "Personnel Information"
-		},
 		{
 			"page_name": "personnel-record",
 			"title": "Personnel Record"

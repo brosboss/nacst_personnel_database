@@ -9,7 +9,11 @@ from frappe.utils import getdate
 
 class PostingAuthority(Document):
 	def validate(self):
-		"""Auto-populate posting_authority from reference and date, and validate service numbers"""
+		"""Auto-populate posting_authority from reference and date, validate service numbers, and validate PDF document"""
+		# Validate that posting_document is a PDF file
+		if self.posting_document:
+			self._validate_pdf_document()
+		
 		# Auto-populate posting_authority from reference and date
 		if self.reference and self.date:
 			# Format date as "5 Mar 25" (d MMM yy format)
@@ -39,6 +43,45 @@ class PostingAuthority(Document):
 		
 		# Check if any rows being deleted are referenced in Unit TOS Record
 		self._prevent_deletion_if_referenced()
+	
+	def _validate_pdf_document(self):
+		"""Validate that posting_document is a PDF file"""
+		if not self.posting_document:
+			return
+		
+		# Get file extension
+		file_extension = None
+		if '.' in self.posting_document:
+			file_extension = self.posting_document.split('.')[-1].lower()
+		
+		# Check if it's a PDF
+		if file_extension != 'pdf':
+			frappe.throw(
+				_("Only PDF documents are allowed for Posting Document. The attached file '{0}' is not a PDF file.").format(
+					self.posting_document
+				),
+				title=_("Invalid File Type")
+			)
+		
+		# Additional validation: Check if file exists and verify MIME type if possible
+		try:
+			# Try to get file info from database
+			file_doc = frappe.get_doc("File", {"file_url": self.posting_document})
+			if hasattr(file_doc, 'file_type') and file_doc.file_type:
+				if file_doc.file_type.upper() != 'PDF':
+					frappe.throw(
+						_("Only PDF documents are allowed for Posting Document. The attached file '{0}' has file type '{1}'.").format(
+							self.posting_document,
+							file_doc.file_type
+						),
+						title=_("Invalid File Type")
+					)
+		except frappe.DoesNotExistError:
+			# File might not be saved yet, just check extension
+			pass
+		except Exception:
+			# If we can't check, just rely on extension validation
+			pass
 	
 	def _prevent_deletion_if_referenced(self):
 		"""Prevent deletion of Posting Authority Details rows if they are used in Unit TOS Record"""

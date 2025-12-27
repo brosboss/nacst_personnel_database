@@ -25,7 +25,7 @@ frappe.pages['personnel-record'].on_page_load = function(wrapper) {
 			setTimeout(function() {
 				load_personnel_data(serviceNumber);
 				// Also set the search field value
-				var searchInput = $('#service_number_search');
+				var searchInput = $('#pr_service_number_search');
 				if (searchInput.length > 0) {
 					// Find the label for this service number
 					frappe.call({
@@ -53,10 +53,10 @@ frappe.pages['personnel-record'].on_page_load = function(wrapper) {
 	$(wrapper).on('show', function() {
 		setTimeout(function() {
 			// Check if page content exists
-			if ($('#service_number_search').length === 0 && wrapper.page) {
+			if ($('#pr_service_number_search').length === 0 && wrapper.page) {
 				// Page content doesn't exist, rebuild it
 				build_personnel_record_page(wrapper.page);
-		} else if (wrapper.page && $('#service_number_search').length > 0) {
+		} else if (wrapper.page && $('#pr_service_number_search').length > 0) {
 			// Check for service number in URL parameters or sessionStorage
 			var urlParams = new URLSearchParams(window.location.search);
 			var serviceNumber = urlParams.get('service_number') || sessionStorage.getItem('personnel_record_service_number');
@@ -74,22 +74,22 @@ frappe.pages['personnel-record'].on_page_load = function(wrapper) {
 								});
 								if (personnel) {
 									var displayText = personnel.service_number + ' - ' + (personnel.personnel_name || '');
-									$('#service_number_search').val(displayText);
+									$('#pr_service_number_search').val(displayText);
 								} else {
-									$('#service_number_search').val(serviceNumber);
+									$('#pr_service_number_search').val(serviceNumber);
 								}
 							}
 						}
 					});
 				} else {
-					$('#service_number_search').val('');
+					$('#pr_service_number_search').val('');
 					// Clear existing autocomplete if it exists
-					if ($('#service_number_search')[0].awesomplete) {
-						$('#service_number_search')[0].awesomplete.destroy();
+					if ($('#pr_service_number_search')[0].awesomplete) {
+						$('#pr_service_number_search')[0].awesomplete.destroy();
 					}
 					setup_service_number_autocomplete();
 					// Hide personnel details if shown
-					$('#personnel_details_container').hide();
+					$('#pr_personnel_details_container').hide();
 				}
 			} else if (wrapper.page) {
 				// If page elements don't exist, rebuild the page
@@ -104,10 +104,10 @@ frappe.pages['personnel-record'].on_page_show = function(wrapper) {
 	// Reinitialize autocomplete when page is shown
 	setTimeout(function() {
 		// Check if page content exists
-		if ($('#service_number_search').length === 0 && wrapper.page) {
+		if ($('#pr_service_number_search').length === 0 && wrapper.page) {
 			// Page content doesn't exist, rebuild it
 			build_personnel_record_page(wrapper.page);
-		} else if (wrapper.page && $('#service_number_search').length > 0) {
+		} else if (wrapper.page && $('#pr_service_number_search').length > 0) {
 			// Check for service number in URL parameters or sessionStorage
 			var urlParams = new URLSearchParams(window.location.search);
 			var serviceNumber = urlParams.get('service_number') || sessionStorage.getItem('personnel_record_service_number');
@@ -125,22 +125,22 @@ frappe.pages['personnel-record'].on_page_show = function(wrapper) {
 							});
 							if (personnel) {
 								var displayText = personnel.service_number + ' - ' + (personnel.personnel_name || '');
-								$('#service_number_search').val(displayText);
+								$('#pr_service_number_search').val(displayText);
 							} else {
-								$('#service_number_search').val(serviceNumber);
+								$('#pr_service_number_search').val(serviceNumber);
 							}
 						}
 					}
 				});
 			} else {
-				$('#service_number_search').val('');
+				$('#pr_service_number_search').val('');
 				// Clear existing autocomplete if it exists
-				if ($('#service_number_search')[0].awesomplete) {
-					$('#service_number_search')[0].awesomplete.destroy();
+				if ($('#pr_service_number_search')[0].awesomplete) {
+					$('#pr_service_number_search')[0].awesomplete.destroy();
 				}
 				setup_service_number_autocomplete();
 				// Hide personnel details if shown
-				$('#personnel_details_container').hide();
+				$('#pr_personnel_details_container').hide();
 			}
 		} else if (wrapper.page) {
 			// If page elements don't exist, rebuild the page
@@ -157,6 +157,7 @@ function build_personnel_record_page(page) {
 			hideDefaultSidebarCSS('personnel-record') + 
 			getNavigationSidebarCSS('pr') + `
 		<style id="pr-page-styles">
+			/* Scoped styles for personnel-record page only - prevents conflicts with other pages */
 			/* Make the page container full width */
 			body[data-page-name="personnel-record"] .page-wrapper {
 				width: 100% !important;
@@ -167,6 +168,7 @@ function build_personnel_record_page(page) {
 				flex-direction: column !important;
 			}
 			
+			/* All .pr- styles are scoped to personnel-record page */
 			.pr-container {
 				display: flex;
 				gap: 20px;
@@ -176,7 +178,7 @@ function build_personnel_record_page(page) {
 				padding: 20px;
 			}
 			
-			.pr-main-content {
+			body[data-page-name="personnel-record"] .pr-main-content {
 				flex: 1;
 				display: flex;
 				flex-direction: column;
@@ -526,9 +528,9 @@ function build_personnel_record_page(page) {
 				flex-shrink: 0;
 			}
 			
-			#posting_history_table_container,
-			#promotion_history_table_container,
-			#courses_attended_table_container {
+			#pr_posting_history_table_container,
+			#pr_promotion_history_table_container,
+			#pr_courses_attended_table_container {
 				flex: 1;
 				overflow-y: auto;
 				min-height: 0;
@@ -663,9 +665,9 @@ function build_personnel_record_page(page) {
 				color: #6c757d;
 			}
 			
-			#posting_history_table_container .pr-empty-state-compact,
-			#promotion_history_table_container .pr-empty-state-compact,
-			#courses_attended_table_container .pr-empty-state-compact {
+			#pr_posting_history_table_container .pr-empty-state-compact,
+			#pr_promotion_history_table_container .pr-empty-state-compact,
+			#pr_courses_attended_table_container .pr-empty-state-compact {
 				padding: 15px;
 			}
 			
@@ -689,24 +691,24 @@ function build_personnel_record_page(page) {
 				<div class="pr-selector-compact">
 					<div class="pr-selector-row">
 						<label class="pr-selector-label">Search Personnel:</label>
-						<input type="text" id="service_number_search" class="pr-selector-autocomplete" placeholder="Type service number or name to search...">
+						<input type="text" id="pr_service_number_search" class="pr-selector-autocomplete" placeholder="Type service number or name to search...">
 					</div>
 				</div>
 				
 				<div class="pr-main-content-wrapper">
 					<div class="pr-details-section">
-						<div id="personnel_details_container" class="pr-card-compact">
+						<div id="pr_personnel_details_container" class="pr-card-compact">
 							<div class="pr-header-compact">
 								<div class="pr-image-section">
-									<img id="personnel_image" src="" alt="Personnel Image" class="pr-img-compact" style="display: none;">
-									<div id="personnel_image_placeholder" class="pr-img-placeholder-compact">
+									<img id="pr_personnel_image" src="" alt="Personnel Image" class="pr-img-compact" style="display: none;">
+									<div id="pr_personnel_image_placeholder" class="pr-img-placeholder-compact">
 										<i class="fa fa-user"></i>
 									</div>
 								</div>
 								<div class="pr-header-info-compact">
-									<h2 id="personnel_name" class="pr-name-compact"></h2>
-									<p id="personnel_service_number" class="pr-meta-compact"></p>
-									<p id="personnel_category" class="pr-meta-compact"></p>
+									<h2 id="pr_personnel_name" class="pr-name-compact"></h2>
+									<p id="pr_personnel_service_number" class="pr-meta-compact"></p>
+									<p id="pr_personnel_category" class="pr-meta-compact"></p>
 								</div>
 							</div>
 							
@@ -714,51 +716,51 @@ function build_personnel_record_page(page) {
 								<div class="pr-info-grid-compact">
 									<div class="pr-info-card">
 										<div class="pr-info-label">First Name</div>
-										<div class="pr-info-value" id="first_name">-</div>
+										<div class="pr-info-value" id="pr_first_name">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Last Name</div>
-										<div class="pr-info-value" id="last_name">-</div>
+										<div class="pr-info-value" id="pr_last_name">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Surname</div>
-										<div class="pr-info-value" id="surname">-</div>
+										<div class="pr-info-value" id="pr_surname">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Phone Number</div>
-										<div class="pr-info-value" id="phone_number">-</div>
+										<div class="pr-info-value" id="pr_phone_number">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Type of Commission</div>
-										<div class="pr-info-value" id="type_of_commission">-</div>
+										<div class="pr-info-value" id="pr_type_of_commission">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Course</div>
-										<div class="pr-info-value" id="course">-</div>
+										<div class="pr-info-value" id="pr_course">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Current Rank</div>
-										<div class="pr-info-value" id="current_rank">-</div>
+										<div class="pr-info-value" id="pr_current_rank">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Date of Last Promotion</div>
-										<div class="pr-info-value" id="date_of_last_promotion">-</div>
+										<div class="pr-info-value" id="pr_date_of_last_promotion">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Current Unit</div>
-										<div class="pr-info-value" id="current_unit">-</div>
+										<div class="pr-info-value" id="pr_current_unit">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Current Unit Location</div>
-										<div class="pr-info-value" id="current_unit_location">-</div>
+										<div class="pr-info-value" id="pr_current_unit_location">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Current Deployment</div>
-										<div class="pr-info-value" id="current_deployment">-</div>
+										<div class="pr-info-value" id="pr_current_deployment">-</div>
 									</div>
 									<div class="pr-info-card">
 										<div class="pr-info-label">Remarks</div>
-										<div class="pr-info-value" id="remarks">-</div>
+										<div class="pr-info-value" id="pr_remarks">-</div>
 									</div>
 								</div>
 							</div>
@@ -770,7 +772,7 @@ function build_personnel_record_page(page) {
 							<h3 class="pr-section-title-compact">
 								<i class="fa fa-history"></i> Posting History
 							</h3>
-							<div id="posting_history_table_container">
+							<div id="pr_posting_history_table_container">
 								<div class="pr-empty-state-compact">
 									<i class="fa fa-inbox"></i>
 									<p>Select a personnel to view posting history</p>
@@ -782,7 +784,7 @@ function build_personnel_record_page(page) {
 							<h3 class="pr-section-title-compact">
 								<i class="fa fa-arrow-up"></i> Promotion History
 							</h3>
-							<div id="promotion_history_table_container">
+							<div id="pr_promotion_history_table_container">
 								<div class="pr-empty-state-compact">
 									<i class="fa fa-inbox"></i>
 									<p>Select a personnel to view promotion history</p>
@@ -794,7 +796,7 @@ function build_personnel_record_page(page) {
 							<h3 class="pr-section-title-compact">
 								<i class="fa fa-graduation-cap"></i> Courses Attended
 							</h3>
-							<div id="courses_attended_table_container">
+							<div id="pr_courses_attended_table_container">
 								<div class="pr-empty-state-compact">
 									<i class="fa fa-inbox"></i>
 									<p>Select a personnel to view courses attended</p>
@@ -814,7 +816,7 @@ function build_personnel_record_page(page) {
 }
 
 function setup_service_number_autocomplete() {
-	let serviceNumberInput = document.getElementById('service_number_search');
+	let serviceNumberInput = document.getElementById('pr_service_number_search');
 	let awesompleteInstance = null;
 	let allPersonnel = [];
 	
@@ -1023,32 +1025,32 @@ function load_personnel_data(service_number) {
 function display_personnel_data(data) {
 	// Display image
 	if (data.personnel_image) {
-		$('#personnel_image').attr('src', data.personnel_image).show();
-		$('#personnel_image_placeholder').hide();
+		$('#pr_personnel_image').attr('src', data.personnel_image).show();
+		$('#pr_personnel_image_placeholder').hide();
 	} else {
-		$('#personnel_image').hide();
-		$('#personnel_image_placeholder').show();
+		$('#pr_personnel_image').hide();
+		$('#pr_personnel_image_placeholder').show();
 	}
 	
 	// Display header info
-	$('#current_rank').text(data.current_rank || 'N/A');
-	$('#personnel_name').text(data.personnel_name || 'N/A');
+	$('#pr_current_rank').text(data.current_rank || 'N/A');
+	$('#pr_personnel_name').text(data.personnel_name || 'N/A');
 	$('#personnel_service_number').text('Service Number: ' + data.service_number);
 	$('#personnel_category').text('Category: ' + (data.category || 'N/A'));
 	
 	// Display information cards
-	$('#first_name').text(data.first_name || 'N/A');
-	$('#last_name').text(data.last_name || 'N/A');
-	$('#surname').text(data.surname || 'N/A');
-	$('#phone_number').text(data.phone_number || 'N/A');
-	$('#type_of_commission').text(data.type_of_commission || 'N/A');
-	$('#course').text(data.course || 'N/A');
-	$('#current_rank').text(data.current_rank || 'N/A');
-	$('#date_of_last_promotion').text(data.date_of_last_promotion || 'N/A');
-	$('#current_unit').text(data.current_unit || 'N/A');
-	$('#current_unit_location').text(data.current_unit_location || 'N/A');
-	$('#current_deployment').text(data.current_deployment || 'N/A');
-	$('#remarks').text(data.remarks || 'N/A');
+	$('#pr_first_name').text(data.first_name || 'N/A');
+	$('#pr_last_name').text(data.last_name || 'N/A');
+	$('#pr_surname').text(data.surname || 'N/A');
+	$('#pr_phone_number').text(data.phone_number || 'N/A');
+	$('#pr_type_of_commission').text(data.type_of_commission || 'N/A');
+	$('#pr_course').text(data.course || 'N/A');
+	$('#pr_current_rank').text(data.current_rank || 'N/A');
+	$('#pr_date_of_last_promotion').text(data.date_of_last_promotion || 'N/A');
+	$('#pr_current_unit').text(data.current_unit || 'N/A');
+	$('#pr_current_unit_location').text(data.current_unit_location || 'N/A');
+	$('#pr_current_deployment').text(data.current_deployment || 'N/A');
+	$('#pr_remarks').text(data.remarks || 'N/A');
 	
 	// Display posting history
 	display_posting_history(data.posting_history || []);
@@ -1064,22 +1066,22 @@ function display_personnel_data(data) {
 	$('.pr-posting-history-section').show();
 	
 	// Force show the promotion and courses sections specifically
-	$('#promotion_history_table_container').closest('.pr-posting-history-compact').show();
-	$('#courses_attended_table_container').closest('.pr-posting-history-compact').show();
+	$('#pr_promotion_history_table_container').closest('.pr-posting-history-compact').show();
+	$('#pr_courses_attended_table_container').closest('.pr-posting-history-compact').show();
 	
 	// Show container
-	$('#personnel_details_container').fadeIn(300);
+	$('#pr_personnel_details_container').fadeIn(300);
 	
 	// Debug: Log section visibility
 	setTimeout(function() {
-		console.log("Promotion section visible:", $('#promotion_history_table_container').closest('.pr-posting-history-compact').is(':visible'));
-		console.log("Courses section visible:", $('#courses_attended_table_container').closest('.pr-posting-history-compact').is(':visible'));
+		console.log("Promotion section visible:", $('#pr_promotion_history_table_container').closest('.pr-posting-history-compact').is(':visible'));
+		console.log("Courses section visible:", $('#pr_courses_attended_table_container').closest('.pr-posting-history-compact').is(':visible'));
 		console.log("Posting history section visible:", $('.pr-posting-history-section').is(':visible'));
 	}, 500);
 }
 
 function display_posting_history(history) {
-	let container = $('#posting_history_table_container');
+	let container = $('#pr_posting_history_table_container');
 	
 	if (!history || history.length === 0) {
 		container.html('<div class="pr-empty-state-compact"><i class="fa fa-inbox"></i><p>No posting history available</p></div>');
@@ -1126,7 +1128,7 @@ function display_posting_history(history) {
 
 function display_promotion_history(history) {
 	console.log("display_promotion_history called with:", history);
-	let container = $('#promotion_history_table_container');
+	let container = $('#pr_promotion_history_table_container');
 	console.log("Promotion history container found:", container.length > 0);
 	
 	if (!container || container.length === 0) {
@@ -1188,7 +1190,7 @@ function display_promotion_history(history) {
 
 function display_courses_attended(courses) {
 	console.log("display_courses_attended called with:", courses);
-	let container = $('#courses_attended_table_container');
+	let container = $('#pr_courses_attended_table_container');
 	console.log("Courses attended container found:", container.length > 0);
 	
 	if (!container || container.length === 0) {
@@ -1259,37 +1261,37 @@ function display_courses_attended(courses) {
 
 function clear_personnel_data() {
 	// Hide personnel details container
-	$('#personnel_details_container').hide();
+	$('#pr_personnel_details_container').hide();
 	
 	// Reset image
-	$('#personnel_image').hide().attr('src', '');
-	$('#personnel_image_placeholder').show();
+	$('#pr_personnel_image').hide().attr('src', '');
+	$('#pr_personnel_image_placeholder').show();
 	
 	// Reset header info
-	$('#personnel_name').text('');
+	$('#pr_personnel_name').text('');
 	$('#personnel_service_number').text('');
 	$('#personnel_category').text('');
 	
 	// Reset information cards
-	$('#first_name').text('-');
-	$('#last_name').text('-');
-	$('#surname').text('-');
-	$('#phone_number').text('-');
-	$('#type_of_commission').text('-');
-	$('#course').text('-');
-	$('#current_rank').text('-');
-	$('#date_of_last_promotion').text('-');
-	$('#current_unit').text('-');
-	$('#current_unit_location').text('-');
-	$('#current_deployment').text('-');
-	$('#remarks').text('-');
+	$('#pr_first_name').text('-');
+	$('#pr_last_name').text('-');
+	$('#pr_surname').text('-');
+	$('#pr_phone_number').text('-');
+	$('#pr_type_of_commission').text('-');
+	$('#pr_course').text('-');
+	$('#pr_current_rank').text('-');
+	$('#pr_date_of_last_promotion').text('-');
+	$('#pr_current_unit').text('-');
+	$('#pr_current_unit_location').text('-');
+	$('#pr_current_deployment').text('-');
+	$('#pr_remarks').text('-');
 	
 	// Clear posting history and show empty state
-	$('#posting_history_table_container').html('<div class="pr-empty-state-compact"><i class="fa fa-inbox"></i><p>Select a personnel to view posting history</p></div>');
+	$('#pr_posting_history_table_container').html('<div class="pr-empty-state-compact"><i class="fa fa-inbox"></i><p>Select a personnel to view posting history</p></div>');
 	
 	// Clear promotion history and show empty state
-	$('#promotion_history_table_container').html('<div class="pr-empty-state-compact"><i class="fa fa-inbox"></i><p>Select a personnel to view promotion history</p></div>');
+	$('#pr_promotion_history_table_container').html('<div class="pr-empty-state-compact"><i class="fa fa-inbox"></i><p>Select a personnel to view promotion history</p></div>');
 	
 	// Clear courses attended and show empty state
-	$('#courses_attended_table_container').html('<div class="pr-empty-state-compact"><i class="fa fa-inbox"></i><p>Select a personnel to view courses attended</p></div>');
+	$('#pr_courses_attended_table_container').html('<div class="pr-empty-state-compact"><i class="fa fa-inbox"></i><p>Select a personnel to view courses attended</p></div>');
 }

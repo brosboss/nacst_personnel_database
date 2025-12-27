@@ -6,9 +6,9 @@ app_email = "brossboss123@gmail.com"
 app_license = "mit"
 
 
+# app_include_css = "/assets/nacstnew/css/futuristic_theme.css"
 
 
-# app_include_css = "/assets/nacstnew/css/workspace_desktop.css"
 
 # Apps
 # ------------------
@@ -30,8 +30,11 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-
+# app_include_css = "/assets/nacstnew/css/workspace_desktop.css"
 # app_include_js = "/assets/nacstnew/js/nacstnew.js"
+
+# Futuristic Modern Theme - Comment out the line below to disable
+
 
 # include js, css files in header of web template
 # web_include_css = "/assets/nacstnew/css/nacstnew.css"
@@ -46,10 +49,6 @@ app_license = "mit"
 
 # include js in page
 page_js = {
-	"personnel-view" : [
-		"public/js/navigation_sidebar.js",
-		"public/js/personnel_view.js"
-	],
 	"personnel-record" : [
 		"public/js/navigation_sidebar.js",
 		"public/js/personnel_record.js"
@@ -57,7 +56,7 @@ page_js = {
 	"personnel-list" : [
 		"public/js/navigation_sidebar.js"
 	],
-	"units-view" : [
+	"units-view2" : [
 		"public/js/navigation_sidebar.js"
 	]
 }
@@ -103,7 +102,9 @@ page_js = {
 # ------------
 
 # before_install = "nacstnew.install.before_install"
-after_install = "nacstnew.nacstnew.utils.create_personnel_view_page"
+after_install = [
+	"nacstnew.nacstnew.fixtures.install_fixtures"
+]
 
 # Uninstallation
 # ------------
