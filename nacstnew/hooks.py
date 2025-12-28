@@ -5,6 +5,11 @@ app_description = "!!"
 app_email = "brossboss123@gmail.com"
 app_license = "mit"
 
+# App Logo and Branding
+app_logo_url = "/assets/nacstnew/images/nacstlogo.JPG"
+favicon = ["/assets/nacstnew/images/nacstlogo.JPG"]
+splash_image = ["/assets/nacstnew/images/nacstlogo.JPG"]
+
 
 # app_include_css = "/assets/nacstnew/css/futuristic_theme.css"
 
