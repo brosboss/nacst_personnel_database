@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"mm2RxS1l98\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">NACST Dashboard</span>\",\"col\":12}},{\"id\":\"IUZJcePjKs\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"State\",\"col\":3}},{\"id\":\"Wxa7dPTkgB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Unit\",\"col\":3}},{\"id\":\"wxRLvsrvbJ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Rank\",\"col\":3}},{\"id\":\"WqlyR-WKSn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Type of Commission\",\"col\":3}},{\"id\":\"UvB0BMka3i\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course\",\"col\":3}},{\"id\":\"u2nZIFmKlr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Appointment\",\"col\":3}},{\"id\":\"MVvqj-TbAY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Name\",\"col\":3}},{\"id\":\"eVD1JXRCFE\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Commander Appointment\",\"col\":3}},{\"id\":\"S0jZNVXn61\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"4c1tvJ4MCO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel\",\"col\":3}},{\"id\":\"0_Cj2JBFJy\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Attended\",\"col\":3}},{\"id\":\"jzMZFRusy2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Posting Authority\",\"col\":3}},{\"id\":\"3tM6MAyUxQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Part 2 Order\",\"col\":3}},{\"id\":\"uQ9liWa4OB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Promotion\",\"col\":3}},{\"id\":\"f_pfF1hjlx\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"N_A3FnFFlh\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Personnel\",\"col\":3}},{\"id\":\"366X7eKWck\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Course Attended\",\"col\":3}},{\"id\":\"wTRGBMvDqs\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Posting Authority\",\"col\":3}},{\"id\":\"F25JmO07fr\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Part 2 Order\",\"col\":3}},{\"id\":\"dJrTXK2JQp\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Promotion\",\"col\":3}}]",
+ "content": "[{\"id\":\"mm2RxS1l98\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">NACST Dashboard</span>\",\"col\":12}},{\"id\":\"IUZJcePjKs\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"State\",\"col\":3}},{\"id\":\"Wxa7dPTkgB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Unit\",\"col\":3}},{\"id\":\"wxRLvsrvbJ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Rank\",\"col\":3}},{\"id\":\"eVD1JXRCFE\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Commander Appointment\",\"col\":3}},{\"id\":\"WqlyR-WKSn\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Type of Commission\",\"col\":3}},{\"id\":\"UvB0BMka3i\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course\",\"col\":3}},{\"id\":\"u2nZIFmKlr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Appointment\",\"col\":3}},{\"id\":\"MVvqj-TbAY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Name\",\"col\":3}},{\"id\":\"S0jZNVXn61\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"4c1tvJ4MCO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel\",\"col\":3}},{\"id\":\"0_Cj2JBFJy\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Course Attended\",\"col\":3}},{\"id\":\"jzMZFRusy2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Posting Authority\",\"col\":3}},{\"id\":\"3tM6MAyUxQ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Part 2 Order\",\"col\":3}},{\"id\":\"uQ9liWa4OB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Promotion\",\"col\":3}},{\"id\":\"R2olJKOiOm\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Mission\",\"col\":3}},{\"id\":\"VDvnI725FI\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Create Operator\",\"col\":3}},{\"id\":\"f_pfF1hjlx\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"N_A3FnFFlh\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Personnel\",\"col\":3}},{\"id\":\"366X7eKWck\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Course Attended\",\"col\":3}},{\"id\":\"wTRGBMvDqs\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Posting Authority\",\"col\":3}},{\"id\":\"F25JmO07fr\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Part 2 Order\",\"col\":3}},{\"id\":\"dJrTXK2JQp\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Promotion\",\"col\":3}},{\"id\":\"KeSqVRm13F\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"wDHAKcRV2_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Personnel List\",\"col\":3}}]",
  "creation": "2025-12-26 11:14:00.807941",
  "custom_blocks": [],
  "docstatus": 0,
@@ -13,7 +13,7 @@
  "is_hidden": 0,
  "label": "NACST Dashboard",
  "links": [],
- "modified": "2025-12-28 00:24:07.937407",
+ "modified": "2025-12-30 21:48:24.852861",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "NACST Dashboard",
@@ -49,6 +49,9 @@
   },
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Can View Dashboard"
   }
  ],
  "sequence_id": 1.0,
@@ -75,6 +78,22 @@
    "label": "Promotion",
    "link_to": "Promotion",
    "stats_filter": "[[\"Promotion\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Create Operator",
+   "link_to": "Create Operator",
+   "stats_filter": "[[\"Create Operator\",\"name\",\"is\",\"set\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Mission",
+   "link_to": "Mission",
+   "stats_filter": "[[\"Mission\",\"name\",\"is\",\"set\",false]]",
    "type": "DocType"
   },
   {
@@ -108,6 +127,13 @@
    "link_to": "Appointment",
    "stats_filter": "[[\"Appointment\",\"name\",\"is\",\"set\",false]]",
    "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Personnel List",
+   "link_to": "personnel-list",
+   "type": "Page"
   },
   {
    "color": "Blue",

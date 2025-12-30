@@ -8,7 +8,18 @@ from frappe import _
 
 class CourseAttended(Document):
 	def validate(self):
-		"""Validate that course_report is a PDF file"""
+		"""Validate that course_report is a PDF file and mandatory if not legacy record"""
+		# Set operator to current user
+		if frappe.session.user:
+			self.operator = frappe.session.user
+		
+		# Validate course_report is mandatory if legacy_record is not checked
+		if not self.legacy_record and not self.course_report:
+			frappe.throw(
+				_("Course Report is mandatory when Legacy Record is not checked. Please attach a course report."),
+				title=_("Missing Required Field")
+			)
+		
 		if self.course_report:
 			self._validate_pdf_document('course_report')
 	
@@ -53,3 +64,8 @@ class CourseAttended(Document):
 		except Exception:
 			# If we can't check, just rely on extension validation
 			pass
+	
+	def on_submit(self):
+		"""Set auditor to current user when document is submitted"""
+		if frappe.session.user:
+			self.db_set('auditor', frappe.session.user, update_modified=False)

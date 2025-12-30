@@ -42,16 +42,33 @@ frappe.ui.form.on("Part 2 Order", {
 		load_document_viewer(frm);
 		// Restrict attach field to PDF only
 		setup_pdf_only_restriction(frm);
+		// Update attach mandatory status based on legacy_record
+		update_attach_required(frm);
 		
 		// Validate all Unit TOS Record rows on refresh
 		if (frm.doc.unit_tos_record && frm.doc.unit_tos_record.length > 0) {
 			validate_all_rows(frm);
 		}
 	},
+	legacy_record: function(frm) {
+		// Update attach mandatory status when legacy_record changes
+		update_attach_required(frm);
+	},
 	attach: function(frm) {
 		// Validate PDF on change
 		validate_pdf_document(frm, 'attach');
 		load_document_viewer(frm);
+	},
+	validate: function(frm) {
+		// Client-side validation: attach is mandatory if legacy_record is not checked
+		if (!frm.doc.legacy_record && !frm.doc.attach) {
+			frappe.msgprint({
+				title: __('Missing Required Field'),
+				message: __('Attach is mandatory when Legacy Record is not checked. Please attach a document.'),
+				indicator: 'red'
+			});
+			frappe.validated = false;
+		}
 	},
 	reference: function(frm) {
 		update_part_2_order_reference(frm);
@@ -697,4 +714,24 @@ function validate_pdf_document(frm, fieldname) {
 		frm.set_value(fieldname, '');
 		frm.refresh_field(fieldname);
 	}
+}
+
+function update_attach_required(frm) {
+	// Get the attach field
+	let attach_field = frm.get_field("attach");
+	if (!attach_field) {
+		return;
+	}
+	
+	// Make attach mandatory if legacy_record is not checked
+	if (!frm.doc.legacy_record) {
+		attach_field.df.reqd = 1;
+		frm.toggle_reqd("attach", true);
+	} else {
+		attach_field.df.reqd = 0;
+		frm.toggle_reqd("attach", false);
+	}
+	
+	// Refresh the field to update the UI
+	frm.refresh_field("attach");
 }

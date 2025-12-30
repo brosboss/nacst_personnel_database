@@ -697,6 +697,9 @@ function build_personnel_list_page(page) {
 								<th>Category</th>
 								<th>Current Unit</th>
 								<th>Rank</th>
+								<th>Date of Enlistment</th>
+								<th>Date of Commission</th>
+								<th>Years in Service</th>
 								<th>Date TOS</th>
 								<th>Period in Unit</th>
 							</tr>
@@ -1025,6 +1028,15 @@ function build_personnel_list_page(page) {
 			
 			// Rank
 			row.append($('<td></td>').text(personnel.current_rank));
+			
+			// Date of Enlistment
+			row.append($('<td></td>').text(personnel.date_of_enlistment || "N/A"));
+			
+			// Date of Commission
+			row.append($('<td></td>').text(personnel.date_of_commission || "N/A"));
+			
+			// Years in Service
+			row.append($('<td></td>').text(personnel.years_in_service || "N/A"));
 			
 			// Date TOS
 			row.append($('<td></td>').text(personnel.date_tos));

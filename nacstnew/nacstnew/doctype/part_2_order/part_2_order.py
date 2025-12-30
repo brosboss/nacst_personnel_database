@@ -10,6 +10,17 @@ from frappe.utils import getdate
 class Part2Order(Document):
 	def validate(self):
 		"""Auto-populate part_2_order_reference from reference and date, validate service numbers, and validate PDF document"""
+		# Set operator to current user
+		if frappe.session.user:
+			self.operator = frappe.session.user
+		
+		# Validate attach is mandatory if legacy_record is not checked
+		if not self.legacy_record and not self.attach:
+			frappe.throw(
+				_("Attach is mandatory when Legacy Record is not checked. Please attach a document."),
+				title=_("Missing Required Field")
+			)
+		
 		# Validate that attach is a PDF file
 		if self.attach:
 			self._validate_pdf_document('attach')
@@ -93,6 +104,10 @@ class Part2Order(Document):
 	
 	def on_submit(self):
 		"""Update Posting Authority Details when Part 2 Order is submitted"""
+		# Set auditor to current user and save to database
+		if frappe.session.user:
+			self.db_set('auditor', frappe.session.user, update_modified=False)
+		
 		self._update_posting_authority_details()
 		# Update Personnel current_unit based on maximum Date TOS
 		self._update_personnel_current_unit()

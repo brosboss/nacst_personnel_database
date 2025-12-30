@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "personal_information_tab",
+  "operator",
+  "section_break_kxlt",
   "image",
   "personnel_image",
   "personnel_full_picture",
@@ -13,10 +15,13 @@
   "category",
   "type_of_commission",
   "course",
+  "date_of_enlistment",
+  "date_of__commission",
   "column_break_ayhz",
   "service_number",
   "first_name",
-  "last_name",
+  "middle_name",
+  "other_names",
   "surname",
   "personnel_name",
   "column_break_wwsz",
@@ -28,6 +33,7 @@
   "current_deployment",
   "column_break_aubc",
   "phone_number",
+  "phone_number_2",
   "remarks",
   "posting_history_tab",
   "personnel_posting_history_html",
@@ -36,7 +42,9 @@
   "courses_attended_tab",
   "courses_attended",
   "brief_tab",
-  "personnel_brief"
+  "personnel_brief",
+  "mission_tab",
+  "personnel_mission"
  ],
  "fields": [
   {
@@ -46,7 +54,6 @@
    "unique": 1
   },
   {
-   "default": "Personnel Category",
    "fieldname": "category",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -74,11 +81,6 @@
    "fieldname": "first_name",
    "fieldtype": "Data",
    "label": "First Name"
-  },
-  {
-   "fieldname": "last_name",
-   "fieldtype": "Data",
-   "label": "Last Name"
   },
   {
    "fieldname": "surname",
@@ -210,11 +212,61 @@
    "label": "Personnel Full Picture"
   },
   {
-   "fetch_from": "current_unit_location.geopolitical_zone_abbrev",
+   "fetch_from": "current_unit.region",
    "fieldname": "current_unit_geopolitical_zone",
    "fieldtype": "Link",
    "label": "Current Unit Geopolitical Zone",
    "options": "Geopolitical Zone"
+  },
+  {
+   "fieldname": "middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name"
+  },
+  {
+   "fieldname": "other_names",
+   "fieldtype": "Data",
+   "label": "Other Names"
+  },
+  {
+   "fieldname": "mission_tab",
+   "fieldtype": "Tab Break",
+   "label": "Mission"
+  },
+  {
+   "fieldname": "personnel_mission",
+   "fieldtype": "HTML",
+   "label": "Personnel Mission"
+  },
+  {
+   "fieldname": "phone_number_2",
+   "fieldtype": "Data",
+   "label": "Phone Number 2"
+  },
+  {
+   "fieldname": "operator",
+   "fieldtype": "Link",
+   "label": "Operator",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "course.date_of_enlistment",
+   "fieldname": "date_of_enlistment",
+   "fieldtype": "Date",
+   "label": "Date of Enlistment",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "course.date_of__commission",
+   "fieldname": "date_of__commission",
+   "fieldtype": "Date",
+   "label": "Date of  Commission",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_kxlt",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -222,7 +274,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-27 23:42:49.952796",
+ "modified": "2025-12-30 07:43:26.074183",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",
@@ -240,11 +292,50 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Personnel Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Personnel Reader"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Personnel Editor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Personnel Deleter",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

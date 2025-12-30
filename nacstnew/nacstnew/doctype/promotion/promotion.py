@@ -4,11 +4,37 @@
 import frappe
 from frappe.model.document import Document
 from frappe import _
+from frappe.utils import getdate
 
 
 class Promotion(Document):
 	def validate(self):
-		"""Validate that attach is a PDF file"""
+		"""Auto-populate promotion_authority from reference and date, and validate PDF document"""
+		# Set operator to current user
+		if frappe.session.user:
+			self.operator = frappe.session.user
+		
+		# Auto-populate promotion_authority from reference and date
+		if self.reference and self.date:
+			# Format date as "5 Mar 25" (d MMM yy format)
+			date_obj = getdate(self.date)
+			# Handle Windows compatibility (Windows doesn't support %-d)
+			try:
+				formatted_date = date_obj.strftime("%-d %b %y")
+			except ValueError:
+				# Windows doesn't support %-d, use %d and strip leading zero
+				formatted_date = date_obj.strftime("%d %b %y").lstrip("0")
+			# Construct promotion authority: "Reference Dated Date"
+			self.promotion_authority = self.reference.strip() + " Dated " + formatted_date
+		
+		# Validate attach is mandatory if legacy_record is not checked
+		if not self.legacy_record and not self.attach:
+			frappe.throw(
+				_("Attach is mandatory when Legacy Record is not checked. Please attach a document."),
+				title=_("Missing Required Field")
+			)
+		
+		# Validate that attach is a PDF file
 		if self.attach:
 			self._validate_pdf_document('attach')
 	
@@ -56,6 +82,10 @@ class Promotion(Document):
 	
 	def on_submit(self):
 		"""Update Personnel records with latest promotion information"""
+		# Set auditor to current user and save to database
+		if frappe.session.user:
+			self.db_set('auditor', frappe.session.user, update_modified=False)
+		
 		# Get all unique service numbers from this promotion's promotion list
 		service_numbers = set()
 		for row in self.promotion_list:
@@ -63,13 +93,15 @@ class Promotion(Document):
 				service_numbers.add(row.service_number)
 		
 		# For each personnel, find their max seniority date from all submitted promotions
+		# and update their current rank to the to_rank from that record
 		for service_number in service_numbers:
 			self.update_personnel_rank(service_number)
 	
 	def update_personnel_rank(self, service_number):
-		"""Update personnel's current rank and date of last promotion based on max seniority date"""
+		"""Update personnel's current rank based on max seniority date from all submitted promotions"""
 		# Get the promotion record with max seniority_date for this personnel
-		# Only consider submitted promotion records
+		# Only consider submitted promotion records (docstatus = 1)
+		# Filter out NULL seniority dates and use parent creation DESC as tiebreaker
 		max_promotion = frappe.db.sql("""
 			SELECT 
 				pl.service_number,
@@ -79,7 +111,9 @@ class Promotion(Document):
 			INNER JOIN `tabPromotion` p ON pl.parent = p.name
 			WHERE pl.service_number = %s
 				AND p.docstatus = 1
-			ORDER BY pl.seniority_date DESC
+				AND pl.seniority_date IS NOT NULL
+				AND pl.to_rank IS NOT NULL
+			ORDER BY pl.seniority_date DESC, p.creation DESC
 			LIMIT 1
 		""", (service_number,), as_dict=True)
 		

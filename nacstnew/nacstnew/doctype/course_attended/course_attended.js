@@ -7,11 +7,28 @@ frappe.ui.form.on("Course Attended", {
 		load_document_viewer(frm);
 		// Restrict course_report field to PDF only
 		setup_pdf_only_restriction(frm);
+		// Update course_report mandatory status based on legacy_record
+		update_course_report_required(frm);
+	},
+	legacy_record: function(frm) {
+		// Update course_report mandatory status when legacy_record changes
+		update_course_report_required(frm);
 	},
 	course_report: function(frm) {
 		// Validate PDF on change
 		validate_pdf_document(frm, 'course_report');
 		load_document_viewer(frm);
+	},
+	validate: function(frm) {
+		// Client-side validation: course_report is mandatory if legacy_record is not checked
+		if (!frm.doc.legacy_record && !frm.doc.course_report) {
+			frappe.msgprint({
+				title: __('Missing Required Field'),
+				message: __('Course Report is mandatory when Legacy Record is not checked. Please attach a course report.'),
+				indicator: 'red'
+			});
+			frappe.validated = false;
+		}
 	}
 });
 
@@ -281,4 +298,24 @@ function validate_pdf_document(frm, fieldname) {
 		frm.set_value(fieldname, '');
 		frm.refresh_field(fieldname);
 	}
+}
+
+function update_course_report_required(frm) {
+	// Get the course_report field
+	let course_report_field = frm.get_field("course_report");
+	if (!course_report_field) {
+		return;
+	}
+	
+	// Make course_report mandatory if legacy_record is not checked
+	if (!frm.doc.legacy_record) {
+		course_report_field.df.reqd = 1;
+		frm.toggle_reqd("course_report", true);
+	} else {
+		course_report_field.df.reqd = 0;
+		frm.toggle_reqd("course_report", false);
+	}
+	
+	// Refresh the field to update the UI
+	frm.refresh_field("course_report");
 }

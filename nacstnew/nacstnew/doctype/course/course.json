@@ -1,12 +1,17 @@
 {
  "actions": [],
+ "allow_events_in_timeline": 1,
  "allow_rename": 1,
  "autoname": "field:course",
  "creation": "2025-12-25 21:16:18.672080",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "course"
+  "course",
+  "personnel_category",
+  "date_of__commission",
+  "date_of_enlistment",
+  "operator"
  ],
  "fields": [
   {
@@ -16,12 +21,36 @@
    "label": "Course",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "personnel_category",
+   "fieldtype": "Link",
+   "label": "Personnel Category",
+   "options": "Personnel Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date_of__commission",
+   "fieldtype": "Date",
+   "label": "Date of  Commission"
+  },
+  {
+   "fieldname": "date_of_enlistment",
+   "fieldtype": "Date",
+   "label": "Date of Enlistment"
+  },
+  {
+   "fieldname": "operator",
+   "fieldtype": "Link",
+   "label": "Operator",
+   "options": "User",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-25 21:17:51.315495",
+ "modified": "2025-12-29 22:52:01.158406",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Course",
@@ -39,6 +68,44 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reference Data Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reference Data Reader"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reference Data Editor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reference Data Deleter",
+   "share": 1
   }
  ],
  "quick_entry": 1,
@@ -46,5 +113,8 @@
  "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
 }
