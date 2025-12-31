@@ -28,6 +28,11 @@ if (typeof window.NAVIGATION_ITEMS === 'undefined') {
 			icon: 'fa-building-o'
 		},
 		{
+			route: 'rtal',
+			label: 'Real-Time Audit Log',
+			icon: 'fa-history'
+		},
+		{
 			route: '#',
 			label: 'Reports',
 			icon: 'fa-chart-line'

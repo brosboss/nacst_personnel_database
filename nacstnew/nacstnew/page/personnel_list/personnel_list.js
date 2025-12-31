@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.pages['personnel-list'].on_page_load = function(wrapper) {
+	// Automatically toggle to full width when page loads
+	localStorage.container_fullwidth = "true";
+	frappe.ui.toolbar.set_fullwidth_if_enabled();
+	
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Personnel List',
@@ -16,6 +20,10 @@ frappe.pages['personnel-list'].on_page_load = function(wrapper) {
 	
 	// Also listen to the "show" event directly
 	$(wrapper).on('show', function() {
+		// Ensure full width is still enabled when page is shown
+		localStorage.container_fullwidth = "true";
+		frappe.ui.toolbar.set_fullwidth_if_enabled();
+		
 		setTimeout(function() {
 			// Check if page content exists
 			if ($('#personnel_table_body').length === 0 && wrapper.page) {
@@ -35,6 +43,10 @@ frappe.pages['personnel-list'].on_page_load = function(wrapper) {
 
 // Reload content when page is shown (e.g., when navigating from another page)
 frappe.pages['personnel-list'].on_page_show = function(wrapper) {
+	// Automatically toggle to full width when page is shown
+	localStorage.container_fullwidth = "true";
+	frappe.ui.toolbar.set_fullwidth_if_enabled();
+	
 	// Reload the personnel list when page is shown
 	setTimeout(function() {
 		// Check if page content exists
@@ -697,6 +709,9 @@ function build_personnel_list_page(page) {
 								<th>Category</th>
 								<th>Current Unit</th>
 								<th>Rank</th>
+								<th>Date of Enlistment</th>
+								<th>Date of Commission</th>
+								<th>Years in Service</th>
 								<th>Date TOS</th>
 								<th>Period in Unit</th>
 							</tr>
@@ -1025,6 +1040,15 @@ function build_personnel_list_page(page) {
 			
 			// Rank
 			row.append($('<td></td>').text(personnel.current_rank));
+			
+			// Date of Enlistment
+			row.append($('<td></td>').text(personnel.date_of_enlistment || "N/A"));
+			
+			// Date of Commission
+			row.append($('<td></td>').text(personnel.date_of_commission || "N/A"));
+			
+			// Years in Service
+			row.append($('<td></td>').text(personnel.years_in_service || "N/A"));
 			
 			// Date TOS
 			row.append($('<td></td>').text(personnel.date_tos));

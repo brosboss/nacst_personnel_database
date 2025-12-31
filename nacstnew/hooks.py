@@ -5,6 +5,11 @@ app_description = "!!"
 app_email = "brossboss123@gmail.com"
 app_license = "mit"
 
+# App Logo and Branding
+app_logo_url = "/assets/nacstnew/images/nacstlogo.JPG"
+favicon = ["/assets/nacstnew/images/nacstlogo.JPG"]
+splash_image = ["/assets/nacstnew/images/nacstlogo.JPG"]
+
 
 # app_include_css = "/assets/nacstnew/css/futuristic_theme.css"
 
@@ -58,11 +63,41 @@ page_js = {
 	],
 	"units-view2" : [
 		"public/js/navigation_sidebar.js"
+	],
+	"rtal" : [
+		"public/js/navigation_sidebar.js"
 	]
 }
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+# Add view_changes.js to key doctypes (you can add more as needed)
+doctype_js = {
+	"Personnel": "public/js/view_changes.js",
+	"Promotion": "public/js/view_changes.js",
+	"Course": "public/js/view_changes.js",
+	"Mission": "public/js/view_changes.js",
+	"Posting Authority": "public/js/view_changes.js",
+	"Part 2 Order": "public/js/view_changes.js",
+	"Course Attended": "public/js/view_changes.js",
+	"Appointment": "public/js/view_changes.js",
+	"Commander Appointment": "public/js/view_changes.js",
+	"Unit": "public/js/view_changes.js",
+	"Rank": "public/js/view_changes.js",
+	"State": "public/js/view_changes.js",
+	"Grade": "public/js/view_changes.js",
+	"Personnel Category": "public/js/view_changes.js",
+	"Geopolitical Zone": "public/js/view_changes.js",
+	"Type of Commission": "public/js/view_changes.js",
+	"Schedule of Activities": "public/js/view_changes.js",
+	"Mission Name": "public/js/view_changes.js",
+	"Mission List": "public/js/view_changes.js",
+	"Promotion List": "public/js/view_changes.js",
+	"Course Name": "public/js/view_changes.js",
+	"Past Postings": "public/js/view_changes.js",
+	"Personnel Posting History": "public/js/view_changes.js",
+	"Unit TOS Record": "public/js/view_changes.js",
+	"Posting Authority Details": "public/js/view_changes.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

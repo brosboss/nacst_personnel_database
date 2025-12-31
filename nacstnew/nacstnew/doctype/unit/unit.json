@@ -7,9 +7,6 @@
  "field_order": [
   "unit",
   "unit_location",
-  "current_unit_commander_service_number",
-  "current_unit_commander_name",
-  "current_unit_commander_rank",
   "region"
  ],
  "fields": [
@@ -29,26 +26,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "current_unit_commander_service_number",
-   "fieldtype": "Link",
-   "label": "Current Unit Commander Service Number",
-   "options": "Personnel"
-  },
-  {
-   "fetch_from": "current_unit_commander_service_number.personnel_name",
-   "fieldname": "current_unit_commander_name",
-   "fieldtype": "Data",
-   "label": "Current Unit Commander Name",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "current_unit_commander_service_number.current_rank",
-   "fieldname": "current_unit_commander_rank",
-   "fieldtype": "Data",
-   "label": "Current Unit Commander Rank",
-   "read_only": 1
-  },
-  {
    "fetch_from": "unit_location.geopolitical_zone",
    "fieldname": "region",
    "fieldtype": "Link",
@@ -57,9 +34,10 @@
   }
  ],
  "grid_page_length": 50,
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-27 23:15:05.707208",
+ "modified": "2025-12-31 15:30:16.067547",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Unit",
@@ -77,6 +55,99 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reference Data Creator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reference Data Reader"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reference Data Editor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reference Data Deleter",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Posting Authority Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Posting Authority Reader",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Posting Authority Editor",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Editor",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Amender",
+   "share": 1
   }
  ],
  "quick_entry": 1,

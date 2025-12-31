@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.pages['units-view2'].on_page_load = function(wrapper) {
+	// Automatically toggle to full width when page loads
+	localStorage.container_fullwidth = "true";
+	frappe.ui.toolbar.set_fullwidth_if_enabled();
+	
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Units View 2 (Compact)',
@@ -16,6 +20,10 @@ frappe.pages['units-view2'].on_page_load = function(wrapper) {
 	
 	// Also listen to the "show" event directly
 	$(wrapper).on('show', function() {
+		// Ensure full width is still enabled when page is shown
+		localStorage.container_fullwidth = "true";
+		frappe.ui.toolbar.set_fullwidth_if_enabled();
+		
 		setTimeout(function() {
 			// Check if page content exists
 			if ($('#units_container').length === 0 && wrapper.page) {
@@ -34,6 +42,10 @@ frappe.pages['units-view2'].on_page_load = function(wrapper) {
 
 // Reload content when page is shown
 frappe.pages['units-view2'].on_page_show = function(wrapper) {
+	// Automatically toggle to full width when page is shown
+	localStorage.container_fullwidth = "true";
+	frappe.ui.toolbar.set_fullwidth_if_enabled();
+	
 	setTimeout(function() {
 		// Check if page content exists
 		if ($('#units_container').length === 0 && wrapper.page) {

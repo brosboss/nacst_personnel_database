@@ -26,6 +26,7 @@ def install_fixtures():
 		insert_appointments()
 		insert_commander_appointments()
 		insert_all_units()
+		insert_grades()
 		frappe.db.commit()
 		print("Initial data fixtures installed successfully")
 	except Exception as e:
@@ -819,6 +820,67 @@ def insert_all_units():
 	]
 	
 	return insert_units(units_data)
+
+
+def insert_grades():
+	"""Insert all grades for course grading"""
+	
+	# Common military course grades
+	grades = [
+		"A",
+		"B",
+		"C",
+		"D",
+		"E",
+		"F",
+		"Pass",
+		"Fail",
+		"Excellent",
+		"Good",
+		"Satisfactory",
+		"Fair",
+		"Poor",
+		"Distinction",
+		"Credit",
+		"Merit"
+	]
+	
+	inserted_count = 0
+	skipped_count = 0
+	
+	for grade_name in grades:
+		# Check if grade already exists
+		if frappe.db.exists("Grade", grade_name):
+			skipped_count += 1
+			continue
+		
+		# Create grade document
+		grade_doc = frappe.get_doc({
+			"doctype": "Grade",
+			"grade": grade_name
+		})
+		grade_doc.insert(ignore_permissions=True)
+		inserted_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} grades. {skipped_count} grades already existed.")
+	
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count
+	}
+
+
+@frappe.whitelist()
+def verify_grades():
+	"""Verify that all grades were inserted correctly"""
+	grades = frappe.get_all("Grade", fields=["grade"], order_by="grade")
+	
+	return {
+		"total": len(grades),
+		"grades": [g.grade for g in grades]
+	}
 
 
 # Add more fixture functions here as needed

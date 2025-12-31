@@ -7,7 +7,22 @@ from frappe import _
 
 
 class Personnel(Document):
-	pass
+	def validate(self):
+		# Set operator to current user
+		if frappe.session.user:
+			self.operator = frappe.session.user
+		
+		# Convert name fields to uppercase
+		if self.personnel_name:
+			self.personnel_name = self.personnel_name.upper()
+		if self.other_names:
+			self.other_names = self.other_names.upper()
+		if self.first_name:
+			self.first_name = self.first_name.upper()
+		if self.middle_name:
+			self.middle_name = self.middle_name.upper()
+		if self.surname:
+			self.surname = self.surname.upper()
 
 
 @frappe.whitelist()
@@ -103,6 +118,120 @@ def get_posting_history_html(service_number):
 				<td><span class="indicator {status_color}">{frappe.utils.escape_html(posting_status)}</span></td>
 				<td>{frappe.utils.escape_html(record.part_2_order or "")}</td>
 				<td>{record.overstay_in_loosing_unit or 0}</td>
+			</tr>
+		"""
+	
+	html += """
+		</tbody>
+	</table>
+	"""
+	
+	return html
+
+@frappe.whitelist()
+def get_personnel_mission_html(service_number):
+	"""Generate HTML table for mission history from Mission List child table"""
+	if not service_number:
+		return "<p>No service number provided.</p>"
+	
+	# Query all Mission List records for this service number from submitted Mission documents
+	mission_records = frappe.db.sql("""
+		SELECT 
+			ml.service_number,
+			ml.personnel_name,
+			ml.mission_start_date,
+			ml.mission_end_date,
+			m.mission_authority,
+			m.mission,
+			m.reference,
+			m.date as mission_date
+		FROM `tabMission List` ml
+		INNER JOIN `tabMission` m ON ml.parent = m.name
+		WHERE ml.service_number = %s
+			AND m.docstatus = 1
+			AND ml.mission_start_date IS NOT NULL
+			AND ml.mission_end_date IS NOT NULL
+		ORDER BY ml.mission_start_date DESC, m.creation DESC
+	""", (service_number,), as_dict=True)
+	
+	if not mission_records:
+		return "<p>No mission records found.</p>"
+	
+	# Generate HTML table
+	html = """
+	<style>
+		.mission-history-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 10px;
+		}
+		.mission-history-table th {
+			background-color: var(--subtle-fg);
+			padding: 8px;
+			text-align: left;
+			border: 1px solid var(--table-border-color);
+			font-weight: bold;
+		}
+		.mission-history-table td {
+			padding: 8px;
+			border: 1px solid var(--table-border-color);
+		}
+		.mission-history-table tr:nth-child(even) {
+			background-color: var(--fg-color);
+		}
+	</style>
+	<table class="mission-history-table">
+		<thead>
+			<tr>
+				<th>Mission Authority</th>
+				<th>Mission Name</th>
+				<th>Start Date</th>
+				<th>End Date</th>
+				<th>Period Spent</th>
+			</tr>
+		</thead>
+		<tbody>
+	"""
+	
+	for record in mission_records:
+		# Format dates
+		start_date = frappe.format_value(record.mission_start_date, {"fieldtype": "Date"}) if record.mission_start_date else ""
+		end_date = frappe.format_value(record.mission_end_date, {"fieldtype": "Date"}) if record.mission_end_date else ""
+		
+		# Calculate period spent
+		period_spent = "N/A"
+		if record.mission_start_date and record.mission_end_date:
+			from frappe.utils import getdate, date_diff
+			start_date_obj = getdate(record.mission_start_date)
+			end_date_obj = getdate(record.mission_end_date)
+			
+			# Calculate difference in days
+			days_diff = date_diff(end_date_obj, start_date_obj)
+			
+			# Convert to years, months, days
+			years = days_diff // 365
+			remaining_days = days_diff % 365
+			months = remaining_days // 30
+			days = remaining_days % 30
+			
+			# Format period string
+			period_parts = []
+			if years > 0:
+				period_parts.append(f"{years} year{'s' if years != 1 else ''}")
+			if months > 0:
+				period_parts.append(f"{months} month{'s' if months != 1 else ''}")
+			if days > 0 or len(period_parts) == 0:
+				period_parts.append(f"{days} day{'s' if days != 1 else ''}")
+			
+			period_spent = ", ".join(period_parts)
+		
+		html += f"""
+			<tr>
+				<td><b>{frappe.utils.escape_html(record.mission_authority or "")}</b></td>
+				<td>{frappe.utils.escape_html(record.mission or "")}</td>
+				<td>{start_date}</td>
+				<td>{end_date}</td>
+				<td><b>{period_spent}</b></td>
 			</tr>
 		"""
 	
@@ -1075,7 +1204,9 @@ def get_personnel_list(page=1, page_length=20, current_unit=None, rank=None, dat
 			"personnel_name",
 			"current_unit",
 			"current_rank",
-			"category"
+			"category",
+			"date_of_enlistment",
+			"date_of__commission"
 		],
 		order_by="personnel_name",
 		limit_start=limit_start,
@@ -1147,6 +1278,48 @@ def get_personnel_list(page=1, page_length=20, current_unit=None, rank=None, dat
 			if filter_date != tos_date_check:
 				continue  # Skip this record if date doesn't match
 		
+		# Get date of enlistment and commission
+		date_of_enlistment = personnel.get("date_of_enlistment")
+		date_of_commission = personnel.get("date_of__commission")
+		
+		# Format dates
+		date_of_enlistment_formatted = frappe.format_value(date_of_enlistment, {"fieldtype": "Date"}) if date_of_enlistment else "N/A"
+		date_of_commission_formatted = frappe.format_value(date_of_commission, {"fieldtype": "Date"}) if date_of_commission else "N/A"
+		
+		# Calculate years in service from the earliest available date
+		years_in_service = None
+		years_in_service_formatted = "N/A"
+		
+		# Determine the service start date (use the earliest of enlistment or commission)
+		service_start_date = None
+		if date_of_enlistment:
+			service_start_date = getdate(date_of_enlistment)
+		if date_of_commission:
+			commission_date = getdate(date_of_commission)
+			if service_start_date is None or commission_date < service_start_date:
+				service_start_date = commission_date
+		
+		if service_start_date:
+			today_date = getdate(today())
+			days_diff = date_diff(today_date, service_start_date)
+			
+			# Convert to years (decimal for precise calculation)
+			years_in_service = days_diff / 365.0
+			
+			# Format as years and months for display
+			years = days_diff // 365
+			remaining_days = days_diff % 365
+			months = remaining_days // 30
+			
+			if years > 0:
+				years_in_service_formatted = f"{years} year{'s' if years != 1 else ''}"
+				if months > 0:
+					years_in_service_formatted += f" {months} month{'s' if months != 1 else ''}"
+			elif months > 0:
+				years_in_service_formatted = f"{months} month{'s' if months != 1 else ''}"
+			else:
+				years_in_service_formatted = f"{days_diff} day{'s' if days_diff != 1 else ''}"
+		
 		result.append({
 			"service_number": service_number,
 			"personnel_name": personnel.personnel_name or "N/A",
@@ -1155,7 +1328,11 @@ def get_personnel_list(page=1, page_length=20, current_unit=None, rank=None, dat
 			"category": personnel.category or "N/A",
 			"date_tos": date_tos_formatted,
 			"period_spent": period_spent,
-			"period_years": period_years  # For color coding
+			"period_years": period_years,  # For color coding
+			"date_of_enlistment": date_of_enlistment_formatted,
+			"date_of_commission": date_of_commission_formatted,
+			"years_in_service": years_in_service_formatted,
+			"years_in_service_decimal": years_in_service  # For sorting/filtering if needed
 		})
 	
 	# Recalculate total count if date filter was applied (since we filtered in Python)
@@ -1205,14 +1382,16 @@ def export_personnel_list_to_excel(current_unit=None, rank=None, date_tos=None, 
 			"personnel_name",
 			"current_unit",
 			"current_rank",
-			"category"
+			"category",
+			"date_of_enlistment",
+			"date_of__commission"
 		],
 		order_by="personnel_name"
 	)
 	
 	# Prepare data for export
 	data = []
-	headers = ["Service Number", "Personnel Name", "Category", "Current Unit", "Current Rank", "Date TOS", "Period Spent"]
+	headers = ["Service Number", "Personnel Name", "Category", "Current Unit", "Current Rank", "Date of Enlistment", "Date of Commission", "Years in Service", "Date TOS", "Period Spent"]
 	data.append(headers)
 	
 	for personnel in personnel_list:
@@ -1273,6 +1452,44 @@ def export_personnel_list_to_excel(current_unit=None, rank=None, date_tos=None, 
 			if filter_date != tos_date_check:
 				continue  # Skip this record if date doesn't match
 		
+		# Get date of enlistment and commission
+		date_of_enlistment = personnel.get("date_of_enlistment")
+		date_of_commission = personnel.get("date_of__commission")
+		
+		# Format dates
+		date_of_enlistment_formatted = frappe.format_value(date_of_enlistment, {"fieldtype": "Date"}) if date_of_enlistment else "N/A"
+		date_of_commission_formatted = frappe.format_value(date_of_commission, {"fieldtype": "Date"}) if date_of_commission else "N/A"
+		
+		# Calculate years in service from the earliest available date
+		years_in_service_formatted = "N/A"
+		
+		# Determine the service start date (use the earliest of enlistment or commission)
+		service_start_date = None
+		if date_of_enlistment:
+			service_start_date = getdate(date_of_enlistment)
+		if date_of_commission:
+			commission_date = getdate(date_of_commission)
+			if service_start_date is None or commission_date < service_start_date:
+				service_start_date = commission_date
+		
+		if service_start_date:
+			today_date = getdate(today())
+			days_diff = date_diff(today_date, service_start_date)
+			
+			# Format as years and months for display
+			years = days_diff // 365
+			remaining_days = days_diff % 365
+			months = remaining_days // 30
+			
+			if years > 0:
+				years_in_service_formatted = f"{years} year{'s' if years != 1 else ''}"
+				if months > 0:
+					years_in_service_formatted += f" {months} month{'s' if months != 1 else ''}"
+			elif months > 0:
+				years_in_service_formatted = f"{months} month{'s' if months != 1 else ''}"
+			else:
+				years_in_service_formatted = f"{days_diff} day{'s' if days_diff != 1 else ''}"
+		
 		# Add row to data
 		data.append([
 			personnel.service_number or "",
@@ -1280,6 +1497,9 @@ def export_personnel_list_to_excel(current_unit=None, rank=None, date_tos=None, 
 			personnel.category or "N/A",
 			personnel.current_unit or "N/A",
 			personnel.current_rank or "N/A",
+			date_of_enlistment_formatted,
+			date_of_commission_formatted,
+			years_in_service_formatted,
 			date_tos_formatted,
 			period_spent
 		])

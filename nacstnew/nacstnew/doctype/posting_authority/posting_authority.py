@@ -10,6 +10,17 @@ from frappe.utils import getdate
 class PostingAuthority(Document):
 	def validate(self):
 		"""Auto-populate posting_authority from reference and date, validate service numbers, and validate PDF document"""
+		# Set operator to current user
+		if frappe.session.user:
+			self.operator = frappe.session.user
+		
+		# Validate posting_document is mandatory if legacy_record is not checked
+		if not self.legacy_record and not self.posting_document:
+			frappe.throw(
+				_("Posting Document is mandatory when Legacy Record is not checked. Please attach a document."),
+				title=_("Missing Required Field")
+			)
+		
 		# Validate that posting_document is a PDF file
 		if self.posting_document:
 			self._validate_pdf_document()
@@ -213,8 +224,13 @@ class PostingAuthority(Document):
 							  "3. Then you can delete this Posting Authority Details row").format(
 								deleted_row.get("service_number")
 							),
-							title=_("Cannot Delete - Used in Unit TOS Record")
-						)
+					title=_("Cannot Delete - Used in Unit TOS Record")
+				)
+	
+	def on_submit(self):
+		"""Set auditor to current user when document is submitted"""
+		if frappe.session.user:
+			self.db_set('auditor', frappe.session.user, update_modified=False)
 
 @frappe.whitelist()
 def check_posting_authority_details_used_in_unit_tos(posting_authority, service_number, personnel_name, from_unit, to_unit):
