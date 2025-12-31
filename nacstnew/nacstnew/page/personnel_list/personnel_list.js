@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.pages['personnel-list'].on_page_load = function(wrapper) {
+	// Automatically toggle to full width when page loads
+	localStorage.container_fullwidth = "true";
+	frappe.ui.toolbar.set_fullwidth_if_enabled();
+	
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Personnel List',
@@ -16,6 +20,10 @@ frappe.pages['personnel-list'].on_page_load = function(wrapper) {
 	
 	// Also listen to the "show" event directly
 	$(wrapper).on('show', function() {
+		// Ensure full width is still enabled when page is shown
+		localStorage.container_fullwidth = "true";
+		frappe.ui.toolbar.set_fullwidth_if_enabled();
+		
 		setTimeout(function() {
 			// Check if page content exists
 			if ($('#personnel_table_body').length === 0 && wrapper.page) {
@@ -35,6 +43,10 @@ frappe.pages['personnel-list'].on_page_load = function(wrapper) {
 
 // Reload content when page is shown (e.g., when navigating from another page)
 frappe.pages['personnel-list'].on_page_show = function(wrapper) {
+	// Automatically toggle to full width when page is shown
+	localStorage.container_fullwidth = "true";
+	frappe.ui.toolbar.set_fullwidth_if_enabled();
+	
 	// Reload the personnel list when page is shown
 	setTimeout(function() {
 		// Check if page content exists

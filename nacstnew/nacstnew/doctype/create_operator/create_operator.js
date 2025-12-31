@@ -35,12 +35,21 @@ frappe.ui.form.on("Create Operator", {
 			});
 		}
 		
+		// Ensure mandatory roles are always assigned
+		frm.trigger("ensure_can_view_dashboard");
+		frm.trigger("ensure_personnel_reader");
+		
 		// Populate roles HTML with checkboxes
 		frm.trigger("populate_roles_html");
 		
 		// Sync child table with checkboxes after a short delay to ensure HTML is rendered
 		setTimeout(function() {
 			frm.trigger("sync_child_table_with_checkboxes");
+			// Ensure mandatory roles checkboxes are checked after HTML is rendered
+			setTimeout(function() {
+				frm.trigger("ensure_can_view_dashboard");
+				frm.trigger("ensure_personnel_reader");
+			}, 100);
 		}, 500);
 	},
 	
@@ -152,6 +161,8 @@ frappe.ui.form.on("Create Operator", {
 								columns[colIndex].forEach(function(role) {
 									let checked = assigned_roles.includes(role.name) ? 'checked' : '';
 									let role_display = role.app_role || role.name;
+									let is_mandatory = role.app_role === "Can View Dashboard" || role.app_role === "Personnel Reader";
+									let mandatory_attr = is_mandatory ? 'data-mandatory="true"' : '';
 									
 									html += `
 										<div class="checkbox role-item" style="
@@ -172,11 +183,13 @@ frappe.ui.form.on("Create Operator", {
 											">
 												<input type="checkbox" class="role-checkbox" 
 													data-role-name="${frappe.utils.escape_html(role.name)}" 
+													${mandatory_attr}
 													${checked} 
+													${is_mandatory ? 'disabled' : ''}
 													style="
 														margin-right: 8px; 
 														margin-top: 0; 
-														cursor: pointer;
+														cursor: ${is_mandatory ? 'not-allowed' : 'pointer'};
 														width: 14px;
 														height: 14px;
 														accent-color: #007bff;
@@ -184,7 +197,8 @@ frappe.ui.form.on("Create Operator", {
 												<span style="
 													flex: 1;
 													line-height: 1.3;
-												">${frappe.utils.escape_html(role_display)}</span>
+													${is_mandatory ? 'font-weight: 500; color: #007bff;' : ''}
+												">${frappe.utils.escape_html(role_display)}${is_mandatory ? ' <span style="font-size: 10px; color: #6c757d;">(Required)</span>' : ''}</span>
 											</label>
 										</div>
 									`;
@@ -203,6 +217,9 @@ frappe.ui.form.on("Create Operator", {
 					if (frm.fields_dict.roles_html) {
 						frm.fields_dict.roles_html.$wrapper.html(html);
 						
+						// Add Select All / Unselect All buttons if they don't exist
+						setup_role_selection_buttons(frm);
+						
 						// Sync child table with checkboxes on initial load
 						frm.trigger("sync_child_table_with_checkboxes");
 						
@@ -211,6 +228,19 @@ frappe.ui.form.on("Create Operator", {
 							let $checkbox = $(this);
 							let role_name = $checkbox.data('role-name');
 							let is_checked = $checkbox.is(':checked');
+							let is_mandatory = $checkbox.data('mandatory') === true;
+							
+							// Prevent unchecking mandatory roles
+							if (is_mandatory && !is_checked) {
+								$checkbox.prop('checked', true);
+								// Get role display name for the message
+								let role_display = $checkbox.closest('.role-item').find('span').first().text().replace(' (Required)', '');
+								frappe.show_alert({
+									message: __("'{0}' role is mandatory and cannot be removed", [role_display]),
+									indicator: "orange"
+								});
+								return;
+							}
 							
 							if (is_checked) {
 								// Add role to child table if it doesn't exist
@@ -286,6 +316,8 @@ frappe.ui.form.on("Create Operator", {
 					
 					if (frm.fields_dict.roles_html) {
 						frm.fields_dict.roles_html.$wrapper.html(html);
+						// Add buttons if roles are available
+						setup_role_selection_buttons(frm);
 					}
 				}
 			},
@@ -325,6 +357,7 @@ frappe.ui.form.on("Create Operator", {
 				
 				if (frm.fields_dict.roles_html) {
 					frm.fields_dict.roles_html.$wrapper.html(html);
+					// Don't add buttons on error - no roles to select
 				}
 			}
 		});
@@ -378,6 +411,48 @@ frappe.ui.form.on("Create Operator", {
 	},
 	
 	app_roles_assigned_list(frm) {
+		// Prevent removal of mandatory roles ("Can View Dashboard" and "Personnel Reader")
+		let mandatory_roles = ["Can View Dashboard", "Personnel Reader"];
+		let roles_to_check = [];
+		
+		// Check each mandatory role
+		mandatory_roles.forEach(function(role_name) {
+			frappe.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "App Role List",
+					filters: {
+						app_role: role_name
+					},
+					fieldname: "name"
+				},
+				callback: function(r) {
+					if (r.message && r.message.name) {
+						let app_role_name = r.message.name;
+						
+						// Check if the role was removed
+						let has_role = false;
+						if (frm.doc.app_roles_assigned_list) {
+							has_role = frm.doc.app_roles_assigned_list.some(
+								row => row.app_role === app_role_name
+							);
+						}
+						
+						// Auto-add if missing
+						if (!has_role) {
+							let child_row = frm.add_child('app_roles_assigned_list');
+							child_row.app_role = app_role_name;
+							frm.refresh_field('app_roles_assigned_list');
+							frappe.show_alert({
+								message: __("'{0}' role is mandatory and has been automatically added", [role_name]),
+								indicator: "orange"
+							});
+						}
+					}
+				}
+			});
+		});
+		
 		// Update checkbox states when child table changes (bidirectional sync)
 		if (frm.fields_dict.roles_html && frm.fields_dict.roles_html.$wrapper) {
 			let assigned_roles = [];
@@ -419,5 +494,245 @@ frappe.ui.form.on("Create Operator", {
 			frappe.msgprint(__("First Name is required"));
 			frappe.validated = false;
 		}
+		
+		// Ensure mandatory roles are assigned
+		frm.trigger("ensure_can_view_dashboard");
+		frm.trigger("ensure_personnel_reader");
+	},
+	
+	ensure_can_view_dashboard(frm) {
+		// Find "Can View Dashboard" role in App Role List
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "App Role List",
+				filters: {
+					app_role: "Can View Dashboard"
+				},
+				fieldname: "name"
+			},
+			callback: function(r) {
+				if (r.message && r.message.name) {
+					let can_view_dashboard_app_role = r.message.name;
+					
+					// Check if it's in the child table
+					let has_can_view_dashboard = false;
+					if (frm.doc.app_roles_assigned_list) {
+						has_can_view_dashboard = frm.doc.app_roles_assigned_list.some(
+							row => row.app_role === can_view_dashboard_app_role
+						);
+					}
+					
+					// Auto-add if missing
+					if (!has_can_view_dashboard) {
+						let child_row = frm.add_child('app_roles_assigned_list');
+						child_row.app_role = can_view_dashboard_app_role;
+						frm.refresh_field('app_roles_assigned_list');
+						
+						// Also check the checkbox in HTML if it exists
+						if (frm.fields_dict.roles_html && frm.fields_dict.roles_html.$wrapper) {
+							let $checkbox = frm.fields_dict.roles_html.$wrapper.find(
+								`.role-checkbox[data-role-name="${can_view_dashboard_app_role}"]`
+							);
+							if ($checkbox.length) {
+								$checkbox.prop('checked', true);
+							}
+						}
+					}
+				} else {
+					// Role doesn't exist in App Role List
+					frappe.msgprint({
+						title: __("Missing Role"),
+						message: __("'Can View Dashboard' role must exist in App Role List. Please create it first."),
+						indicator: "red"
+					});
+					frappe.validated = false;
+				}
+			}
+		});
+	},
+	
+	ensure_personnel_reader(frm) {
+		// Find "Personnel Reader" role in App Role List
+		frappe.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "App Role List",
+				filters: {
+					app_role: "Personnel Reader"
+				},
+				fieldname: "name"
+			},
+			callback: function(r) {
+				if (r.message && r.message.name) {
+					let personnel_reader_app_role = r.message.name;
+					
+					// Check if it's in the child table
+					let has_personnel_reader = false;
+					if (frm.doc.app_roles_assigned_list) {
+						has_personnel_reader = frm.doc.app_roles_assigned_list.some(
+							row => row.app_role === personnel_reader_app_role
+						);
+					}
+					
+					// Auto-add if missing
+					if (!has_personnel_reader) {
+						let child_row = frm.add_child('app_roles_assigned_list');
+						child_row.app_role = personnel_reader_app_role;
+						frm.refresh_field('app_roles_assigned_list');
+						
+						// Also check the checkbox in HTML if it exists
+						if (frm.fields_dict.roles_html && frm.fields_dict.roles_html.$wrapper) {
+							let $checkbox = frm.fields_dict.roles_html.$wrapper.find(
+								`.role-checkbox[data-role-name="${personnel_reader_app_role}"]`
+							);
+							if ($checkbox.length) {
+								$checkbox.prop('checked', true);
+							}
+						}
+					}
+				} else {
+					// Role doesn't exist in App Role List
+					frappe.msgprint({
+						title: __("Missing Role"),
+						message: __("'Personnel Reader' role must exist in App Role List. Please create it first."),
+						indicator: "red"
+					});
+					frappe.validated = false;
+				}
+			}
+		});
 	}
 });
+
+// Setup role selection buttons
+function setup_role_selection_buttons(frm) {
+	if (!frm.fields_dict.roles_html || !frm.fields_dict.roles_html.$wrapper) {
+		return;
+	}
+	
+	// Remove existing buttons if any
+	$('.role-selection-buttons').remove();
+	
+	// Add buttons container before roles_html field
+	let buttons_html = `
+		<div class="role-selection-buttons" style="
+			display: flex;
+			gap: 10px;
+			margin-bottom: 10px;
+			padding: 10px;
+			background: #f8f9fa;
+			border-radius: 6px;
+			border: 1px solid #dee2e6;
+		">
+			<button type="button" class="btn btn-sm btn-primary select-all-roles-btn" style="
+				padding: 6px 16px;
+				font-size: 12px;
+				font-weight: 600;
+			">
+				<i class="fa fa-check-square"></i> ${__("Select All Roles")}
+			</button>
+			<button type="button" class="btn btn-sm btn-secondary unselect-all-roles-btn" style="
+				padding: 6px 16px;
+				font-size: 12px;
+				font-weight: 600;
+			">
+				<i class="fa fa-square"></i> ${__("Unselect All Roles")}
+			</button>
+		</div>
+	`;
+	
+	// Insert buttons before roles_html field
+	frm.fields_dict.roles_html.$wrapper.before(buttons_html);
+	
+	// Bind button click events
+	$('.select-all-roles-btn').off('click').on('click', function() {
+		select_all_roles(frm);
+	});
+	
+	$('.unselect-all-roles-btn').off('click').on('click', function() {
+		unselect_all_roles(frm);
+	});
+}
+
+// Select All Roles function
+function select_all_roles(frm) {
+	if (!frm.fields_dict.roles_html || !frm.fields_dict.roles_html.$wrapper) {
+		return;
+	}
+	
+	// Get all checkboxes
+	let $checkboxes = frm.fields_dict.roles_html.$wrapper.find('.role-checkbox');
+	
+	// Check all checkboxes
+	$checkboxes.each(function() {
+		let $checkbox = $(this);
+		let role_name = $checkbox.data('role-name');
+		let is_checked = $checkbox.is(':checked');
+		
+		if (!is_checked) {
+			$checkbox.prop('checked', true);
+			
+			// Add to child table if not exists
+			let exists = false;
+			if (frm.doc.app_roles_assigned_list) {
+				exists = frm.doc.app_roles_assigned_list.some(row => row.app_role === role_name);
+			}
+			
+			if (!exists) {
+				let child_row = frm.add_child('app_roles_assigned_list');
+				child_row.app_role = role_name;
+			}
+		}
+	});
+	
+	frm.refresh_field('app_roles_assigned_list');
+	frm.dirty();
+	
+	frappe.show_alert({
+		message: __("All roles selected"),
+		indicator: "green"
+	});
+}
+
+// Unselect All Roles function (keeps mandatory roles selected)
+function unselect_all_roles(frm) {
+	if (!frm.fields_dict.roles_html || !frm.fields_dict.roles_html.$wrapper) {
+		return;
+	}
+	
+	// Get all checkboxes
+	let $checkboxes = frm.fields_dict.roles_html.$wrapper.find('.role-checkbox');
+	let roles_to_remove = [];
+	
+	// Uncheck all non-mandatory checkboxes
+	$checkboxes.each(function() {
+		let $checkbox = $(this);
+		let role_name = $checkbox.data('role-name');
+		let is_mandatory = $checkbox.data('mandatory') === true;
+		let is_checked = $checkbox.is(':checked');
+		
+		if (is_checked && !is_mandatory) {
+			$checkbox.prop('checked', false);
+			roles_to_remove.push(role_name);
+		}
+	});
+	
+	// Remove from child table
+	if (frm.doc.app_roles_assigned_list && roles_to_remove.length > 0) {
+		roles_to_remove.forEach(function(role_name) {
+			let row_to_remove = frm.doc.app_roles_assigned_list.find(row => row.app_role === role_name);
+			if (row_to_remove) {
+				frappe.model.clear_doc(row_to_remove.doctype, row_to_remove.name);
+			}
+		});
+	}
+	
+	frm.refresh_field('app_roles_assigned_list');
+	frm.dirty();
+	
+	frappe.show_alert({
+		message: __("All roles unselected (mandatory roles remain selected)"),
+		indicator: "blue"
+	});
+}

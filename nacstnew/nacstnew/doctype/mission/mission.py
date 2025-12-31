@@ -26,6 +26,9 @@ class Mission(Document):
 				formatted_date = date_obj.strftime("%d %b %y").lstrip("0")
 			# Construct mission authority: "Reference Dated Date"
 			self.mission_authority = self.reference.strip() + " Dated " + formatted_date
+		
+		# Validate mission dates in mission_list
+		self.validate_mission_dates()
 	
 	def on_submit(self):
 		"""Update Personnel records with mission information"""
@@ -158,3 +161,21 @@ class Mission(Document):
 			f"Mission records updated for personnel in the mission list",
 			indicator="green"
 		)
+	
+	def validate_mission_dates(self):
+		"""Validate that mission end date is not less than mission start date"""
+		if self.mission_list:
+			for idx, row in enumerate(self.mission_list, start=1):
+				if row.mission_start_date and row.mission_end_date:
+					start_date = getdate(row.mission_start_date)
+					end_date = getdate(row.mission_end_date)
+					
+					if end_date < start_date:
+						frappe.throw(
+							_("Row {0}: Mission End Date ({1}) cannot be less than Mission Start Date ({2})").format(
+								idx,
+								frappe.format_value(row.mission_end_date, {"fieldtype": "Date"}),
+								frappe.format_value(row.mission_start_date, {"fieldtype": "Date"})
+							),
+							title=_("Invalid Date Range")
+						)

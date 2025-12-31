@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.pages['personnel-record'].on_page_load = function(wrapper) {
+	// Automatically toggle to full width when page loads
+	localStorage.container_fullwidth = "true";
+	frappe.ui.toolbar.set_fullwidth_if_enabled();
+	
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'Personnel Record',
@@ -101,6 +105,10 @@ frappe.pages['personnel-record'].on_page_load = function(wrapper) {
 
 // Reload content when page is shown (e.g., when navigating from another page)
 frappe.pages['personnel-record'].on_page_show = function(wrapper) {
+	// Automatically toggle to full width when page is shown
+	localStorage.container_fullwidth = "true";
+	frappe.ui.toolbar.set_fullwidth_if_enabled();
+	
 	// Reinitialize autocomplete when page is shown
 	setTimeout(function() {
 		// Check if page content exists

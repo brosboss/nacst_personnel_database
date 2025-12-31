@@ -9,14 +9,110 @@ frappe.ui.form.on("Mission", {
 				show_document_changes(frm.doctype, frm.docname);
 			}, __('Tools'));
 		}
+		
+		// Set minimum date for mission_end_date based on mission_start_date
+		setup_mission_date_validation(frm);
 	},
 	reference: function(frm) {
 		update_mission_authority(frm);
 	},
 	date: function(frm) {
 		update_mission_authority(frm);
+	},
+	validate: function(frm) {
+		// Validate mission dates on form validation
+		validate_all_mission_dates(frm);
+	},
+	mission_list: function(frm) {
+		// Re-setup date validation when mission list changes
+		setup_mission_date_validation(frm);
 	}
 });
+
+// Validate Mission List dates
+frappe.ui.form.on("Mission List", {
+	mission_start_date: function(frm, cdt, cdn) {
+		validate_mission_date_range(frm, cdt, cdn);
+		// Update minimum date for end date field
+		update_end_date_minimum(frm, cdt, cdn);
+	},
+	mission_end_date: function(frm, cdt, cdn) {
+		validate_mission_date_range(frm, cdt, cdn);
+	}
+});
+
+function setup_mission_date_validation(frm) {
+	// Set up date validation for all rows in mission_list
+	if (frm.fields_dict.mission_list && frm.fields_dict.mission_list.grid) {
+		frm.fields_dict.mission_list.grid.wrapper.on('grid-row-render', function(e, row) {
+			update_end_date_minimum(frm, row.doctype, row.name);
+		});
+	}
+}
+
+function update_end_date_minimum(frm, cdt, cdn) {
+	let row = locals[cdt][cdn];
+	
+	if (row && row.mission_start_date) {
+		// If end date is already set and is less than start date, clear it
+		if (row.mission_end_date) {
+			let start_date = moment(row.mission_start_date);
+			let end_date = moment(row.mission_end_date);
+			
+			if (end_date.isBefore(start_date)) {
+				frappe.model.set_value(cdt, cdn, "mission_end_date", "");
+				frm.refresh_field("mission_list");
+			}
+		}
+	}
+}
+
+function validate_mission_date_range(frm, cdt, cdn) {
+	let row = locals[cdt][cdn];
+	
+	if (row.mission_start_date && row.mission_end_date) {
+		let start_date = moment(row.mission_start_date);
+		let end_date = moment(row.mission_end_date);
+		
+		if (end_date.isBefore(start_date)) {
+			frappe.msgprint({
+				title: __("Invalid Date Range"),
+				message: __("Mission End Date ({0}) cannot be less than Mission Start Date ({1}). Please select an end date that is on or after the start date.", [
+					frappe.datetime.str_to_user(row.mission_end_date),
+					frappe.datetime.str_to_user(row.mission_start_date)
+				]),
+				indicator: "red"
+			});
+			
+			// Clear the end date to force user to select a valid date
+			frappe.model.set_value(cdt, cdn, "mission_end_date", "");
+			frm.refresh_field("mission_list");
+		}
+	}
+}
+
+function validate_all_mission_dates(frm) {
+	if (frm.doc.mission_list) {
+		for (let i = 0; i < frm.doc.mission_list.length; i++) {
+			let row = frm.doc.mission_list[i];
+			if (row.mission_start_date && row.mission_end_date) {
+				let start_date = moment(row.mission_start_date);
+				let end_date = moment(row.mission_end_date);
+				
+				if (end_date.isBefore(start_date)) {
+					frappe.msgprint({
+						title: __("Invalid Date Range"),
+						message: __("Row {0}: Mission End Date cannot be less than Mission Start Date. Please correct the dates.", [i + 1]),
+						indicator: "red"
+					});
+					frappe.validated = false;
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
 
 function update_mission_authority(frm) {
 	// Get reference and date values

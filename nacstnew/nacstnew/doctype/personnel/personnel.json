@@ -122,7 +122,8 @@
   {
    "fieldname": "current_deployment",
    "fieldtype": "Data",
-   "label": "Current Deployment"
+   "label": "Current Deployment",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_wwsz",
@@ -216,7 +217,8 @@
    "fieldname": "current_unit_geopolitical_zone",
    "fieldtype": "Link",
    "label": "Current Unit Geopolitical Zone",
-   "options": "Geopolitical Zone"
+   "options": "Geopolitical Zone",
+   "read_only": 1
   },
   {
    "fieldname": "middle_name",
@@ -274,7 +276,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-31 09:04:13.999456",
+ "modified": "2025-12-31 14:58:08.704998",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",
@@ -330,6 +332,138 @@
    "read": 1,
    "report": 1,
    "role": "Personnel Deleter",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Posting Authority Reader",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Posting Authority Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Posting Authority Editor",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Promotion Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Promotion Editor",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Promotion Amender",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Amender",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Editor",
+   "share": 1
+  },
+  {
+   "read": 1,
+   "role": "Course Attended Creator",
+   "select": 1
+  },
+  {
+   "read": 1,
+   "role": "Course Attended Editor",
+   "select": 1
+  },
+  {
+   "read": 1,
+   "role": "Course Attended Amender",
+   "select": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Creator",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Editor",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Reader",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Amender",
    "share": 1
   }
  ],

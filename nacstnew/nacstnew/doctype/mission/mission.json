@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "legacy_record",
-  "section_break_kmdp",
   "section_break_02jn",
   "mission_authority",
   "section_break_izdc",
@@ -43,7 +42,8 @@
   {
    "fieldname": "reference",
    "fieldtype": "Data",
-   "label": "Reference"
+   "label": "Reference",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_sgdz",
@@ -52,7 +52,8 @@
   {
    "fieldname": "date",
    "fieldtype": "Date",
-   "label": "Date"
+   "label": "Date",
+   "set_only_once": 1
   },
   {
    "fieldname": "operator",
@@ -107,10 +108,6 @@
    "fieldname": "legacy_record",
    "fieldtype": "Check",
    "label": "Legacy Record"
-  },
-  {
-   "fieldname": "section_break_kmdp",
-   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
@@ -118,7 +115,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-29 20:30:10.357728",
+ "modified": "2025-12-31 14:49:16.513776",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Mission",
@@ -146,7 +143,8 @@
    "read": 1,
    "report": 1,
    "role": "Mission Creator",
-   "share": 1
+   "share": 1,
+   "write": 1
   },
   {
    "email": 1,
@@ -184,7 +182,27 @@
    "report": 1,
    "role": "Mission Submitter",
    "share": 1,
-   "submit": 1
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "read": 1,
+   "role": "Mission Canceller",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mission Amender",
+   "share": 1,
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

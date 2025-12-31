@@ -1,5 +1,9 @@
 // Real-Time Audit Log - Futuristic Matrix Style Monitoring Dashboard
 frappe.pages['rtal'].on_page_load = function(wrapper) {
+	// Automatically toggle to full width when page loads
+	localStorage.container_fullwidth = "true";
+	frappe.ui.toolbar.set_fullwidth_if_enabled();
+	
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Real-Time Audit Log'),
@@ -888,4 +892,11 @@ frappe.pages['rtal'].on_page_load = function(wrapper) {
 	$(window).on('pagehide', function() {
 		cleanup();
 	});
+}
+
+// Reload content when page is shown
+frappe.pages['rtal'].on_page_show = function(wrapper) {
+	// Automatically toggle to full width when page is shown
+	localStorage.container_fullwidth = "true";
+	frappe.ui.toolbar.set_fullwidth_if_enabled();
 }

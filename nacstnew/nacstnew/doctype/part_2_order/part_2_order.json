@@ -39,6 +39,7 @@
    "label": "Part 2 Order Reference",
    "read_only": 1,
    "reqd": 1,
+   "set_only_once": 1,
    "unique": 1
   },
   {
@@ -76,7 +77,8 @@
   {
    "fieldname": "reference",
    "fieldtype": "Data",
-   "label": "Reference"
+   "label": "Reference",
+   "set_only_once": 1
   },
   {
    "fieldname": "date",
@@ -130,7 +132,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-27 23:50:38.323847",
+ "modified": "2025-12-31 14:00:28.731029",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Part 2 Order",
@@ -159,7 +161,8 @@
    "read": 1,
    "report": 1,
    "role": "Part 2 Order Creator",
-   "share": 1
+   "share": 1,
+   "write": 1
   },
   {
    "email": 1,
@@ -197,7 +200,31 @@
    "report": 1,
    "role": "Part 2 Order Submitter",
    "share": 1,
-   "submit": 1
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Canceller",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Part 2 Order Amender",
+   "share": 1,
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

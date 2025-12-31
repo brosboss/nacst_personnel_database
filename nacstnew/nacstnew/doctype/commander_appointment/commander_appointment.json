@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "field:appointment",
- "creation": "2025-01-27 00:00:00.000000",
+ "creation": "2025-01-27 00:00:00",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -21,7 +21,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-01-27 00:00:00.000000",
+ "modified": "2025-12-31 15:13:34.720891",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Commander Appointment",
@@ -48,7 +48,8 @@
    "read": 1,
    "report": 1,
    "role": "Reference Data Creator",
-   "share": 1
+   "share": 1,
+   "write": 1
   },
   {
    "email": 1,
@@ -86,4 +87,3 @@
  "sort_order": "DESC",
  "states": []
 }
-

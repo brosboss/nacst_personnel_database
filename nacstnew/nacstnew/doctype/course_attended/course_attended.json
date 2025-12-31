@@ -111,7 +111,8 @@
   {
    "fieldname": "course_reference",
    "fieldtype": "Data",
-   "label": "Course Reference"
+   "label": "Course Reference",
+   "set_only_once": 1
   },
   {
    "fieldname": "section_break_mibt",
@@ -138,7 +139,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-30 18:29:38.382684",
+ "modified": "2025-12-31 14:36:02.977513",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Course Attended",
@@ -165,7 +166,8 @@
    "read": 1,
    "report": 1,
    "role": "Course Attended Creator",
-   "share": 1
+   "share": 1,
+   "write": 1
   },
   {
    "email": 1,
@@ -203,7 +205,32 @@
    "report": 1,
    "role": "Course Attended Submitter",
    "share": 1,
-   "submit": 1
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Course Attended Canceller",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Course Attended Amender",
+   "share": 1,
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

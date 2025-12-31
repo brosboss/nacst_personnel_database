@@ -3,8 +3,8 @@
  "creation": "2025-12-26 06:31:09.358681",
  "docstatus": 0,
  "doctype": "Page",
- "idx": 0,
- "modified": "2025-12-26 06:31:09.358681",
+ "idx": 1,
+ "modified": "2025-12-31 15:38:12.192090",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "personnel-list",
@@ -13,6 +13,9 @@
  "roles": [
   {
    "role": "Administrator"
+  },
+  {
+   "role": "Data Viewer"
   }
  ],
  "script": null,

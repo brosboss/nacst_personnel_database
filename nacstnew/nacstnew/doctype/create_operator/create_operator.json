@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:email",
  "creation": "2025-12-30 18:50:10.555479",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -10,6 +11,9 @@
   "column_break_alnv",
   "password",
   "module_profile",
+  "section_break_login_restrictions",
+  "login_after",
+  "login_before",
   "section_break_nlgh",
   "app_roles_assigned_list",
   "column_break_sxnk",
@@ -21,7 +25,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Email",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "first_name",
@@ -61,6 +66,23 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "section_break_login_restrictions",
+   "fieldtype": "Section Break",
+   "label": "Login Restrictions"
+  },
+  {
+   "description": "Allow user to login only after this hour (0-24). For example, set to 8 to allow login from 8:00 AM onwards. Leave empty to allow login at any time.",
+   "fieldname": "login_after",
+   "fieldtype": "Int",
+   "label": "Login After (Hour)"
+  },
+  {
+   "description": "Allow user to login only before this hour (0-24). For example, set to 18 to allow login until 6:00 PM. Leave empty to allow login at any time.",
+   "fieldname": "login_before",
+   "fieldtype": "Int",
+   "label": "Login Before (Hour)"
+  },
+  {
    "fieldname": "section_break_nlgh",
    "fieldtype": "Section Break"
   },
@@ -73,10 +95,11 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-30 22:32:07.647786",
+ "modified": "2025-12-31 11:26:49.606880",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Create Operator",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

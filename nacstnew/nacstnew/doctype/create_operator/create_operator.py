@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -16,6 +17,22 @@ class CreateOperator(Document):
 		# If updating, the user might have been created by this document
 		if self.is_new() and frappe.db.exists("User", self.email):
 			frappe.throw(f"User with email {self.email} already exists")
+		
+		# Validate login restrictions
+		if self.login_after is not None and (self.login_after < 0 or self.login_after > 24):
+			frappe.throw(_("Login After must be between 0 and 24"), title=_("Invalid Value"))
+		
+		if self.login_before is not None and (self.login_before < 0 or self.login_before > 24):
+			frappe.throw(_("Login Before must be between 0 and 24"), title=_("Invalid Value"))
+		
+		if self.login_after is not None and self.login_before is not None:
+			if self.login_after >= self.login_before:
+				frappe.throw(_("Login After must be less than Login Before"), title=_("Invalid Time Range"))
+		
+		# Ensure "Can View Dashboard" role is always assigned
+		self._ensure_can_view_dashboard_role()
+		# Ensure "Personnel Reader" role is always assigned
+		self._ensure_personnel_reader_role()
 	
 	def after_insert(self):
 		"""Create user after document is inserted"""
@@ -42,11 +59,15 @@ class CreateOperator(Document):
 				"enabled": 1,
 				"user_type": "System User",
 				"send_welcome_email": 0,  # Don't send welcome email automatically
+				"module_profile": "No Module",  # Always set to "No Module" module profile
+				"desk_theme": "Dark",  # Always set to Dark theme
 			})
 			
-			# Set module profile if provided
-			if self.module_profile and self.module_profile != "No Module":
-				user.module_profile = self.module_profile
+			# Set login restrictions if provided
+			if self.login_after is not None:
+				user.login_after = self.login_after
+			if self.login_before is not None:
+				user.login_before = self.login_before
 			
 			# Set password using new_password field (recommended approach)
 			if self.password:
@@ -72,6 +93,12 @@ class CreateOperator(Document):
 			# Add roles to user
 			if roles_to_add:
 				user.add_roles(*roles_to_add)
+			
+			# Ensure module profile is "No Module" - set on document and save to trigger block_modules update
+			user.module_profile = "No Module"
+			# Always ensure dark theme is set
+			user.desk_theme = "Dark"
+			user.save(ignore_permissions=True)
 			
 			# Reload user to ensure all changes are committed
 			user.reload()
@@ -99,11 +126,25 @@ class CreateOperator(Document):
 				user.first_name = self.first_name
 				has_changes = True
 			
-			if self.has_value_changed("module_profile"):
-				if self.module_profile and self.module_profile != "No Module":
-					user.module_profile = self.module_profile
-				else:
-					user.module_profile = None
+			# Always ensure module profile is set to "No Module" for all users
+			# Check current value on document
+			if user.module_profile != "No Module":
+				# Set on document and save to trigger block_modules update
+				user.module_profile = "No Module"
+				has_changes = True
+			
+			# Always ensure dark theme is set
+			if user.desk_theme != "Dark":
+				user.desk_theme = "Dark"
+				has_changes = True
+			
+			# Update login restrictions if changed
+			if self.has_value_changed("login_after"):
+				user.login_after = self.login_after if self.login_after is not None else None
+				has_changes = True
+			
+			if self.has_value_changed("login_before"):
+				user.login_before = self.login_before if self.login_before is not None else None
 				has_changes = True
 			
 			# Update password if changed
@@ -153,3 +194,59 @@ class CreateOperator(Document):
 		except Exception as e:
 			frappe.log_error(f"Error updating user: {str(e)}", "Create Operator Error")
 			frappe.throw(f"Failed to update user: {str(e)}")
+	
+	def _ensure_can_view_dashboard_role(self):
+		"""Ensure 'Can View Dashboard' role is always in app_roles_assigned_list"""
+		# Check if "Can View Dashboard" role exists in App Role List
+		can_view_dashboard_app_role = frappe.db.get_value(
+			"App Role List",
+			{"app_role": "Can View Dashboard"},
+			"name"
+		)
+		
+		if not can_view_dashboard_app_role:
+			frappe.throw(
+				_("'Can View Dashboard' role must exist in App Role List. Please create it first."),
+				title=_("Missing Role")
+			)
+		
+		# Check if "Can View Dashboard" is already in the list
+		has_can_view_dashboard = False
+		if self.app_roles_assigned_list:
+			for role_row in self.app_roles_assigned_list:
+				if role_row.app_role == can_view_dashboard_app_role:
+					has_can_view_dashboard = True
+					break
+		
+		# Auto-add if missing
+		if not has_can_view_dashboard:
+			child_row = self.append("app_roles_assigned_list")
+			child_row.app_role = can_view_dashboard_app_role
+	
+	def _ensure_personnel_reader_role(self):
+		"""Ensure 'Personnel Reader' role is always in app_roles_assigned_list"""
+		# Check if "Personnel Reader" role exists in App Role List
+		personnel_reader_app_role = frappe.db.get_value(
+			"App Role List",
+			{"app_role": "Personnel Reader"},
+			"name"
+		)
+		
+		if not personnel_reader_app_role:
+			frappe.throw(
+				_("'Personnel Reader' role must exist in App Role List. Please create it first."),
+				title=_("Missing Role")
+			)
+		
+		# Check if "Personnel Reader" is already in the list
+		has_personnel_reader = False
+		if self.app_roles_assigned_list:
+			for role_row in self.app_roles_assigned_list:
+				if role_row.app_role == personnel_reader_app_role:
+					has_personnel_reader = True
+					break
+		
+		# Auto-add if missing
+		if not has_personnel_reader:
+			child_row = self.append("app_roles_assigned_list")
+			child_row.app_role = personnel_reader_app_role
