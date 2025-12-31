@@ -79,7 +79,7 @@ frappe.ui.form.on("Create Operator", {
 						<div class="roles-checklist" style="
 							max-height: 550px; 
 							overflow-y: auto; 
-							padding: 20px; 
+							padding: 12px; 
 							border: 1px solid #d1d8dd; 
 							border-radius: 6px; 
 							background: #ffffff;
@@ -93,14 +93,14 @@ frappe.ui.form.on("Create Operator", {
 					if (sorted_doctypes.length === 0) {
 						html += `
 							<div style="
-								padding: 40px 20px; 
+								padding: 20px 15px; 
 								text-align: center; 
 								color: #8d99a6;
 								background: #f8f9fa;
 								border-radius: 4px;
 							">
-								<p style="margin: 0 0 10px 0; font-size: 14px; font-weight: 500;">No roles found in App Role List</p>
-								<p style="margin: 0; font-size: 12px; color: #6c757d;">Please run the role creation script first.</p>
+								<p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 500;">No roles found in App Role List</p>
+								<p style="margin: 0; font-size: 11px; color: #6c757d;">Please run the role creation script first.</p>
 							</div>
 						`;
 					} else {
@@ -111,20 +111,20 @@ frappe.ui.form.on("Create Operator", {
 							// Create header - spans full width
 							html += `
 								<div style="
-									margin-top: ${doctypeIndex === 0 ? '0' : '25px'};
-									margin-bottom: 12px;
-									padding: 10px 12px;
+									margin-top: ${doctypeIndex === 0 ? '0' : '12px'};
+									margin-bottom: 6px;
+									padding: 6px 10px;
 									background: linear-gradient(to right, #f8f9fa, #ffffff);
-									border-left: 4px solid #007bff;
+									border-left: 3px solid #007bff;
 									border-bottom: 1px solid #dee2e6;
 									border-radius: 3px;
 									width: 100%;
 								">
 									<strong style="
-										font-size: 13px; 
+										font-size: 12px; 
 										color: #212529; 
 										font-weight: 600;
-										letter-spacing: 0.3px;
+										letter-spacing: 0.2px;
 										text-transform: uppercase;
 									">${frappe.utils.escape_html(doctype)}</strong>
 								</div>
@@ -134,8 +134,8 @@ frappe.ui.form.on("Create Operator", {
 							html += `
 								<div style="
 									display: flex;
-									gap: 20px;
-									margin-bottom: 15px;
+									gap: 15px;
+									margin-bottom: 8px;
 								">
 							`;
 							
@@ -155,9 +155,9 @@ frappe.ui.form.on("Create Operator", {
 									
 									html += `
 										<div class="checkbox role-item" style="
-											margin: 6px 0;
-											padding: 6px 8px;
-											border-radius: 4px;
+											margin: 3px 0;
+											padding: 4px 6px;
+											border-radius: 3px;
 											transition: background-color 0.2s ease;
 										" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='transparent'">
 											<label style="
@@ -165,24 +165,25 @@ frappe.ui.form.on("Create Operator", {
 												font-weight: normal; 
 												display: flex; 
 												align-items: center; 
-												font-size: 13px;
+												font-size: 12px;
 												color: #495057;
 												margin: 0;
+												line-height: 1.3;
 											">
 												<input type="checkbox" class="role-checkbox" 
 													data-role-name="${frappe.utils.escape_html(role.name)}" 
 													${checked} 
 													style="
-														margin-right: 10px; 
+														margin-right: 8px; 
 														margin-top: 0; 
 														cursor: pointer;
-														width: 16px;
-														height: 16px;
+														width: 14px;
+														height: 14px;
 														accent-color: #007bff;
 													">
 												<span style="
 													flex: 1;
-													line-height: 1.5;
+													line-height: 1.3;
 												">${frappe.utils.escape_html(role_display)}</span>
 											</label>
 										</div>

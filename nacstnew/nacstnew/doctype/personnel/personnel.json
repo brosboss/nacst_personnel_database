@@ -274,7 +274,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-30 07:43:26.074183",
+ "modified": "2025-12-31 09:04:13.999456",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",
@@ -301,7 +301,8 @@
    "read": 1,
    "report": 1,
    "role": "Personnel Creator",
-   "share": 1
+   "share": 1,
+   "write": 1
   },
   {
    "email": 1,
