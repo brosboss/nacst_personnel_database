@@ -9,32 +9,159 @@ This module contains all the data that should be populated automatically during 
 import frappe
 
 
+@frappe.whitelist()
 def install_fixtures():
 	"""
 	Main function to install all fixtures.
 	This function is called after app installation via the after_install hook.
+	Can also be run manually after installation to add missing fixtures.
+	
+	Returns a summary of what was inserted, skipped, and failed.
 	"""
-	try:
-		print("Installing initial data fixtures...")
-		insert_geopolitical_zones()
-		insert_nigeria_states()
-		ensure_personnel_categories()
-		insert_ranks()
-		insert_types_of_commission()
-		insert_courses()
-		insert_course_names()
-		insert_appointments()
-		insert_commander_appointments()
-		insert_all_units()
-		insert_grades()
-		insert_app_role_list()
-		frappe.db.commit()
-		print("Initial data fixtures installed successfully")
-	except Exception as e:
-		frappe.log_error(f"Error installing fixtures: {str(e)}", "Fixtures Installation Error")
-		# Don't raise during installation to avoid breaking the install process
-		# The error is logged for debugging
-		print(f"Warning: Error installing fixtures: {str(e)}")
+	print("\n" + "="*70)
+	print("Installing Initial Data Fixtures...")
+	print("="*70)
+	
+	results = []
+	total_inserted = 0
+	total_skipped = 0
+	total_errors = 0
+	
+	# Define all fixture functions to run
+	fixture_functions = [
+		("Geopolitical Zones", insert_geopolitical_zones),
+		("Nigeria States", insert_nigeria_states),
+		("Personnel Categories", ensure_personnel_categories),
+		("Ranks", insert_ranks),
+		("Types of Commission", insert_types_of_commission),
+		("Courses", insert_courses),
+		("Course Names", insert_course_names),
+		("Appointments", insert_appointments),
+		("Commander Appointments", insert_commander_appointments),
+		("Units", insert_all_units),
+		("Grades", insert_grades),
+		("App Role List", insert_app_role_list),
+	]
+	
+	# Run each fixture function independently
+	for name, func in fixture_functions:
+		try:
+			print(f"\n[{name}] Processing...")
+			result = func()
+			frappe.db.commit()
+			
+			# Extract results (functions return dict with inserted/skipped/errors)
+			if isinstance(result, dict):
+				inserted = result.get("inserted", 0)
+				skipped = result.get("skipped", 0)
+				errors = result.get("errors", 0)
+				error_details = result.get("error_details", [])
+			else:
+				# For functions that don't return detailed results
+				inserted = 0
+				skipped = 0
+				errors = 0
+				error_details = []
+			
+			total_inserted += inserted
+			total_skipped += skipped
+			total_errors += errors
+			
+			status_msg = []
+			if inserted > 0:
+				status_msg.append(f"Inserted: {inserted}")
+			if skipped > 0:
+				status_msg.append(f"Already existed (skipped): {skipped}")
+			if errors > 0:
+				status_msg.append(f"Errors: {errors}")
+			
+			status = " | ".join(status_msg) if status_msg else "No action needed"
+			print(f"  ✓ {status}")
+			
+			results.append({
+				"name": name,
+				"inserted": inserted,
+				"skipped": skipped,
+				"errors": errors,
+				"error_details": error_details,
+				"status": "success" if errors == 0 else "partial" if inserted > 0 else "failed"
+			})
+			
+		except Exception as e:
+			frappe.db.rollback()
+			error_msg = str(e)
+			traceback_str = frappe.get_traceback()
+			frappe.log_error(traceback_str, f"Fixtures Installation Error - {name}")
+			
+			total_errors += 1
+			print(f"  ✗ Error: {error_msg}")
+			
+			results.append({
+				"name": name,
+				"inserted": 0,
+				"skipped": 0,
+				"errors": 1,
+				"error_details": [error_msg],
+				"status": "failed"
+			})
+	
+	# Print detailed summary
+	print("\n" + "="*70)
+	print("FIXTURES INSTALLATION SUMMARY")
+	print("="*70)
+	
+	# Show successful/partial results
+	successful = [r for r in results if r["status"] == "success" and r["inserted"] > 0]
+	partial = [r for r in results if r["status"] == "partial"]
+	no_action = [r for r in results if r["status"] == "success" and r["inserted"] == 0 and r["skipped"] > 0]
+	failed = [r for r in results if r["status"] == "failed"]
+	
+	if successful:
+		print(f"\n✓ Successfully Inserted ({len(successful)}):")
+		for r in successful:
+			print(f"  • {r['name']}: {r['inserted']} items inserted, {r['skipped']} already existed")
+	
+	if no_action:
+		print(f"\n○ Already Complete ({len(no_action)}):")
+		for r in no_action:
+			print(f"  • {r['name']}: All items already exist ({r['skipped']} skipped)")
+	
+	if partial:
+		print(f"\n⚠ Partial Success ({len(partial)}):")
+		for r in partial:
+			print(f"  • {r['name']}: {r['inserted']} inserted, {r['skipped']} skipped, {r['errors']} errors")
+			if r.get("error_details"):
+				for detail in r["error_details"][:3]:  # Show first 3 errors
+					print(f"    - {detail}")
+	
+	if failed:
+		print(f"\n✗ Failed ({len(failed)}):")
+		for r in failed:
+			print(f"  • {r['name']}")
+			if r.get("error_details"):
+				for detail in r["error_details"][:3]:  # Show first 3 errors
+					print(f"    - {detail}")
+	
+	# Overall summary
+	print("\n" + "-"*70)
+	print(f"TOTAL: {total_inserted} inserted | {total_skipped} skipped | {total_errors} errors")
+	
+	if total_errors > 0:
+		print("\n⚠ Some fixtures had errors. Check Error Log for detailed tracebacks.")
+		print("   You can run this function again - it will skip existing items.")
+	else:
+		print("\n✓ All fixtures processed successfully!")
+	
+	print("="*70 + "\n")
+	
+	# Return results for programmatic access
+	return {
+		"total_inserted": total_inserted,
+		"total_skipped": total_skipped,
+		"total_errors": total_errors,
+		"results": results,
+		"success": total_errors == 0
+	}
 
 
 def insert_geopolitical_zones():
@@ -50,19 +177,32 @@ def insert_geopolitical_zones():
 	]
 	
 	inserted_count = 0
+	skipped_count = 0
+	error_count = 0
+	error_details = []
 	
 	for zone_name in geopolitical_zones:
-		if not frappe.db.exists("Geopolitical Zone", zone_name):
+		if frappe.db.exists("Geopolitical Zone", zone_name):
+			skipped_count += 1
+			continue
+		
+		try:
 			zone_doc = frappe.get_doc({
 				"doctype": "Geopolitical Zone",
 				"geopolitical_zone": zone_name
 			})
 			zone_doc.insert(ignore_permissions=True)
 			inserted_count += 1
+		except Exception as e:
+			error_count += 1
+			error_details.append(f"{zone_name}: {str(e)}")
 	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} geopolitical zones")
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count,
+		"error_details": error_details
+	}
 
 
 def insert_nigeria_states():
@@ -142,9 +282,12 @@ def insert_nigeria_states():
 		state_doc.save(ignore_permissions=True)  # Use save to trigger before_save hook
 		inserted_count += 1
 	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} states. {skipped_count} states already existed.")
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": 0,
+		"error_details": []
+	}
 
 
 def ensure_personnel_categories():
@@ -156,22 +299,33 @@ def ensure_personnel_categories():
 	]
 	
 	inserted_count = 0
+	skipped_count = 0
+	error_count = 0
+	error_details = []
 	
 	for cat_info in categories:
-		if not frappe.db.exists("Personnel Category", cat_info["name"]):
-			try:
-				category_doc = frappe.get_doc({
-					"doctype": "Personnel Category",
-					"personnel_category": cat_info["category"]
-				})
-				category_doc.insert(ignore_permissions=True)
-				inserted_count += 1
-			except Exception as e:
-				print(f"Warning: Could not create Personnel Category {cat_info['name']}: {str(e)}")
+		if frappe.db.exists("Personnel Category", cat_info["name"]):
+			skipped_count += 1
+			continue
+		
+		try:
+			category_doc = frappe.get_doc({
+				"doctype": "Personnel Category",
+				"personnel_category": cat_info["category"]
+			})
+			category_doc.insert(ignore_permissions=True)
+			inserted_count += 1
+		except Exception as e:
+			error_msg = f"Could not create Personnel Category '{cat_info['name']}': {str(e)}"
+			error_details.append(error_msg)
+			error_count += 1
 	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} personnel categories")
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count,
+		"error_details": error_details
+	}
 
 
 def insert_ranks():
@@ -238,9 +392,12 @@ def insert_ranks():
 		rank_doc.insert(ignore_permissions=True)
 		inserted_count += 1
 	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} ranks. {skipped_count} ranks already existed.")
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count,
+		"error_details": []
+	}
 
 
 def insert_types_of_commission():
@@ -270,9 +427,12 @@ def insert_types_of_commission():
 		commission_doc.insert(ignore_permissions=True)
 		inserted_count += 1
 	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} types of commission. {skipped_count} already existed.")
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": 0,
+		"error_details": []
+	}
 
 
 def insert_courses():
@@ -297,9 +457,12 @@ def insert_courses():
 		course_doc.insert(ignore_permissions=True)
 		inserted_count += 1
 	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} courses. {skipped_count} courses already existed.")
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": 0,
+		"error_details": []
+	}
 
 
 def insert_course_names():
@@ -343,9 +506,12 @@ def insert_course_names():
 		course_name_doc.insert(ignore_permissions=True)
 		inserted_count += 1
 	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} course names. {skipped_count} course names already existed.")
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": 0,
+		"error_details": []
+	}
 
 
 @frappe.whitelist()
@@ -418,9 +584,12 @@ def insert_appointments():
 		appointment_doc.insert(ignore_permissions=True)
 		inserted_count += 1
 	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} appointments. {skipped_count} appointments already existed.")
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": 0,
+		"error_details": []
+	}
 
 
 def insert_commander_appointments():
@@ -435,6 +604,8 @@ def insert_commander_appointments():
 	
 	inserted_count = 0
 	skipped_count = 0
+	error_count = 0
+	error_details = []
 	
 	for appointment_name in commander_appointments:
 		# Check if the appointment exists first, if not create it
@@ -445,11 +616,10 @@ def insert_commander_appointments():
 					"appointment": appointment_name
 				})
 				appointment_doc.insert(ignore_permissions=True)
-				frappe.db.commit()
-				print(f"Created appointment '{appointment_name}'")
 			except Exception as e:
-				print(f"Warning: Could not create appointment '{appointment_name}': {str(e)}")
-				skipped_count += 1
+				error_msg = f"Could not create appointment '{appointment_name}': {str(e)}"
+				error_details.append(error_msg)
+				error_count += 1
 				continue
 		
 		# Check if commander appointment already exists
@@ -458,16 +628,24 @@ def insert_commander_appointments():
 			continue
 		
 		# Create commander appointment document
-		commander_appointment_doc = frappe.get_doc({
-			"doctype": "Commander Appointment",
-			"appointment": appointment_name
-		})
-		commander_appointment_doc.insert(ignore_permissions=True)
-		inserted_count += 1
+		try:
+			commander_appointment_doc = frappe.get_doc({
+				"doctype": "Commander Appointment",
+				"appointment": appointment_name
+			})
+			commander_appointment_doc.insert(ignore_permissions=True)
+			inserted_count += 1
+		except Exception as e:
+			error_msg = f"Error creating commander appointment '{appointment_name}': {str(e)}"
+			error_details.append(error_msg)
+			error_count += 1
 	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} commander appointments. {skipped_count} already existed or appointments not found.")
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count,
+		"error_details": error_details
+	}
 
 
 @frappe.whitelist()
@@ -619,19 +797,22 @@ def insert_units(units_data):
 	inserted_count = 0
 	skipped_count = 0
 	error_count = 0
+	error_details = []
 	
 	for unit_info in units_data:
 		unit_name = unit_info.get("unit")
 		location = unit_info.get("location")
 		
 		if not unit_name:
-			print(f"Warning: Skipping unit with missing name: {unit_info}")
+			error_msg = f"Unit with missing name: {unit_info}"
+			error_details.append(error_msg)
 			error_count += 1
 			continue
 		
 		# Skip units with "Not stated" location
 		if not location or location.strip() == "Not stated":
-			print(f"Warning: Skipping unit '{unit_name}' with 'Not stated' location")
+			error_msg = f"Unit '{unit_name}' has 'Not stated' location - skipped"
+			error_details.append(error_msg)
 			error_count += 1
 			continue
 		
@@ -645,7 +826,8 @@ def insert_units(units_data):
 		
 		# Verify state exists in database
 		if not frappe.db.exists("State", state):
-			print(f"Warning: State '{state}' not found in database for unit '{unit_name}'. Skipping.")
+			error_msg = f"Unit '{unit_name}': State '{state}' not found in database"
+			error_details.append(error_msg)
 			error_count += 1
 			continue
 		
@@ -660,17 +842,15 @@ def insert_units(units_data):
 			unit_doc.insert(ignore_permissions=True)
 			inserted_count += 1
 		except Exception as e:
-			print(f"Error inserting unit '{unit_name}': {str(e)}")
+			error_msg = f"Unit '{unit_name}': {str(e)}"
+			error_details.append(error_msg)
 			error_count += 1
-	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} units. {skipped_count} units already existed. {error_count} errors.")
 	
 	return {
 		"inserted": inserted_count,
 		"skipped": skipped_count,
-		"errors": error_count
+		"errors": error_count,
+		"error_details": error_details
 	}
 
 
@@ -863,13 +1043,11 @@ def insert_grades():
 		grade_doc.insert(ignore_permissions=True)
 		inserted_count += 1
 	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} grades. {skipped_count} grades already existed.")
-	
 	return {
 		"inserted": inserted_count,
-		"skipped": skipped_count
+		"skipped": skipped_count,
+		"errors": 0,
+		"error_details": []
 	}
 
 
@@ -980,15 +1158,16 @@ def insert_app_role_list():
 	inserted_count = 0
 	skipped_count = 0
 	error_count = 0
+	error_details = []
 	
 	for entry in app_role_entries:
 		role_name = entry["app_role"]
 		owner_doctype = entry.get("owner_doctype")
 		
 		# Check if role exists in Role doctype
+		# If role doesn't exist, skip it (not an error - roles may be created separately)
 		if not frappe.db.exists("Role", role_name):
-			print(f"Warning: Role '{role_name}' does not exist. Skipping App Role List entry.")
-			error_count += 1
+			skipped_count += 1
 			continue
 		
 		# Check if App Role List entry already exists
@@ -998,12 +1177,15 @@ def insert_app_role_list():
 		if existing_entry:
 			# Update owner_doctype if it's different and provided
 			if owner_doctype:
-				existing_doc = frappe.get_doc("App Role List", existing_entry)
-				if existing_doc.owner_doctype != owner_doctype:
-					existing_doc.owner_doctype = owner_doctype
-					existing_doc.save(ignore_permissions=True)
-					frappe.db.commit()
-					print(f"Updated owner_doctype for '{role_name}' to '{owner_doctype}'")
+				try:
+					existing_doc = frappe.get_doc("App Role List", existing_entry)
+					if existing_doc.owner_doctype != owner_doctype:
+						existing_doc.owner_doctype = owner_doctype
+						existing_doc.save(ignore_permissions=True)
+				except Exception as e:
+					error_msg = f"Error updating '{role_name}': {str(e)}"
+					error_details.append(error_msg)
+					error_count += 1
 			skipped_count += 1
 			continue
 		
@@ -1017,17 +1199,15 @@ def insert_app_role_list():
 			app_role_list_doc.insert(ignore_permissions=True)
 			inserted_count += 1
 		except Exception as e:
-			print(f"Error inserting App Role List entry for '{role_name}': {str(e)}")
+			error_msg = f"Error inserting '{role_name}': {str(e)}"
+			error_details.append(error_msg)
 			error_count += 1
-	
-	if inserted_count > 0:
-		frappe.db.commit()
-		print(f"Inserted {inserted_count} App Role List entries. {skipped_count} entries already existed. {error_count} errors.")
 	
 	return {
 		"inserted": inserted_count,
 		"skipped": skipped_count,
-		"errors": error_count
+		"errors": error_count,
+		"error_details": error_details
 	}
 
 
