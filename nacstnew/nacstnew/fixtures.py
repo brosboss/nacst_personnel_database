@@ -27,6 +27,7 @@ def install_fixtures():
 		insert_commander_appointments()
 		insert_all_units()
 		insert_grades()
+		insert_app_role_list()
 		frappe.db.commit()
 		print("Initial data fixtures installed successfully")
 	except Exception as e:
@@ -880,6 +881,153 @@ def verify_grades():
 	return {
 		"total": len(grades),
 		"grades": [g.grade for g in grades]
+	}
+
+
+@frappe.whitelist()
+def export_app_role_list_for_fixtures():
+	"""
+	Export current App Role List entries in a format suitable for fixtures.
+	Run this function on your current instance to get the fixture data.
+	Returns a Python list format that can be copied directly into fixtures.
+	"""
+	app_role_list_entries = frappe.get_all(
+		"App Role List",
+		fields=["app_role", "owner_doctype"],
+		order_by="app_role"
+	)
+	
+	# Format as Python list for fixtures
+	fixture_data = []
+	for entry in app_role_list_entries:
+		entry_dict = {"app_role": entry.app_role}
+		if entry.owner_doctype:
+			entry_dict["owner_doctype"] = entry.owner_doctype
+		else:
+			entry_dict["owner_doctype"] = None
+		fixture_data.append(entry_dict)
+	
+	# Also print in Python code format for easy copy-paste
+	print("\n=== App Role List Fixture Data ===\n")
+	print("app_role_entries = [")
+	for entry in fixture_data:
+		owner_doctype_str = f'"{entry["owner_doctype"]}"' if entry["owner_doctype"] else "None"
+		print(f'\t{{"app_role": "{entry["app_role"]}", "owner_doctype": {owner_doctype_str}}},')
+	print("]\n")
+	
+	return {
+		"total": len(fixture_data),
+		"entries": fixture_data,
+		"python_code": fixture_data
+	}
+
+
+def insert_app_role_list():
+	"""Insert App Role List entries for roles that exist in the system"""
+	
+	# App Role List entries extracted from current instance
+	# Format: {"app_role": role_name, "owner_doctype": doctype_name}
+	# Note: owner_doctype can be None if not applicable
+	app_role_entries = [
+		{"app_role": "Can View Dashboard", "owner_doctype": None},
+		{"app_role": "Can View Real-Time Audit Log", "owner_doctype": None},
+		{"app_role": "Course Attended Amender", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Canceller", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Creator", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Deleter", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Editor", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Reader", "owner_doctype": "Course Attended"},
+		{"app_role": "Course Attended Submitter", "owner_doctype": "Course Attended"},
+		{"app_role": "Data Viewer", "owner_doctype": None},
+		{"app_role": "Mission Amender", "owner_doctype": "Mission"},
+		{"app_role": "Mission Canceller", "owner_doctype": "Mission"},
+		{"app_role": "Mission Creator", "owner_doctype": "Mission"},
+		{"app_role": "Mission Deleter", "owner_doctype": "Mission"},
+		{"app_role": "Mission Editor", "owner_doctype": "Mission"},
+		{"app_role": "Mission Reader", "owner_doctype": "Mission"},
+		{"app_role": "Mission Submitter", "owner_doctype": "Mission"},
+		{"app_role": "Part 2 Order Amender", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Canceller", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Creator", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Deleter", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Editor", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Reader", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Part 2 Order Submitter", "owner_doctype": "Part 2 Order"},
+		{"app_role": "Personnel Creator", "owner_doctype": "Personnel"},
+		{"app_role": "Personnel Deleter", "owner_doctype": "Personnel"},
+		{"app_role": "Personnel Editor", "owner_doctype": "Personnel"},
+		{"app_role": "Personnel Reader", "owner_doctype": "Personnel"},
+		{"app_role": "Posting Authority Amender", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Canceller", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Creator", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Deleter", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Editor", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Reader", "owner_doctype": "Posting Authority"},
+		{"app_role": "Posting Authority Submitter", "owner_doctype": "Posting Authority"},
+		{"app_role": "Promotion Amender", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Canceller", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Creator", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Deleter", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Editor", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Reader", "owner_doctype": "Promotion"},
+		{"app_role": "Promotion Submitter", "owner_doctype": "Promotion"},
+		{"app_role": "Reference Data Creator", "owner_doctype": "Reference Data"},
+		{"app_role": "Reference Data Deleter", "owner_doctype": "Reference Data"},
+		{"app_role": "Reference Data Editor", "owner_doctype": "Reference Data"},
+		{"app_role": "Reference Data Reader", "owner_doctype": "Reference Data"},
+	]
+	
+	inserted_count = 0
+	skipped_count = 0
+	error_count = 0
+	
+	for entry in app_role_entries:
+		role_name = entry["app_role"]
+		owner_doctype = entry.get("owner_doctype")
+		
+		# Check if role exists in Role doctype
+		if not frappe.db.exists("Role", role_name):
+			print(f"Warning: Role '{role_name}' does not exist. Skipping App Role List entry.")
+			error_count += 1
+			continue
+		
+		# Check if App Role List entry already exists
+		# The autoname is based on app_role field, so we check by app_role
+		existing_entry = frappe.db.get_value("App Role List", {"app_role": role_name}, "name")
+		
+		if existing_entry:
+			# Update owner_doctype if it's different and provided
+			if owner_doctype:
+				existing_doc = frappe.get_doc("App Role List", existing_entry)
+				if existing_doc.owner_doctype != owner_doctype:
+					existing_doc.owner_doctype = owner_doctype
+					existing_doc.save(ignore_permissions=True)
+					frappe.db.commit()
+					print(f"Updated owner_doctype for '{role_name}' to '{owner_doctype}'")
+			skipped_count += 1
+			continue
+		
+		try:
+			# Create App Role List entry
+			app_role_list_doc = frappe.get_doc({
+				"doctype": "App Role List",
+				"app_role": role_name,
+				"owner_doctype": owner_doctype
+			})
+			app_role_list_doc.insert(ignore_permissions=True)
+			inserted_count += 1
+		except Exception as e:
+			print(f"Error inserting App Role List entry for '{role_name}': {str(e)}")
+			error_count += 1
+	
+	if inserted_count > 0:
+		frappe.db.commit()
+		print(f"Inserted {inserted_count} App Role List entries. {skipped_count} entries already existed. {error_count} errors.")
+	
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count
 	}
 
 
