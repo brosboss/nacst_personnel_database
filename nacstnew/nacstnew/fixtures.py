@@ -14,27 +14,57 @@ def install_fixtures():
 	Main function to install all fixtures.
 	This function is called after app installation via the after_install hook.
 	"""
-	try:
-		print("Installing initial data fixtures...")
-		insert_geopolitical_zones()
-		insert_nigeria_states()
-		ensure_personnel_categories()
-		insert_ranks()
-		insert_types_of_commission()
-		insert_courses()
-		insert_course_names()
-		insert_appointments()
-		insert_commander_appointments()
-		insert_all_units()
-		insert_grades()
-		insert_app_role_list()
-		frappe.db.commit()
-		print("Initial data fixtures installed successfully")
-	except Exception as e:
-		frappe.log_error(f"Error installing fixtures: {str(e)}", "Fixtures Installation Error")
-		# Don't raise during installation to avoid breaking the install process
-		# The error is logged for debugging
-		print(f"Warning: Error installing fixtures: {str(e)}")
+	print("Installing initial data fixtures...")
+	successful = []
+	failed = []
+	
+	# Define all fixture functions to run
+	fixture_functions = [
+		("Geopolitical Zones", insert_geopolitical_zones),
+		("Nigeria States", insert_nigeria_states),
+		("Personnel Categories", ensure_personnel_categories),
+		("Ranks", insert_ranks),
+		("Types of Commission", insert_types_of_commission),
+		("Courses", insert_courses),
+		("Course Names", insert_course_names),
+		("Appointments", insert_appointments),
+		("Commander Appointments", insert_commander_appointments),
+		("Units", insert_all_units),
+		("Grades", insert_grades),
+		("App Role List", insert_app_role_list),
+	]
+	
+	# Run each fixture function independently
+	for name, func in fixture_functions:
+		try:
+			print(f"Installing {name}...")
+			func()
+			frappe.db.commit()
+			successful.append(name)
+			print(f"✓ {name} installed successfully")
+		except Exception as e:
+			frappe.db.rollback()
+			error_msg = f"Error installing {name}: {str(e)}"
+			frappe.log_error(error_msg, f"Fixtures Installation Error - {name}")
+			failed.append(f"{name}: {str(e)}")
+			print(f"✗ {error_msg}")
+	
+	# Print summary
+	print("\n" + "="*60)
+	print("Fixtures Installation Summary")
+	print("="*60)
+	print(f"✓ Successfully installed: {len(successful)}/{len(fixture_functions)}")
+	for name in successful:
+		print(f"  ✓ {name}")
+	
+	if failed:
+		print(f"\n✗ Failed to install: {len(failed)}/{len(fixture_functions)}")
+		for error in failed:
+			print(f"  ✗ {error}")
+		print("\nCheck Error Log for detailed error messages.")
+	else:
+		print("\n✓ All fixtures installed successfully!")
+	print("="*60)
 
 
 def insert_geopolitical_zones():
