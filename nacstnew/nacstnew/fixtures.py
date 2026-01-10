@@ -40,6 +40,7 @@ def install_fixtures():
 		("Commander Appointments", insert_commander_appointments),
 		("Units", insert_all_units),
 		("Grades", insert_grades),
+		("Module Profiles", insert_module_profiles),
 		("App Role List", insert_app_role_list),
 	]
 	
@@ -1099,6 +1100,81 @@ def export_app_role_list_for_fixtures():
 		"total": len(fixture_data),
 		"entries": fixture_data,
 		"python_code": fixture_data
+	}
+
+
+@frappe.whitelist()
+def export_module_profiles_for_fixtures():
+	"""
+	Export current Module Profile entries in a format suitable for fixtures.
+	Run this function on your current instance to get the fixture data.
+	Returns a Python list format that can be copied directly into fixtures.
+	"""
+	module_profiles = frappe.get_all(
+		"Module Profile",
+		fields=["module_profile_name"],
+		order_by="module_profile_name"
+	)
+	
+	# Format as Python list for fixtures
+	fixture_data = []
+	for profile in module_profiles:
+		fixture_data.append({"module_profile_name": profile.module_profile_name})
+	
+	# Also print in Python code format for easy copy-paste
+	print("\n=== Module Profile Fixture Data ===\n")
+	print("module_profile_entries = [")
+	for entry in fixture_data:
+		print(f'\t{{"module_profile_name": "{entry["module_profile_name"]}"}},')
+	print("]\n")
+	
+	return {
+		"total": len(fixture_data),
+		"entries": fixture_data,
+		"python_code": fixture_data
+	}
+
+
+def insert_module_profiles():
+	"""Insert Module Profile entries"""
+	
+	# Module Profile entries extracted from current instance
+	module_profile_entries = [
+		{"module_profile_name": "No Module"},
+	]
+	
+	inserted_count = 0
+	skipped_count = 0
+	error_count = 0
+	error_details = []
+	
+	for entry in module_profile_entries:
+		module_profile_name = entry["module_profile_name"]
+		
+		# Check if module profile already exists
+		if frappe.db.exists("Module Profile", module_profile_name):
+			skipped_count += 1
+			continue
+		
+		try:
+			# Create Module Profile document
+			# Note: block_modules table is auto-managed by the system via on_update hook
+			module_profile_doc = frappe.get_doc({
+				"doctype": "Module Profile",
+				"module_profile_name": module_profile_name
+			})
+			module_profile_doc.insert(ignore_permissions=True)
+			inserted_count += 1
+		except Exception as e:
+			error_msg = f"Error inserting Module Profile '{module_profile_name}': {str(e)}"
+			error_details.append(error_msg)
+			error_count += 1
+	
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count,
+		"error_details": error_details
 	}
 
 
