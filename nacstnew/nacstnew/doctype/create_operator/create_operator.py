@@ -29,6 +29,14 @@ class CreateOperator(Document):
 			if self.login_after >= self.login_before:
 				frappe.throw(_("Login After must be less than Login Before"), title=_("Invalid Time Range"))
 		
+		# Set default enabled to 1 if not set
+		if not hasattr(self, 'enabled') or self.enabled is None:
+			self.enabled = 1
+		
+		# Validate enabled status - prevent disabling Administrator
+		if frappe.utils.cint(self.enabled) == 0 and self.email == "Administrator":
+			frappe.throw(_("Administrator user cannot be disabled"), title=_("Invalid Operation"))
+		
 		# Ensure "Can View Dashboard" role is always assigned
 		self._ensure_can_view_dashboard_role()
 		# Ensure "Personnel Reader" role is always assigned
@@ -52,11 +60,13 @@ class CreateOperator(Document):
 			
 			# Create new user
 			user = frappe.new_doc("User")
+			# Set enabled status (default to 1 if not set)
+			enabled_status = frappe.utils.cint(getattr(self, 'enabled', 1))
 			user.update({
 				"name": self.email,
 				"email": self.email,
 				"first_name": self.first_name,
-				"enabled": 1,
+				"enabled": enabled_status,
 				"user_type": "System User",
 				"send_welcome_email": 0,  # Don't send welcome email automatically
 				"module_profile": "No Module",  # Always set to "No Module" module profile
@@ -124,6 +134,15 @@ class CreateOperator(Document):
 			# Update basic fields if changed
 			if self.has_value_changed("first_name"):
 				user.first_name = self.first_name
+				has_changes = True
+			
+			# Update enabled status if changed
+			if self.has_value_changed("enabled"):
+				enabled_status = frappe.utils.cint(getattr(self, 'enabled', 1))
+				# Prevent disabling Administrator
+				if enabled_status == 0 and user.name == "Administrator":
+					frappe.throw(_("Administrator user cannot be disabled"), title=_("Invalid Operation"))
+				user.enabled = enabled_status
 				has_changes = True
 			
 			# Always ensure module profile is set to "No Module" for all users

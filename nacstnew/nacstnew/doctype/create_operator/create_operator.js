@@ -3,6 +3,42 @@
 
 frappe.ui.form.on("Create Operator", {
 	refresh(frm) {
+		// Update enabled field status based on email (make read-only for Administrator)
+		frm.trigger("update_enabled_field_status");
+		
+		// Sync enabled status from User if document is not new and user exists
+		if (!frm.is_new() && frm.doc.email) {
+			frappe.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "User",
+					filters: {
+						name: frm.doc.email
+					},
+					fieldname: "enabled"
+				},
+				callback: function(r) {
+					if (r.message && r.message.enabled !== undefined) {
+						// Only update if the field exists and value is different
+						if (frm.doc.enabled !== r.message.enabled) {
+							frm.set_value("enabled", r.message.enabled);
+						}
+					}
+				},
+				error: function() {
+					// User doesn't exist yet, keep current enabled value or default to 1
+					if (frm.doc.enabled === undefined || frm.doc.enabled === null) {
+						frm.set_value("enabled", 1);
+					}
+				}
+			});
+		} else if (frm.is_new()) {
+			// For new documents, default enabled to 1 if not set
+			if (frm.doc.enabled === undefined || frm.doc.enabled === null) {
+				frm.set_value("enabled", 1);
+			}
+		}
+		
 		// Add custom button to check if user exists
 		if (!frm.is_new()) {
 			frm.add_custom_button(__("Check User"), function() {
@@ -479,6 +515,32 @@ frappe.ui.form.on("Create Operator", {
 		if (frm.doc.email && !frappe.utils.validate_email(frm.doc.email)) {
 			frappe.msgprint(__("Please enter a valid email address"));
 			frm.set_value("email", "");
+		}
+		
+		// Update enabled field read-only status based on email
+		frm.trigger("update_enabled_field_status");
+	},
+	
+	enabled(frm) {
+		// Prevent disabling Administrator
+		if (frm.doc.email === "Administrator" && frm.doc.enabled === 0) {
+			frappe.msgprint({
+				title: __("Invalid Operation"),
+				message: __("Administrator user cannot be disabled"),
+				indicator: "red"
+			});
+			frm.set_value("enabled", 1);
+		}
+	},
+	
+	update_enabled_field_status(frm) {
+		// Make enabled field read-only for Administrator
+		if (frm.doc.email === "Administrator") {
+			frm.set_df_property("enabled", "read_only", 1);
+			frm.set_df_property("enabled", "description", __("Administrator user cannot be disabled"));
+		} else {
+			frm.set_df_property("enabled", "read_only", 0);
+			frm.set_df_property("enabled", "description", "");
 		}
 	},
 	
