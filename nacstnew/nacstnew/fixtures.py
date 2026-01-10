@@ -452,7 +452,8 @@ def insert_courses():
 		# Create course document
 		course_doc = frappe.get_doc({
 			"doctype": "Course",
-			"course": course_name
+			"course": course_name,
+			"personnel_category": "Officer"
 		})
 		course_doc.insert(ignore_permissions=True)
 		inserted_count += 1
