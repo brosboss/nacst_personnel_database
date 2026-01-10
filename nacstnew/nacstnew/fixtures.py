@@ -331,7 +331,7 @@ def ensure_personnel_categories():
 
 def insert_ranks():
 	"""Insert all ranks for officers and soldiers"""
-	
+	error_count = 0
 	# Ensure personnel categories exist first
 	ensure_personnel_categories()
 	
