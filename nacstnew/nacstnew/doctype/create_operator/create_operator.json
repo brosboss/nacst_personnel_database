@@ -10,6 +10,7 @@
   "first_name",
   "column_break_alnv",
   "password",
+  "enabled",
   "module_profile",
   "section_break_login_restrictions",
   "login_after",
@@ -47,6 +48,13 @@
    "fieldname": "password",
    "fieldtype": "Data",
    "label": "Password"
+  },
+  {
+   "default": 1,
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled",
+   "in_list_view": 1
   },
   {
    "fieldname": "roles_html",
