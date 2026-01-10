@@ -450,6 +450,7 @@ def insert_courses():
 			continue
 		
 		# Create course document
+		# added personnel category to the course
 		course_doc = frappe.get_doc({
 			"doctype": "Course",
 			"course": course_name,
