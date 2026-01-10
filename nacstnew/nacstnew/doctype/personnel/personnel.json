@@ -276,7 +276,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-31 14:58:08.704998",
+ "modified": "2026-01-10 17:51:28.001773",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",
@@ -465,6 +465,18 @@
    "report": 1,
    "role": "Mission Amender",
    "share": 1
+  },
+  {
+   "read": 1,
+   "role": "Can View Dashboard"
+  },
+  {
+   "read": 1,
+   "role": "Can View Real-Time Audit Log"
+  },
+  {
+   "read": 1,
+   "role": "Data Viewer"
   }
  ],
  "row_format": "Dynamic",
