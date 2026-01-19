@@ -5,29 +5,82 @@ frappe.pages['personnel-unit-stati'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	// Create container for filters and data
+	// Add CSS - include reusable sidebar CSS and page-specific CSS
+	page.add_inner_message(
+		hideDefaultSidebarCSS('personnel-unit-stati') + 
+		getNavigationSidebarCSS('pus') + `
+		<style id="pus-page-styles">
+			/* Make the page container full width */
+			body[data-page-name="personnel-unit-stati"] .page-wrapper {
+				width: 100% !important;
+			}
+			
+			body[data-page-name="personnel-unit-stati"] .layout-main-section-wrapper {
+				display: flex !important;
+				flex-direction: column !important;
+			}
+			
+			.unit-mismatch-container {
+				display: flex;
+				gap: 20px;
+				padding: 20px;
+				min-height: calc(100vh - 120px);
+				width: 100%;
+				margin: 0;
+			}
+			
+			.pus-main-content-wrapper {
+				flex: 1;
+				overflow-y: auto;
+				padding-right: 10px;
+			}
+			
+			/* Scrollbar styling for main content */
+			.pus-main-content-wrapper::-webkit-scrollbar {
+				width: 8px;
+			}
+			
+			.pus-main-content-wrapper::-webkit-scrollbar-track {
+				background: #f1f1f1;
+				border-radius: 10px;
+			}
+			
+			.pus-main-content-wrapper::-webkit-scrollbar-thumb {
+				background: #888;
+				border-radius: 10px;
+			}
+			
+			.pus-main-content-wrapper::-webkit-scrollbar-thumb:hover {
+				background: #555;
+			}
+		</style>
+	`);
+
+	// Create container for filters and data with sidebar
 	let $container = $(`
-		<div class="unit-mismatch-container" style="padding: 20px;">
-			<div class="stats-header" style="margin-bottom: 20px;">
-				<div class="stats-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-					color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative;">
-					<div style="display: flex; justify-content: space-between; align-items: center;">
-						<div>
-							<h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">
-								Unit Mismatch Analysis
-							</h3>
-							<p style="margin: 0; opacity: 0.9; font-size: 14px;">
-								Personnel with different units in Part 2 Orders vs Strength Returns
-							</p>
+		<div class="unit-mismatch-container">
+			${getNavigationSidebar('personnel-unit-stati', 'pus')}
+			<div class="pus-main-content-wrapper">
+				<div class="stats-header" style="margin-bottom: 20px;">
+					<div class="stats-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+						color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative;">
+						<div style="display: flex; justify-content: space-between; align-items: center;">
+							<div>
+								<h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">
+									Unit Mismatch Analysis
+								</h3>
+								<p style="margin: 0; opacity: 0.9; font-size: 14px;">
+									Personnel with different units in Part 2 Orders vs Strength Returns
+								</p>
+							</div>
+							<button class="btn btn-light btn-sm" onclick="refreshData()" 
+								style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); 
+								color: white; padding: 8px 16px;">
+								<i class="fa fa-refresh"></i> Refresh
+							</button>
 						</div>
-						<button class="btn btn-light btn-sm" onclick="refreshData()" 
-							style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); 
-							color: white; padding: 8px 16px;">
-							<i class="fa fa-refresh"></i> Refresh
-						</button>
 					</div>
 				</div>
-			</div>
 			<div id="loading-state" style="text-align: center; padding: 40px;">
 				<div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; 
 					border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
@@ -40,6 +93,7 @@ frappe.pages['personnel-unit-stati'].on_page_load = function(wrapper) {
 				}
 			</style>
 			<div id="data-container" style="display: none;"></div>
+			</div>
 		</div>
 	`).appendTo(page.main);
 

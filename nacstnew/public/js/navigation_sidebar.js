@@ -33,6 +33,11 @@ if (typeof window.NAVIGATION_ITEMS === 'undefined') {
 			icon: 'fa-history'
 		},
 		{
+			route: 'personnel-unit-stati',
+			label: 'Unit Analysis',
+			icon: 'fa-exchange-alt'
+		},
+		{
 			route: '#',
 			label: 'Reports',
 			icon: 'fa-chart-line'

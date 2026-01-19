@@ -66,6 +66,9 @@ page_js = {
 	],
 	"rtal" : [
 		"public/js/navigation_sidebar.js"
+	],
+	"personnel-unit-stati" : [
+		"public/js/navigation_sidebar.js"
 	]
 }
 
