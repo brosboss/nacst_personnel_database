@@ -527,6 +527,99 @@ def get_personnel_strength_returns_html(service_number):
 	return html
 
 @frappe.whitelist()
+def get_personnel_attsdets_html(service_number):
+	"""Generate HTML table for personnel attachments/detachments from Personnel Att and Dets Form"""
+	if not service_number:
+		return "<p>No service number provided.</p>"
+	
+	# Query all Personnel Att and Dets Form records for this service number
+	attsdets_records = frappe.db.get_all(
+		"Personnel Att and Dets Form",
+		filters={
+			"personnel": service_number
+		},
+		fields=[
+			"name",
+			"personnel_attachment_reference",
+			"attsdets_type",
+			"from_unit",
+			"to_unit",
+			"date",
+			"type",
+			"remarks"
+		],
+		order_by="date desc, creation desc"
+	)
+	
+	if not attsdets_records:
+		return "<p>No attachment/detachment records found.</p>"
+	
+	# Generate HTML table
+	html = """
+	<style>
+		.attsdets-history-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 10px;
+		}
+		.attsdets-history-table th {
+			background-color: var(--subtle-fg);
+			padding: 8px;
+			text-align: left;
+			border: 1px solid var(--table-border-color);
+			font-weight: bold;
+		}
+		.attsdets-history-table td {
+			padding: 8px;
+			border: 1px solid var(--table-border-color);
+		}
+		.attsdets-history-table tr:nth-child(even) {
+			background-color: var(--fg-color);
+		}
+	</style>
+	<table class="attsdets-history-table">
+		<thead>
+			<tr>
+				<th>Reference</th>
+				<th>Atts/Dets Type</th>
+				<th>From Unit</th>
+				<th>To Unit</th>
+				<th>Date</th>
+				<th>Attachment Type</th>
+				<th>Remarks</th>
+			</tr>
+		</thead>
+		<tbody>
+	"""
+	
+	for record in attsdets_records:
+		# Format date
+		date_formatted = frappe.format_value(record.date, {"fieldtype": "Date"}) if record.date else ""
+		
+		# Format attsdets type with color
+		attsdets_type = record.attsdets_type or ""
+		type_color = "blue" if attsdets_type == "Attachment" else "orange" if attsdets_type == "Detachment" else "gray"
+		
+		html += f"""
+			<tr>
+				<td><b>{frappe.utils.escape_html(record.personnel_attachment_reference or "")}</b></td>
+				<td><span class="indicator {type_color}">{frappe.utils.escape_html(attsdets_type)}</span></td>
+				<td>{frappe.utils.escape_html(record.from_unit or "")}</td>
+				<td><b>{frappe.utils.escape_html(record.to_unit or "")}</b></td>
+				<td>{date_formatted}</td>
+				<td>{frappe.utils.escape_html(record.type or "")}</td>
+				<td>{frappe.utils.escape_html(record.remarks or "")}</td>
+			</tr>
+		"""
+	
+	html += """
+		</tbody>
+	</table>
+	"""
+	
+	return html
+
+@frappe.whitelist()
 def get_personnel_data(service_number):
 	"""Get complete personnel data for display page"""
 	if not service_number:

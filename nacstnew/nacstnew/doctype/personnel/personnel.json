@@ -38,10 +38,18 @@
   "remarks",
   "personnel_unit_reference_section",
   "personnel_unit_from_returns",
-  "personnel_unit_verified",
   "column_break_iwqg",
   "strength_returns",
+  "column_break_xjix",
   "dtos",
+  "personnel_attachement_section",
+  "current_personnel_attachment",
+  "personnel_attachment_type",
+  "column_break_fjky",
+  "personnel_attachment_unit",
+  "personnel_attachment_remarks",
+  "section_break_zpop",
+  "personnel_unit_verified",
   "posting_history_tab",
   "personnel_posting_history_html",
   "promotion_history_tab",
@@ -53,7 +61,9 @@
   "mission_tab",
   "personnel_mission",
   "strength_returns_tab",
-  "personnel_strength_returns"
+  "personnel_strength_returns",
+  "personnel_attsdets_tab",
+  "personnel_attsdets"
  ],
  "fields": [
   {
@@ -312,6 +322,7 @@
    "read_only": 1
   },
   {
+   "description": "Derived from Personnel Unit Verification Form",
    "fieldname": "personnel_unit_verified",
    "fieldtype": "Link",
    "label": "Personnel Unit Verified",
@@ -331,6 +342,57 @@
    "fieldname": "dtos",
    "fieldtype": "Date",
    "label": "DTOS"
+  },
+  {
+   "fieldname": "column_break_xjix",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zpop",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "personnel_attachement_section",
+   "fieldtype": "Section Break",
+   "label": "Personnel Attachment"
+  },
+  {
+   "fieldname": "current_personnel_attachment",
+   "fieldtype": "Link",
+   "label": "Current Personnel Attachment",
+   "options": "Personnel Att and Dets Form"
+  },
+  {
+   "fetch_from": "current_personnel_attachment.unit",
+   "fieldname": "personnel_attachment_unit",
+   "fieldtype": "Data",
+   "label": "Personnel Attachment Unit"
+  },
+  {
+   "fetch_from": "current_personnel_attachment.attachment_type",
+   "fieldname": "personnel_attachment_type",
+   "fieldtype": "Data",
+   "label": "Personnel Attachment Type"
+  },
+  {
+   "fieldname": "column_break_fjky",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "current_personnel_attachment.remarks",
+   "fieldname": "personnel_attachment_remarks",
+   "fieldtype": "Data",
+   "label": "Personnel Attachment Remarks"
+  },
+  {
+   "fieldname": "personnel_attsdets_tab",
+   "fieldtype": "Tab Break",
+   "label": "Personnel Atts/Dets"
+  },
+  {
+   "fieldname": "personnel_attsdets",
+   "fieldtype": "HTML",
+   "label": "Personnel Atts/Dets"
   }
  ],
  "grid_page_length": 50,
@@ -338,7 +400,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-19 18:03:08.280044",
+ "modified": "2026-01-19 19:06:41.081105",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",

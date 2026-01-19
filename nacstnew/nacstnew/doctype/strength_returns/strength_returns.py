@@ -38,7 +38,8 @@ class StrengthReturns(Document):
 			SELECT 
 				srd.personnel,
 				srd.dtos,
-				srd.current_depl
+				srd.current_depl,
+				sr.name as strength_returns_doc
 			FROM `tabStrength Returns Details` srd
 			INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
 			WHERE sr.docstatus = 1
@@ -60,6 +61,7 @@ class StrengthReturns(Document):
 			personnel_name = detail.personnel
 			dtos = frappe.utils.getdate(detail.dtos) if detail.dtos else None
 			current_depl = detail.current_depl
+			strength_returns_doc = detail.strength_returns_doc
 			
 			if not dtos or not personnel_name:
 				continue
@@ -68,14 +70,16 @@ class StrengthReturns(Document):
 			if personnel_name not in personnel_updates:
 				personnel_updates[personnel_name] = {
 					'dtos': dtos,
-					'current_depl': current_depl
+					'current_depl': current_depl,
+					'strength_returns_doc': strength_returns_doc
 				}
 			else:
 				# Compare DTOS dates - use the most recent one
 				if dtos > personnel_updates[personnel_name]['dtos']:
 					personnel_updates[personnel_name] = {
 						'dtos': dtos,
-						'current_depl': current_depl
+						'current_depl': current_depl,
+						'strength_returns_doc': strength_returns_doc
 					}
 		
 		# Get all personnel that have ever been in any Strength Returns Details
@@ -134,10 +138,18 @@ class StrengthReturns(Document):
 					)
 					continue
 				
-				# Update personnel_unit_from_returns and current_deployment
+				# Update personnel_unit_from_returns, dtos, strength_returns, and current_deployment
 				update_dict = {
 					"personnel_unit_from_returns": update_data['current_depl']
 				}
+				
+				# Update dtos field if it exists
+				if personnel_meta.has_field("dtos"):
+					update_dict["dtos"] = update_data['dtos']
+				
+				# Update strength_returns field if it exists
+				if personnel_meta.has_field("strength_returns") and update_data.get('strength_returns_doc'):
+					update_dict["strength_returns"] = update_data['strength_returns_doc']
 				
 				# Only update current_deployment if field exists
 				if personnel_meta.has_field("current_deployment"):
@@ -175,6 +187,10 @@ class StrengthReturns(Document):
 				
 				if personnel_meta.has_field("personnel_unit_from_returns"):
 					clear_dict["personnel_unit_from_returns"] = None
+				if personnel_meta.has_field("dtos"):
+					clear_dict["dtos"] = None
+				if personnel_meta.has_field("strength_returns"):
+					clear_dict["strength_returns"] = None
 				if personnel_meta.has_field("current_deployment"):
 					clear_dict["current_deployment"] = None
 				

@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestPersonnelUnitVerified(FrappeTestCase):
+class TestAttachmentType(FrappeTestCase):
 	pass
