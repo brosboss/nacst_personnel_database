@@ -20,6 +20,7 @@ frappe.ui.form.on("Personnel", {
 			load_promotion_history(frm);
 			load_personnel_brief(frm);
 			load_personnel_mission(frm);
+			load_personnel_strength_returns(frm);
 		} else {
 			frm.set_value("personnel_posting_history_html", "");
 			frm.refresh_field("personnel_posting_history_html");
@@ -31,6 +32,8 @@ frappe.ui.form.on("Personnel", {
 			frm.refresh_field("personnel_brief");
 			frm.set_value("personnel_mission", "");
 			frm.refresh_field("personnel_mission");
+			frm.set_value("personnel_strength_returns", "");
+			frm.refresh_field("personnel_strength_returns");
 		}
 	},
 	personnel_image: function(frm) {
@@ -45,6 +48,7 @@ frappe.ui.form.on("Personnel", {
 			load_promotion_history(frm);
 			load_personnel_brief(frm);
 			load_personnel_mission(frm);
+			load_personnel_strength_returns(frm);
 		} else {
 			frm.set_value("personnel_posting_history_html", "");
 			frm.refresh_field("personnel_posting_history_html");
@@ -56,6 +60,8 @@ frappe.ui.form.on("Personnel", {
 			frm.refresh_field("personnel_brief");
 			frm.set_value("personnel_mission", "");
 			frm.refresh_field("personnel_mission");
+			frm.set_value("personnel_strength_returns", "");
+			frm.refresh_field("personnel_strength_returns");
 		}
 	},
 	personnel_name: function(frm) {
@@ -477,6 +483,74 @@ function load_personnel_mission(frm) {
 			} else {
 				frm.set_df_property("personnel_mission", "options", "<p>Error loading mission history.</p>");
 				frm.refresh_field("personnel_mission");
+			}
+		}
+	});
+}
+
+function load_personnel_strength_returns(frm) {
+	// Call server method to generate strength returns HTML
+	frappe.call({
+		method: "nacstnew.nacstnew.doctype.personnel.personnel.get_personnel_strength_returns_html",
+		args: {
+			service_number: frm.doc.service_number
+		},
+		callback: function(r) {
+			if (r.message) {
+				console.log("Strength returns HTML received:", r.message);
+				// Set the value using the field control directly (HTML fields use df.options)
+				let html_field = frm.get_field("personnel_strength_returns");
+				if (html_field) {
+					// Update the df.options property and set the value
+					html_field.df.options = r.message;
+					html_field.set_value(r.message);
+					// Ensure the wrapper is visible
+					if (html_field.$wrapper) {
+						html_field.$wrapper.show();
+						console.log("HTML field wrapper found and shown");
+					} else if (html_field.wrapper) {
+						$(html_field.wrapper).show();
+						console.log("HTML field wrapper (non-jQuery) found and shown");
+					}
+					console.log("HTML field updated via field control, wrapper:", html_field.$wrapper || html_field.wrapper);
+				} else {
+					console.log("HTML field control not found, using fallback method");
+					// Fallback: set df property and refresh
+					frm.set_df_property("personnel_strength_returns", "options", r.message);
+					frm.refresh_field("personnel_strength_returns");
+					// Try direct DOM manipulation as last resort
+					setTimeout(() => {
+						// Try multiple selectors to find the HTML field wrapper
+						let field_wrapper = $(`[data-fieldname="personnel_strength_returns"]`);
+						if (field_wrapper && field_wrapper.length) {
+							// HTML fields typically have the content in the wrapper itself or in a child div
+							field_wrapper.html(r.message).show();
+							console.log("Updated HTML field via direct DOM manipulation");
+						} else {
+							console.log("Could not find HTML field wrapper in DOM");
+						}
+					}, 200);
+				}
+			} else {
+				let html_field = frm.get_field("personnel_strength_returns");
+				if (html_field) {
+					html_field.df.options = "<p>No strength returns records found.</p>";
+					html_field.set_value("<p>No strength returns records found.</p>");
+				} else {
+					frm.set_df_property("personnel_strength_returns", "options", "<p>No strength returns records found.</p>");
+					frm.refresh_field("personnel_strength_returns");
+				}
+			}
+		},
+		error: function(r) {
+			console.error("Error loading strength returns:", r);
+			let html_field = frm.get_field("personnel_strength_returns");
+			if (html_field) {
+				html_field.df.options = "<p>Error loading strength returns.</p>";
+				html_field.set_value("<p>Error loading strength returns.</p>");
+			} else {
+				frm.set_df_property("personnel_strength_returns", "options", "<p>Error loading strength returns.</p>");
+				frm.refresh_field("personnel_strength_returns");
 			}
 		}
 	});

@@ -36,6 +36,12 @@
   "phone_number",
   "phone_number_2",
   "remarks",
+  "personnel_unit_reference_section",
+  "personnel_unit_from_returns",
+  "personnel_unit_verified",
+  "column_break_iwqg",
+  "strength_returns",
+  "dtos",
   "posting_history_tab",
   "personnel_posting_history_html",
   "promotion_history_tab",
@@ -45,7 +51,9 @@
   "brief_tab",
   "personnel_brief",
   "mission_tab",
-  "personnel_mission"
+  "personnel_mission",
+  "strength_returns_tab",
+  "personnel_strength_returns"
  ],
  "fields": [
   {
@@ -108,6 +116,7 @@
    "read_only": 1
   },
   {
+   "description": "** From Part 2 Order **",
    "fieldname": "current_unit",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -189,6 +198,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "**From Posting Record**",
    "fieldname": "current_rank",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -278,6 +288,49 @@
    "fieldname": "data_import_reference",
    "fieldtype": "Data",
    "label": "Data Import Reference"
+  },
+  {
+   "fieldname": "strength_returns_tab",
+   "fieldtype": "Tab Break",
+   "label": "Strength Returns "
+  },
+  {
+   "fieldname": "personnel_strength_returns",
+   "fieldtype": "HTML",
+   "label": "Personnel Strength Returns "
+  },
+  {
+   "fieldname": "personnel_unit_reference_section",
+   "fieldtype": "Section Break",
+   "label": "Personnel Unit Reference"
+  },
+  {
+   "fieldname": "personnel_unit_from_returns",
+   "fieldtype": "Link",
+   "label": "Personnel Unit from Returns",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "personnel_unit_verified",
+   "fieldtype": "Link",
+   "label": "Personnel Unit Verified",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_iwqg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "strength_returns",
+   "fieldtype": "Link",
+   "label": "Strength Returns",
+   "options": "Strength Returns"
+  },
+  {
+   "fieldname": "dtos",
+   "fieldtype": "Date",
+   "label": "DTOS"
   }
  ],
  "grid_page_length": 50,
@@ -285,7 +338,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-12 11:38:38.219117",
+ "modified": "2026-01-19 18:03:08.280044",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",

@@ -415,6 +415,118 @@ def get_promotion_history_html(service_number):
 	return html
 
 @frappe.whitelist()
+def get_personnel_strength_returns_html(service_number):
+	"""Generate HTML table for strength returns from Strength Returns Details child table"""
+	if not service_number:
+		return "<p>No service number provided.</p>"
+	
+	# Query all Strength Returns Details records for this service number from submitted Strength Returns documents
+	strength_returns_records = frappe.db.sql("""
+		SELECT 
+			srd.personnel,
+			srd.personnel_name,
+			srd.rank,
+			srd.trade,
+			srd.dob,
+			srd.doe,
+			srd.dolp,
+			srd.current_depl,
+			srd.dtos,
+			srd.last_unit,
+			srd.last_second_unit,
+			srd.last_third_unit,
+			srd.remarks,
+			sr.returns_reference,
+			sr.year,
+			sr.quarter,
+			sr.returns_originator_unit,
+			sr.returns_status,
+			sr.name as strength_returns_doc
+		FROM `tabStrength Returns Details` srd
+		INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+		WHERE srd.personnel = %s
+			AND sr.docstatus = 1
+		ORDER BY srd.dtos DESC, sr.creation DESC
+	""", (service_number,), as_dict=True)
+	
+	if not strength_returns_records:
+		return "<p>No strength returns records found.</p>"
+	
+	# Generate HTML table
+	html = """
+	<style>
+		.strength-returns-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 10px;
+		}
+		.strength-returns-table th {
+			background-color: var(--subtle-fg);
+			padding: 8px;
+			text-align: left;
+			border: 1px solid var(--table-border-color);
+			font-weight: bold;
+		}
+		.strength-returns-table td {
+			padding: 8px;
+			border: 1px solid var(--table-border-color);
+		}
+		.strength-returns-table tr:nth-child(even) {
+			background-color: var(--fg-color);
+		}
+	</style>
+	<table class="strength-returns-table">
+		<thead>
+			<tr>
+				<th>Returns Reference</th>
+				<th>Year</th>
+				<th>Quarter</th>
+				<th>Originator Unit</th>
+				<th>Rank</th>
+				<th>Trade</th>
+				<th>DTOS</th>
+				<th>Current Depl</th>
+				<th>Last Unit</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>
+	"""
+	
+	for record in strength_returns_records:
+		# Format dates
+		dtos = frappe.format_value(record.dtos, {"fieldtype": "Date"}) if record.dtos else ""
+		dob = frappe.format_value(record.dob, {"fieldtype": "Date"}) if record.dob else ""
+		doe = frappe.format_value(record.doe, {"fieldtype": "Date"}) if record.doe else ""
+		dolp = frappe.format_value(record.dolp, {"fieldtype": "Date"}) if record.dolp else ""
+		
+		# Format returns status with color
+		returns_status = record.returns_status or ""
+		status_color = "green" if returns_status == "Processed" else "orange" if returns_status == "Rolled Back" else "gray"
+		
+		html += f"""
+			<tr>
+				<td><b>{frappe.utils.escape_html(record.returns_reference or "")}</b></td>
+				<td>{frappe.utils.escape_html(record.year or "")}</td>
+				<td>{frappe.utils.escape_html(record.quarter or "")}</td>
+				<td>{frappe.utils.escape_html(record.returns_originator_unit or "")}</td>
+				<td>{frappe.utils.escape_html(record.rank or "")}</td>
+				<td>{frappe.utils.escape_html(record.trade or "")}</td>
+				<td>{dtos}</td>
+				<td><b>{frappe.utils.escape_html(record.current_depl or "")}</b></td>
+				<td>{frappe.utils.escape_html(record.last_unit or "")}</td>
+				<td><span class="indicator {status_color}">{frappe.utils.escape_html(returns_status)}</span></td>
+			</tr>
+		"""
+	
+	html += """
+		</tbody>
+	</table>
+	"""
+	
+	return html
+
+@frappe.whitelist()
 def get_personnel_data(service_number):
 	"""Get complete personnel data for display page"""
 	if not service_number:
