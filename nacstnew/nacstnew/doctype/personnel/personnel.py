@@ -532,24 +532,22 @@ def get_personnel_attsdets_html(service_number):
 	if not service_number:
 		return "<p>No service number provided.</p>"
 	
-	# Query all Personnel Att and Dets Form records for this service number
-	attsdets_records = frappe.db.get_all(
-		"Personnel Att and Dets Form",
-		filters={
-			"personnel": service_number
-		},
-		fields=[
-			"name",
-			"personnel_attachment_reference",
-			"attsdets_type",
-			"from_unit",
-			"to_unit",
-			"date",
-			"type",
-			"remarks"
-		],
-		order_by="date desc, creation desc"
-	)
+	# Query all submitted Personnel Att and Dets Form records for this service number
+	attsdets_records = frappe.db.sql("""
+		SELECT 
+			name,
+			personnel_attachment_reference,
+			attsdets_type,
+			from_unit,
+			to_unit,
+			date,
+			type,
+			remarks
+		FROM `tabPersonnel Att and Dets Form`
+		WHERE personnel = %s
+			AND docstatus = 1
+		ORDER BY date DESC, creation DESC
+	""", (service_number,), as_dict=True)
 	
 	if not attsdets_records:
 		return "<p>No attachment/detachment records found.</p>"
@@ -2364,5 +2362,85 @@ def rollback_personnel_import(import_reference):
 		results['error'] = str(e)
 		frappe.log_error(f"Personnel rollback error: {str(e)}", "Personnel Rollback")
 		frappe.db.rollback()
+	
+	return results
+
+@frappe.whitelist()
+def get_personnel_unit_mismatches():
+	"""Get personnel where current_unit != personnel_unit_from_returns with date information"""
+	from frappe.utils import getdate
+	
+	# Query personnel where current_unit and personnel_unit_from_returns are different and both exist
+	personnel_list = frappe.db.sql("""
+		SELECT 
+			p.service_number,
+			p.personnel_name,
+			p.current_unit,
+			p.personnel_unit_from_returns,
+			p.dtos,
+			p.strength_returns
+		FROM `tabPersonnel` p
+		WHERE p.current_unit IS NOT NULL 
+			AND p.current_unit != ''
+			AND p.personnel_unit_from_returns IS NOT NULL
+			AND p.personnel_unit_from_returns != ''
+			AND p.current_unit != p.personnel_unit_from_returns
+		ORDER BY p.personnel_name
+	""", as_dict=True)
+	
+	results = []
+	
+	for personnel in personnel_list:
+		# Get latest date_tos from Posting Authority Details for current_unit
+		latest_posting = frappe.db.sql("""
+			SELECT 
+				pad.gaining_unit_date_tos,
+				pad.part_2_order,
+				pad.wef_date
+			FROM `tabPosting Authority Details` pad
+			WHERE pad.service_number = %s
+				AND pad.to_unit = %s
+				AND pad.gaining_unit_date_tos IS NOT NULL
+				AND pad.posting_status = 'TOS'
+			ORDER BY pad.gaining_unit_date_tos DESC, pad.creation DESC
+			LIMIT 1
+		""", (personnel.service_number, personnel.current_unit), as_dict=True)
+		
+		current_unit_date = None
+		part_2_order = None
+		if latest_posting:
+			current_unit_date = latest_posting[0].gaining_unit_date_tos
+			part_2_order = latest_posting[0].part_2_order
+		
+		# Get dtos from Strength Returns (already stored in personnel.dtos)
+		returns_date = personnel.dtos
+		
+		# Determine which is latest
+		latest_source = None
+		if current_unit_date and returns_date:
+			current_date_obj = getdate(current_unit_date)
+			returns_date_obj = getdate(returns_date)
+			if current_date_obj > returns_date_obj:
+				latest_source = "current_unit"
+			elif returns_date_obj > current_date_obj:
+				latest_source = "personnel_unit_from_returns"
+			else:
+				latest_source = "equal"
+		elif current_unit_date:
+			latest_source = "current_unit"
+		elif returns_date:
+			latest_source = "personnel_unit_from_returns"
+		
+		results.append({
+			"service_number": personnel.service_number,
+			"personnel_name": personnel.personnel_name,
+			"current_unit": personnel.current_unit,
+			"personnel_unit_from_returns": personnel.personnel_unit_from_returns,
+			"current_unit_date": current_unit_date,
+			"returns_date": returns_date,
+			"part_2_order": part_2_order,
+			"strength_returns": personnel.strength_returns,
+			"latest_source": latest_source
+		})
 	
 	return results

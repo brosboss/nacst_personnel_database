@@ -48,6 +48,7 @@
   "column_break_fjky",
   "personnel_attachment_unit",
   "personnel_attachment_remarks",
+  "atts__dets_type",
   "section_break_zpop",
   "personnel_unit_verified",
   "posting_history_tab",
@@ -360,19 +361,22 @@
    "fieldname": "current_personnel_attachment",
    "fieldtype": "Link",
    "label": "Current Personnel Attachment",
-   "options": "Personnel Att and Dets Form"
+   "options": "Personnel Att and Dets Form",
+   "read_only": 1
   },
   {
    "fetch_from": "current_personnel_attachment.unit",
    "fieldname": "personnel_attachment_unit",
    "fieldtype": "Data",
-   "label": "Personnel Attachment Unit"
+   "label": "Personnel Attachment Unit",
+   "read_only": 1
   },
   {
    "fetch_from": "current_personnel_attachment.attachment_type",
    "fieldname": "personnel_attachment_type",
    "fieldtype": "Data",
-   "label": "Personnel Attachment Type"
+   "label": "Personnel Attachment Type",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_fjky",
@@ -382,7 +386,8 @@
    "fetch_from": "current_personnel_attachment.remarks",
    "fieldname": "personnel_attachment_remarks",
    "fieldtype": "Data",
-   "label": "Personnel Attachment Remarks"
+   "label": "Personnel Attachment Remarks",
+   "read_only": 1
   },
   {
    "fieldname": "personnel_attsdets_tab",
@@ -393,6 +398,13 @@
    "fieldname": "personnel_attsdets",
    "fieldtype": "HTML",
    "label": "Personnel Atts/Dets"
+  },
+  {
+   "fetch_from": "current_personnel_attachment.attsdets_type",
+   "fieldname": "atts__dets_type",
+   "fieldtype": "Data",
+   "label": "Atts / Dets Type",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -400,7 +412,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-19 19:06:41.081105",
+ "modified": "2026-01-19 20:17:46.307815",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",

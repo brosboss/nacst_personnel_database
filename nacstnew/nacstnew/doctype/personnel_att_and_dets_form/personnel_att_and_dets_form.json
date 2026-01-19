@@ -18,7 +18,8 @@
   "date",
   "column_break_qvrz",
   "type",
-  "remarks"
+  "remarks",
+  "amended_from"
  ],
  "fields": [
   {
@@ -79,7 +80,7 @@
    "fieldname": "attsdets_type",
    "fieldtype": "Select",
    "label": "Atts/Dets Type",
-   "options": "Attachment\nDetachment"
+   "options": "Attachment\nDetachment\nRTU"
   },
   {
    "fieldname": "section_break_untd",
@@ -99,13 +100,24 @@
    "label": "Type",
    "options": "Attachment Type",
    "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Personnel Att and Dets Form",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2026-01-19 19:06:10.207537",
+ "modified": "2026-01-19 19:32:33.377472",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel Att and Dets Form",

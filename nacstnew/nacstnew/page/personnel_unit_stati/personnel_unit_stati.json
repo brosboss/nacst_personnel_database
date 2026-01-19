@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-01-19 20:19:31.548093",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-01-19 20:19:31.548093",
+ "modified_by": "Administrator",
+ "module": "Nacstnew",
+ "name": "personnel-unit-stati",
+ "owner": "Administrator",
+ "page_name": "personnel-unit-stati",
+ "roles": [
+  {
+   "role": "Administrator"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": "Personnel Unit Statistics"
+}
