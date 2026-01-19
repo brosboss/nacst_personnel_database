@@ -7,6 +7,7 @@
  "field_order": [
   "personal_information_tab",
   "operator",
+  "data_import_reference",
   "section_break_kxlt",
   "image",
   "personnel_image",
@@ -51,6 +52,7 @@
    "fieldname": "service_number",
    "fieldtype": "Data",
    "label": "Service Number",
+   "reqd": 1,
    "unique": 1
   },
   {
@@ -58,7 +60,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Category",
-   "options": "Personnel Category"
+   "options": "Personnel Category",
+   "reqd": 1
   },
   {
    "fieldname": "personal_information_tab",
@@ -91,7 +94,8 @@
    "fieldname": "personnel_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Personnel Name"
+   "label": "Personnel Name",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_ayhz",
@@ -269,6 +273,11 @@
   {
    "fieldname": "section_break_kxlt",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "data_import_reference",
+   "fieldtype": "Data",
+   "label": "Data Import Reference"
   }
  ],
  "grid_page_length": 50,
@@ -276,7 +285,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-10 17:51:28.001773",
+ "modified": "2026-01-12 11:38:38.219117",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",

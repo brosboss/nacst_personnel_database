@@ -1515,3 +1515,649 @@ def export_personnel_list_to_excel(current_unit=None, rank=None, date_tos=None, 
 	
 	# Use provide_binary_file to download directly
 	provide_binary_file(file_name, "xlsx", file_content)
+
+@frappe.whitelist()
+def download_personnel_import_template(file_format='xlsx'):
+	"""Download a template file for personnel import"""
+	from frappe.desk.utils import provide_binary_file
+	import csv
+	import io
+	
+	# Get mandatory fields dynamically from the doctype
+	doctype_meta = frappe.get_meta("Personnel")
+	mandatory_fields = [field.fieldname for field in doctype_meta.fields if field.reqd]
+	
+	# Ensure data_import_reference is not in mandatory fields (it's optional)
+	if 'data_import_reference' in mandatory_fields:
+		mandatory_fields.remove('data_import_reference')
+	
+	# Add data_import_reference as optional field
+	template_fields = mandatory_fields + ['data_import_reference']
+	
+	# Get field labels for better readability
+	field_labels = []
+	for fieldname in template_fields:
+		field = doctype_meta.get_field(fieldname)
+		if field:
+			field_labels.append(field.label or fieldname)
+		else:
+			field_labels.append(fieldname)
+	
+	if file_format.lower() == 'csv':
+		# Generate CSV template
+		output = io.StringIO()
+		writer = csv.writer(output)
+		
+		# Write headers
+		writer.writerow(template_fields)
+		
+		# Write example row (empty values) - users can fill this in
+		writer.writerow([''] * len(template_fields))
+		
+		csv_content = output.getvalue()
+		file_content = csv_content.encode('utf-8')
+		file_name = "Personnel_Import_Template.csv"
+		
+		provide_binary_file(file_name, "csv", file_content)
+	else:
+		# Generate Excel template
+		try:
+			from openpyxl import Workbook
+			from openpyxl.styles import Font, PatternFill, Alignment
+		except ImportError:
+			frappe.throw("openpyxl is required for Excel template generation. Please install it: pip install openpyxl")
+		
+		wb = Workbook()
+		ws = wb.active
+		ws.title = "Personnel Import Template"
+		
+		# Header row with field names
+		header_row = template_fields
+		ws.append(header_row)
+		
+		# Style the header row
+		header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+		header_font = Font(bold=True, color="FFFFFF")
+		
+		for cell in ws[1]:
+			cell.fill = header_fill
+			cell.font = header_font
+			cell.alignment = Alignment(horizontal="center", vertical="center")
+		
+		# Add field labels row (row 2)
+		label_row = field_labels
+		ws.append(label_row)
+		
+		# Style the label row
+		label_font = Font(italic=True, color="666666")
+		for cell in ws[2]:
+			cell.font = label_font
+			cell.alignment = Alignment(horizontal="left", vertical="center")
+		
+		# Add example row with empty values (row 3)
+		example_row = [''] * len(template_fields)
+		ws.append(example_row)
+		
+		# Add instructions row (row 4)
+		from openpyxl.utils import get_column_letter
+		instruction_text = "Instructions: 1) Fill in the mandatory fields (service_number, category, personnel_name). 2) data_import_reference is optional - used for rollback. 3) Delete this instruction row before importing. 4) Save the file and upload it using the import page."
+		ws.append([instruction_text] + [''] * (len(template_fields) - 1))
+		
+		# Merge cells for instructions (merge all columns)
+		last_col = get_column_letter(len(template_fields))
+		ws.merge_cells(f'A4:{last_col}4')
+		instruction_cell = ws['A4']
+		instruction_cell.font = Font(italic=True, color="0066CC")
+		instruction_cell.alignment = Alignment(wrap_text=True, horizontal="left", vertical="center")
+		
+		# Auto-adjust column widths
+		for column in ws.columns:
+			max_length = 0
+			column_letter = column[0].column_letter
+			for cell in column:
+				try:
+					if len(str(cell.value)) > max_length:
+						max_length = len(str(cell.value))
+				except:
+					pass
+			adjusted_width = min(max_length + 2, 50)
+			ws.column_dimensions[column_letter].width = adjusted_width
+		
+		# Save to BytesIO
+		from io import BytesIO
+		output = BytesIO()
+		wb.save(output)
+		file_content = output.getvalue()
+		file_name = "Personnel_Import_Template.xlsx"
+		
+		provide_binary_file(file_name, "xlsx", file_content)
+
+@frappe.whitelist()
+def validate_preview_data(rows_data):
+	"""Validate preview data and check for existing records"""
+	# Get mandatory fields dynamically from the doctype
+	doctype_meta = frappe.get_meta("Personnel")
+	mandatory_fields = [field.fieldname for field in doctype_meta.fields if field.reqd]
+	
+	# Ensure data_import_reference is not in mandatory fields (it's optional)
+	if 'data_import_reference' in mandatory_fields:
+		mandatory_fields.remove('data_import_reference')
+	
+	# Normalize header names (remove spaces, underscores, convert to lowercase)
+	def normalize_header_name(header):
+		return str(header).strip().lower().replace(' ', '').replace('_', '').replace('-', '')
+	
+	# Get field definitions for link validation
+	field_definitions = {}
+	field_labels_map = {}  # Map label -> fieldname
+	for field in doctype_meta.fields:
+		field_label = field.label if hasattr(field, 'label') and field.label else field.fieldname
+		field_definitions[field.fieldname] = {
+			'fieldtype': field.fieldtype,
+			'options': field.options if hasattr(field, 'options') else None,
+			'reqd': field.reqd,
+			'label': field_label
+		}
+		# Map label to fieldname (case-insensitive)
+		if hasattr(field, 'label') and field.label:
+			label_normalized = normalize_header_name(field.label)
+			field_labels_map[label_normalized] = field.fieldname
+	
+	validation_results = []
+	
+	if not rows_data or len(rows_data) < 2:
+		return {'validations': []}
+	
+	headers = rows_data[0]
+	data_rows = rows_data[1:]
+	
+	# Find the last row with actual content (stop processing empty rows)
+	last_row_with_content = -1
+	for i in range(len(data_rows) - 1, -1, -1):
+		row = data_rows[i]
+		if row and any(str(cell).strip() if cell is not None else '' for cell in row):
+			last_row_with_content = i
+			break
+	
+	# Only process rows up to the last row with content
+	if last_row_with_content >= 0:
+		data_rows = data_rows[:last_row_with_content + 1]
+	else:
+		data_rows = []
+	
+	# Create mapping from header names to field names (case-insensitive, handle variations)
+	# Map header -> (field_name, column_index)
+	header_to_field_map = {}
+	
+	# Create a list of all possible field name variations
+	all_fields = list(field_definitions.keys()) + mandatory_fields
+	field_variations = {}
+	for field in all_fields:
+		# Get field label if available
+		field_label = field_definitions[field].get('label', field)
+		
+		# Create variations: fieldname, field_name, Field Name, label, etc.
+		variations = [
+			field.lower(),
+			field.lower().replace('_', ''),
+			field.lower().replace('_', ' '),
+			field_label.lower(),
+			field_label.lower().replace(' ', ''),
+			field_label.lower().replace(' ', '_'),
+			field
+		]
+		for variation in variations:
+			normalized = normalize_header_name(variation)
+			if normalized not in field_variations:
+				field_variations[normalized] = field
+	
+	# Map each header to its corresponding field
+	for idx, header in enumerate(headers):
+		header_str = str(header).strip() if header else ''
+		if not header_str:
+			continue
+		
+		# Try to find matching field - try direct match first (most common case)
+		matched_field = None
+		header_lower = header_str.lower().strip()
+		
+		# First try exact match (case-insensitive) with field names - this handles most cases
+		for field in all_fields:
+			if field.lower() == header_lower:
+				matched_field = field
+				break
+		
+		# If no exact match, try with field labels
+		if not matched_field:
+			for field in all_fields:
+				field_label = field_definitions[field].get('label', field)
+				if field_label and field_label.lower().strip() == header_lower:
+					matched_field = field
+					break
+		
+		# If still no match, try normalized match
+		if not matched_field:
+			normalized_header = normalize_header_name(header_str)
+			if normalized_header in field_variations:
+				matched_field = field_variations[normalized_header]
+			elif normalized_header in field_labels_map:
+				matched_field = field_labels_map[normalized_header]
+		
+		if matched_field:
+			header_to_field_map[matched_field] = idx
+	
+	# Debug: Check if all mandatory fields are mapped
+	missing_mappings = [f for f in mandatory_fields if f not in header_to_field_map]
+	if missing_mappings:
+		# Log warning if mandatory fields are not found in headers
+		frappe.log_error(f"Missing header mappings for mandatory fields: {missing_mappings}. Headers: {headers}. Mapping: {header_to_field_map}", "Preview Validation Warning")
+	
+	for row_idx, row in enumerate(data_rows):
+		# Skip empty rows
+		if not row or not any(str(cell).strip() if cell is not None else '' for cell in row):
+			continue
+		
+		row_result = {
+			'row_index': row_idx + 2,  # +2 because row 1 is header, and we start from 2
+			'exists': False,
+			'errors': [],
+			'warnings': [],
+			'debug_data': {}  # For debugging - will be removed or can be filtered out
+		}
+		
+		# Extract data by field name (not header name)
+		row_data_by_field = {}
+		for field_name, col_idx in header_to_field_map.items():
+			if col_idx < len(row):
+				value = row[col_idx]
+				# Handle different value types - be more lenient with what counts as "empty"
+				if value is None:
+					row_data_by_field[field_name] = ''
+				elif isinstance(value, (int, float)):
+					# Convert numbers to string (preserve the value)
+					if isinstance(value, float) and value.is_integer():
+						row_data_by_field[field_name] = str(int(value))
+					else:
+						row_data_by_field[field_name] = str(value)
+				elif isinstance(value, bool):
+					row_data_by_field[field_name] = str(value)
+				else:
+					# String value - preserve the value, only strip whitespace
+					value_str = str(value) if value is not None else ''
+					# Don't treat 'None' string as empty - it's actual data
+					if value_str.lower() == 'none':
+						row_data_by_field[field_name] = ''
+					else:
+						row_data_by_field[field_name] = value_str.strip()
+			else:
+				row_data_by_field[field_name] = ''
+		
+		# Initialize all mandatory fields (set to empty if not found in header mapping)
+		for field in mandatory_fields:
+			if field not in row_data_by_field:
+				row_data_by_field[field] = ''
+		
+		# Check for service_number
+		service_number = row_data_by_field.get('service_number', '')
+		
+		# Check if record exists
+		if service_number:
+			if frappe.db.exists("Personnel", service_number):
+				row_result['exists'] = True
+		
+		# Store debug data (extracted values for troubleshooting)
+		row_result['debug_data'] = {
+			'header_mapping': header_to_field_map,
+			'row_length': len(row) if row else 0,
+			'extracted_values': {k: v for k, v in row_data_by_field.items() if k in mandatory_fields},
+			'raw_row_sample': [str(cell)[:50] if cell is not None else 'None' for cell in (row[:10] if row else [])]  # First 10 cells for debugging
+		}
+		
+		# Validate mandatory fields
+		for field in mandatory_fields:
+			value = row_data_by_field.get(field, '')
+			
+			if not value:
+				row_result['errors'].append(f"Missing mandatory field: {field}")
+		
+		# Validate link fields
+		for field_name, field_info in field_definitions.items():
+			if field_info['fieldtype'] == 'Link' and field_name in row_data_by_field:
+				value = row_data_by_field[field_name]
+				if value:  # Only validate if value is provided
+					options = field_info.get('options')
+					if options:
+						# Check if the link value exists
+						if not frappe.db.exists(options, value):
+							row_result['errors'].append(f"Invalid {field_name}: '{value}' not found in {options}")
+		
+		validation_results.append(row_result)
+	
+	# Return validation results with debug info (header mapping for troubleshooting)
+	return {
+		'validations': validation_results,
+		'header_mapping': header_to_field_map,  # Debug info
+		'mandatory_fields': mandatory_fields  # Debug info
+	}
+
+@frappe.whitelist()
+def preview_excel_file(file_content):
+	"""Preview Excel file data for frontend display"""
+	import base64
+	import io
+	try:
+		from openpyxl import load_workbook
+	except ImportError:
+		return {'error': 'openpyxl is required for Excel file preview'}
+	
+	try:
+		# Decode base64 content
+		file_bytes = base64.b64decode(file_content)
+		
+		# Load workbook
+		wb = load_workbook(filename=io.BytesIO(file_bytes), read_only=True, data_only=True)
+		ws = wb.active
+		
+		# Get headers from first row
+		headers = []
+		for cell in ws[1]:
+			if cell.value:
+				headers.append(str(cell.value).strip())
+			else:
+				headers.append('')
+		
+		# Get data rows - find the last row with content first
+		# First, scan to find the last row with content
+		last_row_with_content = 1  # Start from row 1 (header)
+		max_row_to_check = min(ws.max_row, 1000)  # Limit check to 1000 rows max
+		
+		for row_num in range(2, max_row_to_check + 1):
+			row = ws[row_num]
+			has_content = False
+			for cell in row:
+				if cell.value is not None and str(cell.value).strip():
+					has_content = True
+					break
+			if has_content:
+				last_row_with_content = row_num
+			elif row_num > last_row_with_content + 10:  # Stop if we've gone 10 rows without content
+				break
+		
+		# Get data rows up to the last row with content (limit to 10 for preview)
+		rows = [headers]
+		max_preview_row = min(last_row_with_content, 11)  # Header + 10 data rows
+		
+		for row in ws.iter_rows(min_row=2, max_row=max_preview_row, values_only=False):
+			row_data = []
+			for idx, cell in enumerate(row):
+				if idx < len(headers):
+					value = cell.value
+					if value is not None:
+						# Preserve the actual value
+						row_data.append(str(value).strip())
+					else:
+						row_data.append('')
+			# Only add row if it has at least one non-empty value
+			if any(v for v in row_data):
+				rows.append(row_data)
+		
+		return {'rows': rows}
+	except Exception as e:
+		return {'error': str(e)}
+
+@frappe.whitelist()
+def import_personnel_data(file_name, file_content, file_extension, import_reference=None):
+	"""Import personnel data from CSV or Excel file"""
+	import csv
+	import io
+	import base64
+	from frappe.utils import now_datetime, getdate
+	try:
+		from openpyxl import load_workbook
+	except ImportError:
+		frappe.throw("openpyxl is required for Excel file import. Please install it: pip install openpyxl")
+	
+	# Generate import reference if not provided
+	if not import_reference:
+		import_reference = f"IMPORT_{now_datetime().strftime('%Y%m%d_%H%M%S')}"
+	
+	# Get mandatory fields dynamically from the doctype
+	doctype_meta = frappe.get_meta("Personnel")
+	mandatory_fields = [field.fieldname for field in doctype_meta.fields if field.reqd]
+	
+	# Ensure data_import_reference is not in mandatory fields (it's optional)
+	if 'data_import_reference' in mandatory_fields:
+		mandatory_fields.remove('data_import_reference')
+	
+	results = {
+		'success': False,
+		'total_rows': 0,
+		'created': 0,
+		'updated': 0,
+		'failed': 0,
+		'errors': [],
+		'import_reference': import_reference
+	}
+	
+	try:
+		# Parse file based on extension
+		rows = []
+		
+		if file_extension == 'csv':
+			# Parse CSV - file_content is base64 encoded
+			try:
+				decoded_content = base64.b64decode(file_content).decode('utf-8')
+			except UnicodeDecodeError:
+				# Try with different encoding
+				try:
+					decoded_content = base64.b64decode(file_content).decode('latin-1')
+				except:
+					decoded_content = base64.b64decode(file_content).decode('utf-8', errors='ignore')
+			except:
+				# Try without base64 decoding (in case it's already text)
+				decoded_content = file_content
+			
+			try:
+				csv_reader = csv.DictReader(io.StringIO(decoded_content))
+				rows = list(csv_reader)
+			except Exception as e:
+				results['errors'].append(f"Error parsing CSV file: {str(e)}")
+				return results
+		elif file_extension in ['xlsx', 'xls']:
+			# Parse Excel - file_content is base64 encoded
+			try:
+				file_bytes = base64.b64decode(file_content)
+			except:
+				# If decoding fails, try using as-is
+				if isinstance(file_content, bytes):
+					file_bytes = file_content
+				else:
+					file_bytes = file_content.encode('utf-8')
+			
+			# Load workbook
+			try:
+				wb = load_workbook(filename=io.BytesIO(file_bytes), read_only=True, data_only=True)
+				ws = wb.active
+			except Exception as e:
+				results['errors'].append(f"Error reading Excel file: {str(e)}")
+				return results
+			
+			# Get headers from first row
+			headers = []
+			for cell in ws[1]:
+				if cell.value:
+					headers.append(str(cell.value).strip())
+			
+			if not headers:
+				results['errors'].append("No headers found in Excel file")
+				return results
+			
+			# Read data rows
+			for row in ws.iter_rows(min_row=2, values_only=False):
+				row_data = {}
+				for idx, cell in enumerate(row):
+					if idx < len(headers) and headers[idx]:
+						value = cell.value
+						# Convert to string if not None
+						if value is not None:
+							row_data[headers[idx]] = str(value).strip()
+						else:
+							row_data[headers[idx]] = None
+				# Only add row if it has at least one non-empty value
+				if any(v for v in row_data.values() if v):
+					rows.append(row_data)
+		else:
+			results['errors'].append(f"Unsupported file format: {file_extension}")
+			return results
+		
+		results['total_rows'] = len(rows)
+		
+		if not rows:
+			results['errors'].append("No data rows found in file")
+			return results
+		
+		# Validate headers
+		first_row = rows[0]
+		file_headers = [str(k).strip().lower() for k in first_row.keys()]
+		
+		missing_fields = []
+		for field in mandatory_fields:
+			if field.lower() not in file_headers:
+				missing_fields.append(field)
+		
+		if missing_fields:
+			results['errors'].append(f"Missing mandatory columns: {', '.join(missing_fields)}")
+			return results
+		
+		# Process each row
+		for row_idx, row_data in enumerate(rows, start=2):  # Start at 2 (row 1 is header)
+			try:
+				# Normalize field names (case-insensitive)
+				normalized_data = {}
+				for key, value in row_data.items():
+					normalized_key = str(key).strip().lower()
+					normalized_data[normalized_key] = value
+				
+				# Extract mandatory fields
+				personnel_data = {}
+				for field in mandatory_fields:
+					field_lower = field.lower()
+					if field_lower in normalized_data:
+						value = normalized_data[field_lower]
+						# Convert to string and strip whitespace
+						if value is not None:
+							personnel_data[field] = str(value).strip()
+						else:
+							personnel_data[field] = None
+					else:
+						personnel_data[field] = None
+				
+				# Validate mandatory fields are not empty
+				missing_values = []
+				for field in mandatory_fields:
+					if not personnel_data.get(field):
+						missing_values.append(field)
+				
+				if missing_values:
+					results['errors'].append(f"Row {row_idx}: Missing values for: {', '.join(missing_values)}")
+					results['failed'] += 1
+					continue
+				
+				# Set import reference - always use the page field value, ignore CSV column
+				personnel_data['data_import_reference'] = import_reference
+				
+				# Check if record exists
+				service_number = personnel_data['service_number']
+				exists = frappe.db.exists("Personnel", service_number)
+				
+				if exists:
+					# Update existing record
+					doc = frappe.get_doc("Personnel", service_number)
+					
+					# Update only mandatory fields
+					for field in mandatory_fields:
+						if field in personnel_data:
+							doc.set(field, personnel_data[field])
+					
+					# Update import reference
+					doc.set('data_import_reference', personnel_data['data_import_reference'])
+					
+					doc.save(ignore_permissions=True)
+					results['updated'] += 1
+				else:
+					# Create new record
+					doc = frappe.get_doc({
+						'doctype': 'Personnel',
+						**personnel_data
+					})
+					doc.insert(ignore_permissions=True)
+					results['created'] += 1
+				
+				frappe.db.commit()
+				
+			except frappe.UniqueValidationError as e:
+				results['errors'].append(f"Row {row_idx}: Duplicate service number - {str(e)}")
+				results['failed'] += 1
+				frappe.db.rollback()
+			except frappe.LinkValidationError as e:
+				results['errors'].append(f"Row {row_idx}: Invalid link value - {str(e)}")
+				results['failed'] += 1
+				frappe.db.rollback()
+			except Exception as e:
+				results['errors'].append(f"Row {row_idx}: {str(e)}")
+				results['failed'] += 1
+				frappe.db.rollback()
+		
+		results['success'] = True
+		
+	except Exception as e:
+		results['errors'].append(f"Import error: {str(e)}")
+		frappe.log_error(f"Personnel import error: {str(e)}", "Personnel Import")
+	
+	return results
+
+@frappe.whitelist()
+def rollback_personnel_import(import_reference):
+	"""Rollback all personnel records imported with a specific import reference"""
+	if not import_reference:
+		return {
+			'success': False,
+			'error': 'Import reference is required'
+		}
+	
+	results = {
+		'success': False,
+		'deleted': 0,
+		'import_reference': import_reference,
+		'error': None
+	}
+	
+	try:
+		# Find all personnel records with this import reference
+		personnel_list = frappe.db.get_all(
+			"Personnel",
+			filters={'data_import_reference': import_reference},
+			fields=['name', 'service_number']
+		)
+		
+		if not personnel_list:
+			results['error'] = f"No records found with import reference: {import_reference}"
+			return results
+		
+		# Delete each record
+		for personnel in personnel_list:
+			try:
+				frappe.delete_doc("Personnel", personnel.name, force=1, ignore_permissions=True)
+				results['deleted'] += 1
+			except Exception as e:
+				frappe.log_error(f"Error deleting personnel {personnel.service_number}: {str(e)}", "Personnel Rollback")
+		
+		frappe.db.commit()
+		results['success'] = True
+		
+	except Exception as e:
+		results['error'] = str(e)
+		frappe.log_error(f"Personnel rollback error: {str(e)}", "Personnel Rollback")
+		frappe.db.rollback()
+	
+	return results
