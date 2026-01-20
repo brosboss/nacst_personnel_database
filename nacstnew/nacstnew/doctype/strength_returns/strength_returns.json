@@ -104,7 +104,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-01-20 08:01:12.051329",
+ "modified": "2026-01-20 17:34:54.335983",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Strength Returns",
@@ -196,6 +196,13 @@
    "role": "Strength Returns Canceller",
    "share": 1,
    "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "import": 1,
+   "read": 1,
+   "role": "Can Import Data",
    "write": 1
   }
  ],

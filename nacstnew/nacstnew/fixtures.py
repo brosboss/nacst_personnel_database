@@ -1194,6 +1194,7 @@ def insert_app_role_list():
 		{"app_role": "Course Attended Reader", "owner_doctype": "Course Attended"},
 		{"app_role": "Course Attended Submitter", "owner_doctype": "Course Attended"},
 		{"app_role": "Data Viewer", "owner_doctype": None},
+		{"app_role": "Can Import Data", "owner_doctype": None},
 		{"app_role": "Database Operator Manager", "owner_doctype": "Create Operator"},
 		{"app_role": "Mission Amender", "owner_doctype": "Mission"},
 		{"app_role": "Mission Canceller", "owner_doctype": "Mission"},
