@@ -242,9 +242,8 @@ function build_units_view2_page(page) {
 				color: white;
 				cursor: pointer;
 				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				gap: 15px;
+				flex-direction: column;
+				gap: 8px;
 				user-select: none;
 				transition: background 0.2s ease;
 			}
@@ -253,18 +252,27 @@ function build_units_view2_page(page) {
 				background: linear-gradient(135deg, #5568d3 0%, #653d8f 100%);
 			}
 			
+			.uv2-unit-header-top {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 15px;
+				flex-wrap: wrap;
+			}
+			
 			.uv2-unit-header-left {
 				display: flex;
 				align-items: center;
-				flex: 1;
+				flex: 1 1 auto;
 				min-width: 0;
-				gap: 0;
+				gap: 15px;
+				flex-wrap: wrap;
+				row-gap: 8px;
 			}
 			
 			.uv2-unit-name-container {
-				min-width: 200px;
-				max-width: 200px;
-				flex-shrink: 0;
+				flex: 0 0 auto;
+				min-width: 150px;
 			}
 			
 			.uv2-unit-header-title {
@@ -277,10 +285,8 @@ function build_units_view2_page(page) {
 			}
 			
 			.uv2-unit-location-container {
-				min-width: 180px;
-				max-width: 180px;
-				flex-shrink: 0;
-				padding-left: 20px;
+				flex: 0 0 auto;
+				min-width: 120px;
 			}
 			
 			.uv2-unit-location {
@@ -294,13 +300,12 @@ function build_units_view2_page(page) {
 			
 			.uv2-unit-location i {
 				font-size: 10px;
+				flex-shrink: 0;
 			}
 			
 			.uv2-unit-personnel-container {
-				min-width: 120px;
-				max-width: 120px;
-				flex-shrink: 0;
-				padding-left: 20px;
+				flex: 0 0 auto;
+				min-width: 100px;
 			}
 			
 			.uv2-unit-personnel-count {
@@ -312,8 +317,10 @@ function build_units_view2_page(page) {
 			.uv2-unit-commander {
 				display: flex;
 				align-items: center;
-				margin-right: 15px;
-				flex-shrink: 0;
+				width: 100%;
+				margin-top: 5px;
+				padding-top: 8px;
+				border-top: 1px solid rgba(255, 255, 255, 0.2);
 			}
 			
 			.uv2-commander-info-line {
@@ -322,32 +329,41 @@ function build_units_view2_page(page) {
 				gap: 6px;
 				font-size: 12px;
 				color: rgba(255, 255, 255, 0.95);
-				white-space: nowrap;
+				flex-wrap: wrap;
+				row-gap: 4px;
 			}
 			
 			.uv2-commander-info-line i {
 				font-size: 11px;
 				opacity: 0.9;
+				flex-shrink: 0;
 			}
 			
 			.uv2-commander-name {
 				font-weight: 600;
+				word-wrap: break-word;
+				overflow-wrap: break-word;
 			}
 			
 			.uv2-commander-appointment {
 				font-weight: 400;
 				opacity: 0.9;
 				font-size: 11px;
+				word-wrap: break-word;
+				overflow-wrap: break-word;
 			}
 			
 			.uv2-commander-separator {
 				opacity: 0.7;
 				margin: 0 4px;
+				flex-shrink: 0;
 			}
 			
 			.uv2-commander-phone {
 				font-size: 11px;
 				color: rgba(255, 255, 255, 0.9);
+				word-wrap: break-word;
+				overflow-wrap: break-word;
 			}
 			
 			.uv2-commander-phone-link {
@@ -372,10 +388,65 @@ function build_units_view2_page(page) {
 				font-size: 12px;
 				opacity: 0.9;
 				transition: transform 0.2s ease;
+				flex-shrink: 0;
+				align-self: flex-start;
+				margin-top: 2px;
 			}
 			
 			.uv2-unit-accordion.expanded .uv2-unit-toggle {
 				transform: rotate(180deg);
+			}
+			
+			/* Responsive adjustments for smaller screens */
+			@media (max-width: 1200px) {
+				.uv2-unit-header {
+					gap: 8px;
+				}
+				
+				.uv2-unit-header-left {
+					gap: 12px;
+				}
+				
+				.uv2-unit-name-container {
+					min-width: 120px;
+				}
+				
+				.uv2-unit-location-container {
+					min-width: 100px;
+				}
+				
+				.uv2-unit-personnel-container {
+					min-width: 80px;
+				}
+			}
+			
+			@media (max-width: 768px) {
+				.uv2-unit-header-left {
+					width: 100%;
+					gap: 10px;
+				}
+				
+				.uv2-unit-name-container {
+					min-width: 100%;
+					flex: 1 1 100%;
+				}
+				
+				.uv2-unit-location-container,
+				.uv2-unit-personnel-container {
+					min-width: auto;
+					flex: 0 0 auto;
+				}
+				
+				.uv2-unit-toggle {
+					position: absolute;
+					top: 10px;
+					right: 12px;
+				}
+				
+				.uv2-unit-header {
+					position: relative;
+					padding-right: 35px;
+				}
 			}
 			
 			.uv2-unit-body {
@@ -1112,6 +1183,8 @@ function display_units(units) {
 		
 		// Unit header (clickable)
 		html += '<div class="uv2-unit-header" onclick="toggleUnit(\'' + unitId + '\')">';
+		// Top row: Unit info and toggle
+		html += '<div class="uv2-unit-header-top">';
 		html += '<div class="uv2-unit-header-left">';
 		html += '<div class="uv2-unit-name-container">';
 		html += '<h3 class="uv2-unit-header-title">' + frappe.utils.escape_html(unit.unit_name) + '</h3>';
@@ -1127,8 +1200,10 @@ function display_units(units) {
 		html += '<span class="uv2-unit-personnel-count">' + unit.personnel_count + ' Personnel</span>';
 		html += '</div>';
 		html += '</div>';
+		html += '<div class="uv2-unit-toggle"><i class="fa fa-chevron-down"></i></div>';
+		html += '</div>';
 		
-		// Commander info on the right (one line)
+		// Commander info on separate line below unit info
 		if (unit.commander && unit.commander.name) {
 			html += '<div class="uv2-unit-commander" onclick="event.stopPropagation();">';
 			html += '<div class="uv2-commander-info-line">';
@@ -1152,8 +1227,6 @@ function display_units(units) {
 			html += '</div>';
 			html += '</div>';
 		}
-		
-		html += '<div class="uv2-unit-toggle"><i class="fa fa-chevron-down"></i></div>';
 		html += '</div>';
 		
 		// Unit body (collapsible)
