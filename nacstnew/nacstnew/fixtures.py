@@ -1230,6 +1230,13 @@ def insert_app_role_list():
 		{"app_role": "Reference Data Deleter", "owner_doctype": "Reference Data"},
 		{"app_role": "Reference Data Editor", "owner_doctype": "Reference Data"},
 		{"app_role": "Reference Data Reader", "owner_doctype": "Reference Data"},
+		{"app_role": "Strength Returns Amender", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Canceller", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Creator", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Deleter", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Editor", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Reader", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Submitter", "owner_doctype": "Strength Returns"},
 	]
 	
 	inserted_count = 0
