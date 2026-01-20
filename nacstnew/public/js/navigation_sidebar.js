@@ -23,6 +23,17 @@ if (typeof window.NAVIGATION_ITEMS === 'undefined') {
 			icon: 'fa-list'
 		},
 		{
+			route: 'no-strength-returns-',
+			label: 'No Strength Returns',
+			icon: 'fa-user-times'
+		},
+		{
+			route: 'multiple-strength-re',
+			label: 'Multiple Strength Returns',
+			icon: 'fa-clone'
+		},
+		
+		{
 			route: 'units-view2',
 			label: 'Units View 2 (Compact)',
 			icon: 'fa-building-o'
@@ -33,14 +44,27 @@ if (typeof window.NAVIGATION_ITEMS === 'undefined') {
 			icon: 'fa-history'
 		},
 		{
+			route: 'postings-with-pengin',
+			label: 'Pending Part 2 Orders',
+			icon: 'fa-exclamation-circle'
+		},
+		{
+			route: 'personnel-unit-stati',
+			label: 'Unit Analysis',
+			// Use Font Awesome 4 icon (Frappe v15 ships FA4, not FA5)
+			icon: 'fa-exchange'
+		},
+		{
 			route: '#',
 			label: 'Reports',
-			icon: 'fa-chart-line'
+			// Use FA4 chart icon
+			icon: 'fa-bar-chart'
 		},
 		{
 			route: '#',
 			label: 'Documents',
-			icon: 'fa-file-alt'
+			// Use FA4 document icon
+			icon: 'fa-file-text-o'
 		},
 		{
 			route: '#',
@@ -198,7 +222,8 @@ function hideDefaultSidebarCSS(pageName) {
 	style.textContent = `
 		body[data-page-name="${pageName}"] .form-sidebar,
 		body[data-page-name="${pageName}"] .list-sidebar,
-		body[data-page-name="${pageName}"] .desk-sidebar {
+		body[data-page-name="${pageName}"] .desk-sidebar,
+		body[data-page-name="${pageName}"] .page-sidebar {
 			display: none !important;
 		}
 		

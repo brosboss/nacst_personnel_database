@@ -7,6 +7,7 @@
  "field_order": [
   "personal_information_tab",
   "operator",
+  "data_import_reference",
   "section_break_kxlt",
   "image",
   "personnel_image",
@@ -35,6 +36,21 @@
   "phone_number",
   "phone_number_2",
   "remarks",
+  "personnel_unit_reference_section",
+  "personnel_unit_from_returns",
+  "column_break_iwqg",
+  "strength_returns",
+  "column_break_xjix",
+  "dtos",
+  "personnel_attachement_section",
+  "current_personnel_attachment",
+  "type",
+  "column_break_fjky",
+  "personnel_attachment_unit",
+  "personnel_attachment_remarks",
+  "atts__dets_type",
+  "section_break_zpop",
+  "personnel_unit_verified",
   "posting_history_tab",
   "personnel_posting_history_html",
   "promotion_history_tab",
@@ -44,13 +60,18 @@
   "brief_tab",
   "personnel_brief",
   "mission_tab",
-  "personnel_mission"
+  "personnel_mission",
+  "strength_returns_tab",
+  "personnel_strength_returns",
+  "personnel_attsdets_tab",
+  "personnel_attsdets"
  ],
  "fields": [
   {
    "fieldname": "service_number",
    "fieldtype": "Data",
    "label": "Service Number",
+   "reqd": 1,
    "unique": 1
   },
   {
@@ -58,7 +79,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Category",
-   "options": "Personnel Category"
+   "options": "Personnel Category",
+   "reqd": 1
   },
   {
    "fieldname": "personal_information_tab",
@@ -91,7 +113,8 @@
    "fieldname": "personnel_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Personnel Name"
+   "label": "Personnel Name",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_ayhz",
@@ -104,6 +127,7 @@
    "read_only": 1
   },
   {
+   "description": "** From Part 2 Order **",
    "fieldname": "current_unit",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -120,6 +144,7 @@
    "read_only": 1
   },
   {
+   "description": "** From Strength Returns**",
    "fieldname": "current_deployment",
    "fieldtype": "Data",
    "label": "Current Deployment",
@@ -185,6 +210,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "**From Posting Record**",
    "fieldname": "current_rank",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -269,6 +295,117 @@
   {
    "fieldname": "section_break_kxlt",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "data_import_reference",
+   "fieldtype": "Data",
+   "label": "Data Import Reference"
+  },
+  {
+   "fieldname": "strength_returns_tab",
+   "fieldtype": "Tab Break",
+   "label": "Strength Returns "
+  },
+  {
+   "fieldname": "personnel_strength_returns",
+   "fieldtype": "HTML",
+   "label": "Personnel Strength Returns "
+  },
+  {
+   "fieldname": "personnel_unit_reference_section",
+   "fieldtype": "Section Break",
+   "label": "Personnel Unit Reference"
+  },
+  {
+   "fieldname": "personnel_unit_from_returns",
+   "fieldtype": "Link",
+   "label": "Personnel Unit from Returns",
+   "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "description": "Derived from Personnel Unit Verification Form",
+   "fieldname": "personnel_unit_verified",
+   "fieldtype": "Link",
+   "label": "Personnel Unit Verified",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "column_break_iwqg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "strength_returns",
+   "fieldtype": "Link",
+   "label": "Strength Returns",
+   "options": "Strength Returns"
+  },
+  {
+   "fieldname": "dtos",
+   "fieldtype": "Date",
+   "label": "DTOS"
+  },
+  {
+   "fieldname": "column_break_xjix",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zpop",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "personnel_attachement_section",
+   "fieldtype": "Section Break",
+   "label": "Personnel Attachment"
+  },
+  {
+   "fieldname": "current_personnel_attachment",
+   "fieldtype": "Link",
+   "label": "Current Personnel Attachment",
+   "options": "Personnel Att and Dets Form",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "current_personnel_attachment.unit",
+   "fieldname": "personnel_attachment_unit",
+   "fieldtype": "Data",
+   "label": "Personnel Attachment Unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_fjky",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "current_personnel_attachment.remarks",
+   "fieldname": "personnel_attachment_remarks",
+   "fieldtype": "Data",
+   "label": "Personnel Attachment Remarks",
+   "read_only": 1
+  },
+  {
+   "fieldname": "personnel_attsdets_tab",
+   "fieldtype": "Tab Break",
+   "label": "Personnel Atts/Dets"
+  },
+  {
+   "fieldname": "personnel_attsdets",
+   "fieldtype": "HTML",
+   "label": "Personnel Atts/Dets"
+  },
+  {
+   "fetch_from": "current_personnel_attachment.attsdets_type",
+   "fieldname": "atts__dets_type",
+   "fieldtype": "Data",
+   "label": "Atts / Dets Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "current_personnel_attachment.type",
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -276,7 +413,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-10 17:51:28.001773",
+ "modified": "2026-01-20 10:19:16.763919",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",

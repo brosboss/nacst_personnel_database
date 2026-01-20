@@ -42,6 +42,7 @@ def install_fixtures():
 		("Grades", insert_grades),
 		("Module Profiles", insert_module_profiles),
 		("App Role List", insert_app_role_list),
+		("Attachment Types", insert_attachment_types),
 	]
 	
 	# Run each fixture function independently
@@ -1230,6 +1231,20 @@ def insert_app_role_list():
 		{"app_role": "Reference Data Deleter", "owner_doctype": "Reference Data"},
 		{"app_role": "Reference Data Editor", "owner_doctype": "Reference Data"},
 		{"app_role": "Reference Data Reader", "owner_doctype": "Reference Data"},
+		{"app_role": "Strength Returns Amender", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Canceller", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Creator", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Deleter", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Editor", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Reader", "owner_doctype": "Strength Returns"},
+		{"app_role": "Strength Returns Submitter", "owner_doctype": "Strength Returns"},
+		{"app_role": "Atts and Dets Creator", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets  Amender", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Canceller", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Editor", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Reader", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Submitter", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Deleter", "owner_doctype": "Personnel Att and Dets Form"},
 	]
 	
 	inserted_count = 0
@@ -1279,6 +1294,44 @@ def insert_app_role_list():
 			error_msg = f"Error inserting '{role_name}': {str(e)}"
 			error_details.append(error_msg)
 			error_count += 1
+	
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count,
+		"error_details": error_details
+	}
+
+
+def insert_attachment_types():
+	"""Insert default attachment types used in personnel attachments"""
+	
+	attachment_types = [
+		"Mission",
+		"Principal",
+	]
+	
+	inserted_count = 0
+	skipped_count = 0
+	error_count = 0
+	error_details = []
+	
+	for att_type in attachment_types:
+		# Check if attachment type already exists
+		if frappe.db.exists("Attachment Type", att_type):
+			skipped_count += 1
+			continue
+		
+		try:
+			att_doc = frappe.get_doc({
+				"doctype": "Attachment Type",
+				"attachment_type": att_type
+			})
+			att_doc.insert(ignore_permissions=True)
+			inserted_count += 1
+		except Exception as e:
+			error_count += 1
+			error_details.append(f"{att_type}: {str(e)}")
 	
 	return {
 		"inserted": inserted_count,

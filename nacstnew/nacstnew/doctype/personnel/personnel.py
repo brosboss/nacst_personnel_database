@@ -415,6 +415,209 @@ def get_promotion_history_html(service_number):
 	return html
 
 @frappe.whitelist()
+def get_personnel_strength_returns_html(service_number):
+	"""Generate HTML table for strength returns from Strength Returns Details child table"""
+	if not service_number:
+		return "<p>No service number provided.</p>"
+	
+	# Query all Strength Returns Details records for this service number from submitted Strength Returns documents
+	strength_returns_records = frappe.db.sql("""
+		SELECT 
+			srd.personnel,
+			srd.personnel_name,
+			srd.rank,
+			srd.trade,
+			srd.dob,
+			srd.doe,
+			srd.dolp,
+			srd.current_depl,
+			srd.dtos,
+			srd.last_unit,
+			srd.last_second_unit,
+			srd.last_third_unit,
+			srd.remarks,
+			sr.returns_reference,
+			sr.year,
+			sr.quarter,
+			sr.returns_originator_unit,
+			sr.returns_status,
+			sr.name as strength_returns_doc
+		FROM `tabStrength Returns Details` srd
+		INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+		WHERE srd.personnel = %s
+			AND sr.docstatus = 1
+		ORDER BY srd.dtos DESC, sr.creation DESC
+	""", (service_number,), as_dict=True)
+	
+	if not strength_returns_records:
+		return "<p>No strength returns records found.</p>"
+	
+	# Generate HTML table
+	html = """
+	<style>
+		.strength-returns-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 10px;
+		}
+		.strength-returns-table th {
+			background-color: var(--subtle-fg);
+			padding: 8px;
+			text-align: left;
+			border: 1px solid var(--table-border-color);
+			font-weight: bold;
+		}
+		.strength-returns-table td {
+			padding: 8px;
+			border: 1px solid var(--table-border-color);
+		}
+		.strength-returns-table tr:nth-child(even) {
+			background-color: var(--fg-color);
+		}
+	</style>
+	<table class="strength-returns-table">
+		<thead>
+			<tr>
+				<th>Returns Reference</th>
+				<th>Year</th>
+				<th>Quarter</th>
+				<th>Originator Unit</th>
+				<th>Rank</th>
+				<th>Trade</th>
+				<th>DTOS</th>
+				<th>Current Depl</th>
+				<th>Last Unit</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>
+	"""
+	
+	for record in strength_returns_records:
+		# Format dates
+		dtos = frappe.format_value(record.dtos, {"fieldtype": "Date"}) if record.dtos else ""
+		dob = frappe.format_value(record.dob, {"fieldtype": "Date"}) if record.dob else ""
+		doe = frappe.format_value(record.doe, {"fieldtype": "Date"}) if record.doe else ""
+		dolp = frappe.format_value(record.dolp, {"fieldtype": "Date"}) if record.dolp else ""
+		
+		# Format returns status with color
+		returns_status = record.returns_status or ""
+		status_color = "green" if returns_status == "Processed" else "orange" if returns_status == "Rolled Back" else "gray"
+		
+		html += f"""
+			<tr>
+				<td><b>{frappe.utils.escape_html(record.returns_reference or "")}</b></td>
+				<td>{frappe.utils.escape_html(record.year or "")}</td>
+				<td>{frappe.utils.escape_html(record.quarter or "")}</td>
+				<td>{frappe.utils.escape_html(record.returns_originator_unit or "")}</td>
+				<td>{frappe.utils.escape_html(record.rank or "")}</td>
+				<td>{frappe.utils.escape_html(record.trade or "")}</td>
+				<td>{dtos}</td>
+				<td><b>{frappe.utils.escape_html(record.current_depl or "")}</b></td>
+				<td>{frappe.utils.escape_html(record.last_unit or "")}</td>
+				<td><span class="indicator {status_color}">{frappe.utils.escape_html(returns_status)}</span></td>
+			</tr>
+		"""
+	
+	html += """
+		</tbody>
+	</table>
+	"""
+	
+	return html
+
+@frappe.whitelist()
+def get_personnel_attsdets_html(service_number):
+	"""Generate HTML table for personnel attachments/detachments from Personnel Att and Dets Form"""
+	if not service_number:
+		return "<p>No service number provided.</p>"
+	
+	# Query all submitted Personnel Att and Dets Form records for this service number
+	attsdets_records = frappe.db.sql("""
+		SELECT 
+			name,
+			personnel_attachment_reference,
+			attsdets_type,
+			from_unit,
+			to_unit,
+			date,
+			type,
+			remarks
+		FROM `tabPersonnel Att and Dets Form`
+		WHERE personnel = %s
+			AND docstatus = 1
+		ORDER BY date DESC, creation DESC
+	""", (service_number,), as_dict=True)
+	
+	if not attsdets_records:
+		return "<p>No attachment/detachment records found.</p>"
+	
+	# Generate HTML table
+	html = """
+	<style>
+		.attsdets-history-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 10px;
+		}
+		.attsdets-history-table th {
+			background-color: var(--subtle-fg);
+			padding: 8px;
+			text-align: left;
+			border: 1px solid var(--table-border-color);
+			font-weight: bold;
+		}
+		.attsdets-history-table td {
+			padding: 8px;
+			border: 1px solid var(--table-border-color);
+		}
+		.attsdets-history-table tr:nth-child(even) {
+			background-color: var(--fg-color);
+		}
+	</style>
+	<table class="attsdets-history-table">
+		<thead>
+			<tr>
+				<th>Reference</th>
+				<th>Atts/Dets Type</th>
+				<th>From Unit</th>
+				<th>To Unit</th>
+				<th>Date</th>
+				<th>Attachment Type</th>
+				<th>Remarks</th>
+			</tr>
+		</thead>
+		<tbody>
+	"""
+	
+	for record in attsdets_records:
+		# Format date
+		date_formatted = frappe.format_value(record.date, {"fieldtype": "Date"}) if record.date else ""
+		
+		# Format attsdets type with color
+		attsdets_type = record.attsdets_type or ""
+		type_color = "blue" if attsdets_type == "Attachment" else "orange" if attsdets_type == "Detachment" else "gray"
+		
+		html += f"""
+			<tr>
+				<td><b>{frappe.utils.escape_html(record.personnel_attachment_reference or "")}</b></td>
+				<td><span class="indicator {type_color}">{frappe.utils.escape_html(attsdets_type)}</span></td>
+				<td>{frappe.utils.escape_html(record.from_unit or "")}</td>
+				<td><b>{frappe.utils.escape_html(record.to_unit or "")}</b></td>
+				<td>{date_formatted}</td>
+				<td>{frappe.utils.escape_html(record.type or "")}</td>
+				<td>{frappe.utils.escape_html(record.remarks or "")}</td>
+			</tr>
+		"""
+	
+	html += """
+		</tbody>
+	</table>
+	"""
+	
+	return html
+
+@frappe.whitelist()
 def get_personnel_data(service_number):
 	"""Get complete personnel data for display page"""
 	if not service_number:
@@ -1515,3 +1718,923 @@ def export_personnel_list_to_excel(current_unit=None, rank=None, date_tos=None, 
 	
 	# Use provide_binary_file to download directly
 	provide_binary_file(file_name, "xlsx", file_content)
+
+@frappe.whitelist()
+def download_personnel_import_template(file_format='xlsx'):
+	"""Download a template file for personnel import"""
+	from frappe.desk.utils import provide_binary_file
+	import csv
+	import io
+	
+	# Get mandatory fields dynamically from the doctype
+	doctype_meta = frappe.get_meta("Personnel")
+	mandatory_fields = [field.fieldname for field in doctype_meta.fields if field.reqd]
+	
+	# Ensure data_import_reference is not in mandatory fields (it's optional)
+	if 'data_import_reference' in mandatory_fields:
+		mandatory_fields.remove('data_import_reference')
+	
+	# Add data_import_reference as optional field
+	template_fields = mandatory_fields + ['data_import_reference']
+	
+	# Get field labels for better readability
+	field_labels = []
+	for fieldname in template_fields:
+		field = doctype_meta.get_field(fieldname)
+		if field:
+			field_labels.append(field.label or fieldname)
+		else:
+			field_labels.append(fieldname)
+	
+	if file_format.lower() == 'csv':
+		# Generate CSV template
+		output = io.StringIO()
+		writer = csv.writer(output)
+		
+		# Write headers
+		writer.writerow(template_fields)
+		
+		# Write example row (empty values) - users can fill this in
+		writer.writerow([''] * len(template_fields))
+		
+		csv_content = output.getvalue()
+		file_content = csv_content.encode('utf-8')
+		file_name = "Personnel_Import_Template.csv"
+		
+		provide_binary_file(file_name, "csv", file_content)
+	else:
+		# Generate Excel template
+		try:
+			from openpyxl import Workbook
+			from openpyxl.styles import Font, PatternFill, Alignment
+		except ImportError:
+			frappe.throw("openpyxl is required for Excel template generation. Please install it: pip install openpyxl")
+		
+		wb = Workbook()
+		ws = wb.active
+		ws.title = "Personnel Import Template"
+		
+		# Header row with field names
+		header_row = template_fields
+		ws.append(header_row)
+		
+		# Style the header row
+		header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+		header_font = Font(bold=True, color="FFFFFF")
+		
+		for cell in ws[1]:
+			cell.fill = header_fill
+			cell.font = header_font
+			cell.alignment = Alignment(horizontal="center", vertical="center")
+		
+		# Add field labels row (row 2)
+		label_row = field_labels
+		ws.append(label_row)
+		
+		# Style the label row
+		label_font = Font(italic=True, color="666666")
+		for cell in ws[2]:
+			cell.font = label_font
+			cell.alignment = Alignment(horizontal="left", vertical="center")
+		
+		# Add example row with empty values (row 3)
+		example_row = [''] * len(template_fields)
+		ws.append(example_row)
+		
+		# Add instructions row (row 4)
+		from openpyxl.utils import get_column_letter
+		instruction_text = "Instructions: 1) Fill in the mandatory fields (service_number, category, personnel_name). 2) data_import_reference is optional - used for rollback. 3) Delete this instruction row before importing. 4) Save the file and upload it using the import page."
+		ws.append([instruction_text] + [''] * (len(template_fields) - 1))
+		
+		# Merge cells for instructions (merge all columns)
+		last_col = get_column_letter(len(template_fields))
+		ws.merge_cells(f'A4:{last_col}4')
+		instruction_cell = ws['A4']
+		instruction_cell.font = Font(italic=True, color="0066CC")
+		instruction_cell.alignment = Alignment(wrap_text=True, horizontal="left", vertical="center")
+		
+		# Auto-adjust column widths
+		for column in ws.columns:
+			max_length = 0
+			column_letter = column[0].column_letter
+			for cell in column:
+				try:
+					if len(str(cell.value)) > max_length:
+						max_length = len(str(cell.value))
+				except:
+					pass
+			adjusted_width = min(max_length + 2, 50)
+			ws.column_dimensions[column_letter].width = adjusted_width
+		
+		# Save to BytesIO
+		from io import BytesIO
+		output = BytesIO()
+		wb.save(output)
+		file_content = output.getvalue()
+		file_name = "Personnel_Import_Template.xlsx"
+		
+		provide_binary_file(file_name, "xlsx", file_content)
+
+@frappe.whitelist()
+def validate_preview_data(rows_data):
+	"""Validate preview data and check for existing records"""
+	# Get mandatory fields dynamically from the doctype
+	doctype_meta = frappe.get_meta("Personnel")
+	mandatory_fields = [field.fieldname for field in doctype_meta.fields if field.reqd]
+	
+	# Ensure data_import_reference is not in mandatory fields (it's optional)
+	if 'data_import_reference' in mandatory_fields:
+		mandatory_fields.remove('data_import_reference')
+	
+	# Normalize header names (remove spaces, underscores, convert to lowercase)
+	def normalize_header_name(header):
+		return str(header).strip().lower().replace(' ', '').replace('_', '').replace('-', '')
+	
+	# Get field definitions for link validation
+	field_definitions = {}
+	field_labels_map = {}  # Map label -> fieldname
+	for field in doctype_meta.fields:
+		field_label = field.label if hasattr(field, 'label') and field.label else field.fieldname
+		field_definitions[field.fieldname] = {
+			'fieldtype': field.fieldtype,
+			'options': field.options if hasattr(field, 'options') else None,
+			'reqd': field.reqd,
+			'label': field_label
+		}
+		# Map label to fieldname (case-insensitive)
+		if hasattr(field, 'label') and field.label:
+			label_normalized = normalize_header_name(field.label)
+			field_labels_map[label_normalized] = field.fieldname
+	
+	validation_results = []
+	
+	if not rows_data or len(rows_data) < 2:
+		return {'validations': []}
+	
+	headers = rows_data[0]
+	data_rows = rows_data[1:]
+	
+	# Find the last row with actual content (stop processing empty rows)
+	last_row_with_content = -1
+	for i in range(len(data_rows) - 1, -1, -1):
+		row = data_rows[i]
+		if row and any(str(cell).strip() if cell is not None else '' for cell in row):
+			last_row_with_content = i
+			break
+	
+	# Only process rows up to the last row with content
+	if last_row_with_content >= 0:
+		data_rows = data_rows[:last_row_with_content + 1]
+	else:
+		data_rows = []
+	
+	# Create mapping from header names to field names (case-insensitive, handle variations)
+	# Map header -> (field_name, column_index)
+	header_to_field_map = {}
+	
+	# Create a list of all possible field name variations
+	all_fields = list(field_definitions.keys()) + mandatory_fields
+	field_variations = {}
+	for field in all_fields:
+		# Get field label if available
+		field_label = field_definitions[field].get('label', field)
+		
+		# Create variations: fieldname, field_name, Field Name, label, etc.
+		variations = [
+			field.lower(),
+			field.lower().replace('_', ''),
+			field.lower().replace('_', ' '),
+			field_label.lower(),
+			field_label.lower().replace(' ', ''),
+			field_label.lower().replace(' ', '_'),
+			field
+		]
+		for variation in variations:
+			normalized = normalize_header_name(variation)
+			if normalized not in field_variations:
+				field_variations[normalized] = field
+	
+	# Map each header to its corresponding field
+	for idx, header in enumerate(headers):
+		header_str = str(header).strip() if header else ''
+		if not header_str:
+			continue
+		
+		# Try to find matching field - try direct match first (most common case)
+		matched_field = None
+		header_lower = header_str.lower().strip()
+		
+		# First try exact match (case-insensitive) with field names - this handles most cases
+		for field in all_fields:
+			if field.lower() == header_lower:
+				matched_field = field
+				break
+		
+		# If no exact match, try with field labels
+		if not matched_field:
+			for field in all_fields:
+				field_label = field_definitions[field].get('label', field)
+				if field_label and field_label.lower().strip() == header_lower:
+					matched_field = field
+					break
+		
+		# If still no match, try normalized match
+		if not matched_field:
+			normalized_header = normalize_header_name(header_str)
+			if normalized_header in field_variations:
+				matched_field = field_variations[normalized_header]
+			elif normalized_header in field_labels_map:
+				matched_field = field_labels_map[normalized_header]
+		
+		if matched_field:
+			header_to_field_map[matched_field] = idx
+	
+	# Debug: Check if all mandatory fields are mapped
+	missing_mappings = [f for f in mandatory_fields if f not in header_to_field_map]
+	if missing_mappings:
+		# Log warning if mandatory fields are not found in headers
+		frappe.log_error(f"Missing header mappings for mandatory fields: {missing_mappings}. Headers: {headers}. Mapping: {header_to_field_map}", "Preview Validation Warning")
+	
+	for row_idx, row in enumerate(data_rows):
+		# Skip empty rows
+		if not row or not any(str(cell).strip() if cell is not None else '' for cell in row):
+			continue
+		
+		row_result = {
+			'row_index': row_idx + 2,  # +2 because row 1 is header, and we start from 2
+			'exists': False,
+			'errors': [],
+			'warnings': [],
+			'debug_data': {}  # For debugging - will be removed or can be filtered out
+		}
+		
+		# Extract data by field name (not header name)
+		row_data_by_field = {}
+		for field_name, col_idx in header_to_field_map.items():
+			if col_idx < len(row):
+				value = row[col_idx]
+				# Handle different value types - be more lenient with what counts as "empty"
+				if value is None:
+					row_data_by_field[field_name] = ''
+				elif isinstance(value, (int, float)):
+					# Convert numbers to string (preserve the value)
+					if isinstance(value, float) and value.is_integer():
+						row_data_by_field[field_name] = str(int(value))
+					else:
+						row_data_by_field[field_name] = str(value)
+				elif isinstance(value, bool):
+					row_data_by_field[field_name] = str(value)
+				else:
+					# String value - preserve the value, only strip whitespace
+					value_str = str(value) if value is not None else ''
+					# Don't treat 'None' string as empty - it's actual data
+					if value_str.lower() == 'none':
+						row_data_by_field[field_name] = ''
+					else:
+						row_data_by_field[field_name] = value_str.strip()
+			else:
+				row_data_by_field[field_name] = ''
+		
+		# Initialize all mandatory fields (set to empty if not found in header mapping)
+		for field in mandatory_fields:
+			if field not in row_data_by_field:
+				row_data_by_field[field] = ''
+		
+		# Check for service_number
+		service_number = row_data_by_field.get('service_number', '')
+		
+		# Check if record exists
+		if service_number:
+			if frappe.db.exists("Personnel", service_number):
+				row_result['exists'] = True
+		
+		# Store debug data (extracted values for troubleshooting)
+		row_result['debug_data'] = {
+			'header_mapping': header_to_field_map,
+			'row_length': len(row) if row else 0,
+			'extracted_values': {k: v for k, v in row_data_by_field.items() if k in mandatory_fields},
+			'raw_row_sample': [str(cell)[:50] if cell is not None else 'None' for cell in (row[:10] if row else [])]  # First 10 cells for debugging
+		}
+		
+		# Validate mandatory fields
+		for field in mandatory_fields:
+			value = row_data_by_field.get(field, '')
+			
+			if not value:
+				row_result['errors'].append(f"Missing mandatory field: {field}")
+		
+		# Validate link fields
+		for field_name, field_info in field_definitions.items():
+			if field_info['fieldtype'] == 'Link' and field_name in row_data_by_field:
+				value = row_data_by_field[field_name]
+				if value:  # Only validate if value is provided
+					options = field_info.get('options')
+					if options:
+						# Check if the link value exists
+						if not frappe.db.exists(options, value):
+							row_result['errors'].append(f"Invalid {field_name}: '{value}' not found in {options}")
+		
+		validation_results.append(row_result)
+	
+	# Return validation results with debug info (header mapping for troubleshooting)
+	return {
+		'validations': validation_results,
+		'header_mapping': header_to_field_map,  # Debug info
+		'mandatory_fields': mandatory_fields  # Debug info
+	}
+
+@frappe.whitelist()
+def preview_excel_file(file_content):
+	"""Preview Excel file data for frontend display"""
+	import base64
+	import io
+	try:
+		from openpyxl import load_workbook
+	except ImportError:
+		return {'error': 'openpyxl is required for Excel file preview'}
+	
+	try:
+		# Decode base64 content
+		file_bytes = base64.b64decode(file_content)
+		
+		# Load workbook
+		wb = load_workbook(filename=io.BytesIO(file_bytes), read_only=True, data_only=True)
+		ws = wb.active
+		
+		# Get headers from first row
+		headers = []
+		for cell in ws[1]:
+			if cell.value:
+				headers.append(str(cell.value).strip())
+			else:
+				headers.append('')
+		
+		# Get data rows - find the last row with content first
+		# First, scan to find the last row with content
+		last_row_with_content = 1  # Start from row 1 (header)
+		max_row_to_check = min(ws.max_row, 1000)  # Limit check to 1000 rows max
+		
+		for row_num in range(2, max_row_to_check + 1):
+			row = ws[row_num]
+			has_content = False
+			for cell in row:
+				if cell.value is not None and str(cell.value).strip():
+					has_content = True
+					break
+			if has_content:
+				last_row_with_content = row_num
+			elif row_num > last_row_with_content + 10:  # Stop if we've gone 10 rows without content
+				break
+		
+		# Get data rows up to the last row with content (limit to 10 for preview)
+		rows = [headers]
+		max_preview_row = min(last_row_with_content, 11)  # Header + 10 data rows
+		
+		for row in ws.iter_rows(min_row=2, max_row=max_preview_row, values_only=False):
+			row_data = []
+			for idx, cell in enumerate(row):
+				if idx < len(headers):
+					value = cell.value
+					if value is not None:
+						# Preserve the actual value
+						row_data.append(str(value).strip())
+					else:
+						row_data.append('')
+			# Only add row if it has at least one non-empty value
+			if any(v for v in row_data):
+				rows.append(row_data)
+		
+		return {'rows': rows}
+	except Exception as e:
+		return {'error': str(e)}
+
+@frappe.whitelist()
+def import_personnel_data(file_name, file_content, file_extension, import_reference=None):
+	"""Import personnel data from CSV or Excel file"""
+	import csv
+	import io
+	import base64
+	from frappe.utils import now_datetime, getdate
+	try:
+		from openpyxl import load_workbook
+	except ImportError:
+		frappe.throw("openpyxl is required for Excel file import. Please install it: pip install openpyxl")
+	
+	# Generate import reference if not provided
+	if not import_reference:
+		import_reference = f"IMPORT_{now_datetime().strftime('%Y%m%d_%H%M%S')}"
+	
+	# Get mandatory fields dynamically from the doctype
+	doctype_meta = frappe.get_meta("Personnel")
+	mandatory_fields = [field.fieldname for field in doctype_meta.fields if field.reqd]
+	
+	# Ensure data_import_reference is not in mandatory fields (it's optional)
+	if 'data_import_reference' in mandatory_fields:
+		mandatory_fields.remove('data_import_reference')
+	
+	results = {
+		'success': False,
+		'total_rows': 0,
+		'created': 0,
+		'updated': 0,
+		'failed': 0,
+		'errors': [],
+		'import_reference': import_reference
+	}
+	
+	try:
+		# Parse file based on extension
+		rows = []
+		
+		if file_extension == 'csv':
+			# Parse CSV - file_content is base64 encoded
+			try:
+				decoded_content = base64.b64decode(file_content).decode('utf-8')
+			except UnicodeDecodeError:
+				# Try with different encoding
+				try:
+					decoded_content = base64.b64decode(file_content).decode('latin-1')
+				except:
+					decoded_content = base64.b64decode(file_content).decode('utf-8', errors='ignore')
+			except:
+				# Try without base64 decoding (in case it's already text)
+				decoded_content = file_content
+			
+			try:
+				csv_reader = csv.DictReader(io.StringIO(decoded_content))
+				rows = list(csv_reader)
+			except Exception as e:
+				results['errors'].append(f"Error parsing CSV file: {str(e)}")
+				return results
+		elif file_extension in ['xlsx', 'xls']:
+			# Parse Excel - file_content is base64 encoded
+			try:
+				file_bytes = base64.b64decode(file_content)
+			except:
+				# If decoding fails, try using as-is
+				if isinstance(file_content, bytes):
+					file_bytes = file_content
+				else:
+					file_bytes = file_content.encode('utf-8')
+			
+			# Load workbook
+			try:
+				wb = load_workbook(filename=io.BytesIO(file_bytes), read_only=True, data_only=True)
+				ws = wb.active
+			except Exception as e:
+				results['errors'].append(f"Error reading Excel file: {str(e)}")
+				return results
+			
+			# Get headers from first row
+			headers = []
+			for cell in ws[1]:
+				if cell.value:
+					headers.append(str(cell.value).strip())
+			
+			if not headers:
+				results['errors'].append("No headers found in Excel file")
+				return results
+			
+			# Read data rows
+			for row in ws.iter_rows(min_row=2, values_only=False):
+				row_data = {}
+				for idx, cell in enumerate(row):
+					if idx < len(headers) and headers[idx]:
+						value = cell.value
+						# Convert to string if not None
+						if value is not None:
+							row_data[headers[idx]] = str(value).strip()
+						else:
+							row_data[headers[idx]] = None
+				# Only add row if it has at least one non-empty value
+				if any(v for v in row_data.values() if v):
+					rows.append(row_data)
+		else:
+			results['errors'].append(f"Unsupported file format: {file_extension}")
+			return results
+		
+		results['total_rows'] = len(rows)
+		
+		if not rows:
+			results['errors'].append("No data rows found in file")
+			return results
+		
+		# Validate headers
+		first_row = rows[0]
+		file_headers = [str(k).strip().lower() for k in first_row.keys()]
+		
+		missing_fields = []
+		for field in mandatory_fields:
+			if field.lower() not in file_headers:
+				missing_fields.append(field)
+		
+		if missing_fields:
+			results['errors'].append(f"Missing mandatory columns: {', '.join(missing_fields)}")
+			return results
+		
+		# Process each row
+		for row_idx, row_data in enumerate(rows, start=2):  # Start at 2 (row 1 is header)
+			try:
+				# Normalize field names (case-insensitive)
+				normalized_data = {}
+				for key, value in row_data.items():
+					normalized_key = str(key).strip().lower()
+					normalized_data[normalized_key] = value
+				
+				# Extract mandatory fields
+				personnel_data = {}
+				for field in mandatory_fields:
+					field_lower = field.lower()
+					if field_lower in normalized_data:
+						value = normalized_data[field_lower]
+						# Convert to string and strip whitespace
+						if value is not None:
+							personnel_data[field] = str(value).strip()
+						else:
+							personnel_data[field] = None
+					else:
+						personnel_data[field] = None
+				
+				# Validate mandatory fields are not empty
+				missing_values = []
+				for field in mandatory_fields:
+					if not personnel_data.get(field):
+						missing_values.append(field)
+				
+				if missing_values:
+					results['errors'].append(f"Row {row_idx}: Missing values for: {', '.join(missing_values)}")
+					results['failed'] += 1
+					continue
+				
+				# Set import reference - always use the page field value, ignore CSV column
+				personnel_data['data_import_reference'] = import_reference
+				
+				# Check if record exists
+				service_number = personnel_data['service_number']
+				exists = frappe.db.exists("Personnel", service_number)
+				
+				if exists:
+					# Update existing record
+					doc = frappe.get_doc("Personnel", service_number)
+					
+					# Update only mandatory fields
+					for field in mandatory_fields:
+						if field in personnel_data:
+							doc.set(field, personnel_data[field])
+					
+					# Update import reference
+					doc.set('data_import_reference', personnel_data['data_import_reference'])
+					
+					doc.save(ignore_permissions=True)
+					results['updated'] += 1
+				else:
+					# Create new record
+					doc = frappe.get_doc({
+						'doctype': 'Personnel',
+						**personnel_data
+					})
+					doc.insert(ignore_permissions=True)
+					results['created'] += 1
+				
+				frappe.db.commit()
+				
+			except frappe.UniqueValidationError as e:
+				results['errors'].append(f"Row {row_idx}: Duplicate service number - {str(e)}")
+				results['failed'] += 1
+				frappe.db.rollback()
+			except frappe.LinkValidationError as e:
+				results['errors'].append(f"Row {row_idx}: Invalid link value - {str(e)}")
+				results['failed'] += 1
+				frappe.db.rollback()
+			except Exception as e:
+				results['errors'].append(f"Row {row_idx}: {str(e)}")
+				results['failed'] += 1
+				frappe.db.rollback()
+		
+		results['success'] = True
+		
+	except Exception as e:
+		results['errors'].append(f"Import error: {str(e)}")
+		frappe.log_error(f"Personnel import error: {str(e)}", "Personnel Import")
+	
+	return results
+
+@frappe.whitelist()
+def rollback_personnel_import(import_reference):
+	"""Rollback all personnel records imported with a specific import reference"""
+	if not import_reference:
+		return {
+			'success': False,
+			'error': 'Import reference is required'
+		}
+	
+	results = {
+		'success': False,
+		'deleted': 0,
+		'import_reference': import_reference,
+		'error': None
+	}
+	
+	try:
+		# Find all personnel records with this import reference
+		personnel_list = frappe.db.get_all(
+			"Personnel",
+			filters={'data_import_reference': import_reference},
+			fields=['name', 'service_number']
+		)
+		
+		if not personnel_list:
+			results['error'] = f"No records found with import reference: {import_reference}"
+			return results
+		
+		# Delete each record
+		for personnel in personnel_list:
+			try:
+				frappe.delete_doc("Personnel", personnel.name, force=1, ignore_permissions=True)
+				results['deleted'] += 1
+			except Exception as e:
+				frappe.log_error(f"Error deleting personnel {personnel.service_number}: {str(e)}", "Personnel Rollback")
+		
+		frappe.db.commit()
+		results['success'] = True
+		
+	except Exception as e:
+		results['error'] = str(e)
+		frappe.log_error(f"Personnel rollback error: {str(e)}", "Personnel Rollback")
+		frappe.db.rollback()
+	
+	return results
+
+@frappe.whitelist()
+def get_personnel_unit_mismatches():
+	"""Get personnel where current_unit != personnel_unit_from_returns with date information"""
+	from frappe.utils import getdate
+	
+	# Query personnel where current_unit and personnel_unit_from_returns are different and both exist
+	personnel_list = frappe.db.sql("""
+		SELECT 
+			p.service_number,
+			p.personnel_name,
+			p.current_unit,
+			p.personnel_unit_from_returns,
+			p.dtos,
+			p.strength_returns
+		FROM `tabPersonnel` p
+		WHERE p.current_unit IS NOT NULL 
+			AND p.current_unit != ''
+			AND p.personnel_unit_from_returns IS NOT NULL
+			AND p.personnel_unit_from_returns != ''
+			AND p.current_unit != p.personnel_unit_from_returns
+		ORDER BY p.personnel_name
+	""", as_dict=True)
+	
+	results = []
+	
+	for personnel in personnel_list:
+		# Get latest date_tos from Posting Authority Details for current_unit
+		latest_posting = frappe.db.sql("""
+			SELECT 
+				pad.gaining_unit_date_tos,
+				pad.part_2_order,
+				pad.wef_date
+			FROM `tabPosting Authority Details` pad
+			WHERE pad.service_number = %s
+				AND pad.to_unit = %s
+				AND pad.gaining_unit_date_tos IS NOT NULL
+				AND pad.posting_status = 'TOS'
+			ORDER BY pad.gaining_unit_date_tos DESC, pad.creation DESC
+			LIMIT 1
+		""", (personnel.service_number, personnel.current_unit), as_dict=True)
+		
+		current_unit_date = None
+		part_2_order = None
+		if latest_posting:
+			current_unit_date = latest_posting[0].gaining_unit_date_tos
+			part_2_order = latest_posting[0].part_2_order
+		
+		# Get dtos from Strength Returns (already stored in personnel.dtos)
+		returns_date = personnel.dtos
+		
+		# Determine which is latest
+		latest_source = None
+		if current_unit_date and returns_date:
+			current_date_obj = getdate(current_unit_date)
+			returns_date_obj = getdate(returns_date)
+			if current_date_obj > returns_date_obj:
+				latest_source = "current_unit"
+			elif returns_date_obj > current_date_obj:
+				latest_source = "personnel_unit_from_returns"
+			else:
+				latest_source = "equal"
+		elif current_unit_date:
+			latest_source = "current_unit"
+		elif returns_date:
+			latest_source = "personnel_unit_from_returns"
+		
+		results.append({
+			"service_number": personnel.service_number,
+			"personnel_name": personnel.personnel_name,
+			"current_unit": personnel.current_unit,
+			"personnel_unit_from_returns": personnel.personnel_unit_from_returns,
+			"current_unit_date": current_unit_date,
+			"returns_date": returns_date,
+			"part_2_order": part_2_order,
+			"strength_returns": personnel.strength_returns,
+			"latest_source": latest_source
+		})
+	
+	return results
+
+
+@frappe.whitelist()
+def get_personnel_without_strength_returns(
+	page=1,
+	page_length=50,
+	category=None,
+	year=None,
+	quarter=None,
+	returns_originator_unit=None,
+	personnel_category=None,
+):
+	"""Get paginated list of personnel that have no Strength Returns record
+	for the given filters.
+
+	The filters apply to submitted Strength Returns documents (`tabStrength Returns`)
+	and their child table (`tabStrength Returns Details`):
+	- year (sr.year)
+	- quarter (sr.quarter)
+	- returns_originator_unit (sr.returns_originator_unit)
+	- personnel_category (sr.personnel_category)
+
+	`category` filters on the Personnel doctype (Officer / Soldier).
+
+	Logic:
+	1. Take all Personnel (optionally filtered by category).
+	2. From them, mark those that appear in any submitted Strength Returns row
+	   matching the filters above as "with returns".
+	3. Everyone else is "without returns" for this filter context.
+	"""
+	page = int(page) if page else 1
+	page_length = int(page_length) if page_length else 50
+	if page < 1:
+		page = 1
+	if page_length < 1:
+		page_length = 50
+	limit_start = (page - 1) * page_length
+
+	# Personnel-level filter (Officer / Soldier)
+	personnel_where = ["1=1"]
+	personnel_params: list[object] = []
+	if category:
+		personnel_where.append("p.category = %s")
+		personnel_params.append(category)
+	personnel_where_sql = " AND ".join(personnel_where)
+
+	# Strength Returns–level filters (apply consistently everywhere)
+	sr_where = ["sr.docstatus = 1", "srd.personnel IS NOT NULL"]
+	sr_params: list[object] = []
+
+	if year:
+		sr_where.append("sr.year = %s")
+		sr_params.append(year)
+	if quarter:
+		sr_where.append("sr.quarter = %s")
+		sr_params.append(quarter)
+	if returns_originator_unit:
+		sr_where.append("sr.returns_originator_unit = %s")
+		sr_params.append(returns_originator_unit)
+	if personnel_category:
+		# Filter by Strength Returns' Personnel Category
+		sr_where.append("sr.personnel_category = %s")
+		sr_params.append(personnel_category)
+
+	sr_where_sql = " AND ".join(sr_where)
+
+	# 1) Total personnel in scope (respecting Personnel.category filter only)
+	total_personnel_row = frappe.db.sql(
+		f"""
+		SELECT COUNT(*) AS cnt
+		FROM `tabPersonnel` p
+		WHERE {personnel_where_sql}
+		""",
+		tuple(personnel_params),
+		as_dict=True,
+	)
+	total_personnel = total_personnel_row[0].cnt if total_personnel_row else 0
+
+	# 2) Personnel that HAVE at least one Strength Returns row matching filters
+	# Join with Personnel to respect Personnel.category filter as well
+	total_with_returns_row = frappe.db.sql(
+		f"""
+		SELECT COUNT(DISTINCT srd.personnel) AS cnt
+		FROM `tabStrength Returns Details` srd
+		INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+		INNER JOIN `tabPersonnel` p ON p.service_number = srd.personnel
+		WHERE {sr_where_sql}
+		  AND {personnel_where_sql}
+		""",
+		tuple(sr_params + personnel_params),
+		as_dict=True,
+	)
+	total_with_returns = (
+		total_with_returns_row[0].cnt if total_with_returns_row else 0
+	)
+
+	# 3) Personnel WITHOUT any Strength Returns row matching the filters
+	total_without_returns = max(total_personnel - total_with_returns, 0)
+
+	# 4) By-category breakdown among personnel WITHOUT returns
+	by_category_rows = frappe.db.sql(
+		f"""
+		SELECT p.category, COUNT(*) AS cnt
+		FROM `tabPersonnel` p
+		WHERE {personnel_where_sql}
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM `tabStrength Returns Details` srd
+			INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+			WHERE {sr_where_sql}
+			  AND srd.personnel = p.service_number
+		  )
+		GROUP BY p.category
+		""",
+		tuple(personnel_params + sr_params),
+		as_dict=True,
+	)
+	by_category = {
+		(row.category or "Unknown"): row.cnt for row in by_category_rows
+	}
+
+	# 5) Paginated data – only personnel WITHOUT returns in this filter context
+	data_rows = frappe.db.sql(
+		f"""
+		SELECT
+			p.service_number,
+			p.personnel_name,
+			p.category,
+			p.current_rank,
+			p.current_unit,
+			p.current_deployment,
+			p.personnel_unit_from_returns,
+			p.dtos
+		FROM `tabPersonnel` p
+		WHERE {personnel_where_sql}
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM `tabStrength Returns Details` srd
+			INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+			WHERE {sr_where_sql}
+			  AND srd.personnel = p.service_number
+		  )
+		ORDER BY p.personnel_name
+		LIMIT %s OFFSET %s
+		""",
+		tuple(personnel_params + sr_params + [page_length, limit_start]),
+		as_dict=True,
+	)
+
+	formatted = []
+	for row in data_rows:
+		formatted.append(
+			{
+				"service_number": row.service_number,
+				"personnel_name": row.personnel_name,
+				"category": row.category,
+				"current_rank": row.current_rank,
+				"current_unit": row.current_unit,
+				"current_deployment": row.current_deployment,
+				"personnel_unit_from_returns": row.personnel_unit_from_returns,
+				"dtos": frappe.format_value(
+					row.dtos, {"fieldtype": "Date"}
+				)
+				if row.dtos
+				else "",
+			}
+		)
+
+	total_pages = (
+		(total_without_returns + page_length - 1) // page_length
+		if total_without_returns > 0
+		else 1
+	)
+
+	return {
+		"data": formatted,
+		"total_without_returns": total_without_returns,
+		"total_personnel": total_personnel,
+		"total_with_returns": total_with_returns,
+		"stats": {
+			"total_personnel": total_personnel,
+			"total_with_returns": total_with_returns,
+			"total_without_returns": total_without_returns,
+			"percent_without_returns": round(
+				(total_without_returns / total_personnel) * 100, 2
+			)
+			if total_personnel
+			else 0,
+			"by_category": by_category,
+		},
+		"page": page,
+		"page_length": page_length,
+		"total_pages": total_pages,
+	}

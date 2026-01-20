@@ -70,7 +70,7 @@ class CreateOperator(Document):
 				"user_type": "System User",
 				"send_welcome_email": 0,  # Don't send welcome email automatically
 				"module_profile": "No Module",  # Always set to "No Module" module profile
-				"desk_theme": "Dark",  # Always set to Dark theme
+				"desk_theme": "Light",  # Always set to Dark theme
 			})
 			
 			# Set login restrictions if provided
@@ -107,7 +107,7 @@ class CreateOperator(Document):
 			# Ensure module profile is "No Module" - set on document and save to trigger block_modules update
 			user.module_profile = "No Module"
 			# Always ensure dark theme is set
-			user.desk_theme = "Dark"
+			user.desk_theme = "Light"
 			user.save(ignore_permissions=True)
 			
 			# Reload user to ensure all changes are committed
@@ -153,8 +153,8 @@ class CreateOperator(Document):
 				has_changes = True
 			
 			# Always ensure dark theme is set
-			if user.desk_theme != "Dark":
-				user.desk_theme = "Dark"
+			if user.desk_theme != "Light":
+				user.desk_theme = "Light"
 				has_changes = True
 			
 			# Update login restrictions if changed
