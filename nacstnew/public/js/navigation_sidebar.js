@@ -23,6 +23,17 @@ if (typeof window.NAVIGATION_ITEMS === 'undefined') {
 			icon: 'fa-list'
 		},
 		{
+			route: 'no-strength-returns-',
+			label: 'No Strength Returns',
+			icon: 'fa-user-times'
+		},
+		{
+			route: 'multiple-strength-re',
+			label: 'Multiple Strength Returns',
+			icon: 'fa-clone'
+		},
+		
+		{
 			route: 'units-view2',
 			label: 'Units View 2 (Compact)',
 			icon: 'fa-building-o'
@@ -203,7 +214,8 @@ function hideDefaultSidebarCSS(pageName) {
 	style.textContent = `
 		body[data-page-name="${pageName}"] .form-sidebar,
 		body[data-page-name="${pageName}"] .list-sidebar,
-		body[data-page-name="${pageName}"] .desk-sidebar {
+		body[data-page-name="${pageName}"] .desk-sidebar,
+		body[data-page-name="${pageName}"] .page-sidebar {
 			display: none !important;
 		}
 		

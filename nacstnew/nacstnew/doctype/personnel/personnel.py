@@ -2444,3 +2444,197 @@ def get_personnel_unit_mismatches():
 		})
 	
 	return results
+
+
+@frappe.whitelist()
+def get_personnel_without_strength_returns(
+	page=1,
+	page_length=50,
+	category=None,
+	year=None,
+	quarter=None,
+	returns_originator_unit=None,
+	personnel_category=None,
+):
+	"""Get paginated list of personnel that have no Strength Returns record
+	for the given filters.
+
+	The filters apply to submitted Strength Returns documents (`tabStrength Returns`)
+	and their child table (`tabStrength Returns Details`):
+	- year (sr.year)
+	- quarter (sr.quarter)
+	- returns_originator_unit (sr.returns_originator_unit)
+	- personnel_category (sr.personnel_category)
+
+	`category` filters on the Personnel doctype (Officer / Soldier).
+
+	Logic:
+	1. Take all Personnel (optionally filtered by category).
+	2. From them, mark those that appear in any submitted Strength Returns row
+	   matching the filters above as "with returns".
+	3. Everyone else is "without returns" for this filter context.
+	"""
+	page = int(page) if page else 1
+	page_length = int(page_length) if page_length else 50
+	if page < 1:
+		page = 1
+	if page_length < 1:
+		page_length = 50
+	limit_start = (page - 1) * page_length
+
+	# Personnel-level filter (Officer / Soldier)
+	personnel_where = ["1=1"]
+	personnel_params: list[object] = []
+	if category:
+		personnel_where.append("p.category = %s")
+		personnel_params.append(category)
+	personnel_where_sql = " AND ".join(personnel_where)
+
+	# Strength Returns–level filters (apply consistently everywhere)
+	sr_where = ["sr.docstatus = 1", "srd.personnel IS NOT NULL"]
+	sr_params: list[object] = []
+
+	if year:
+		sr_where.append("sr.year = %s")
+		sr_params.append(year)
+	if quarter:
+		sr_where.append("sr.quarter = %s")
+		sr_params.append(quarter)
+	if returns_originator_unit:
+		sr_where.append("sr.returns_originator_unit = %s")
+		sr_params.append(returns_originator_unit)
+	if personnel_category:
+		# Filter by Strength Returns' Personnel Category
+		sr_where.append("sr.personnel_category = %s")
+		sr_params.append(personnel_category)
+
+	sr_where_sql = " AND ".join(sr_where)
+
+	# 1) Total personnel in scope (respecting Personnel.category filter only)
+	total_personnel_row = frappe.db.sql(
+		f"""
+		SELECT COUNT(*) AS cnt
+		FROM `tabPersonnel` p
+		WHERE {personnel_where_sql}
+		""",
+		tuple(personnel_params),
+		as_dict=True,
+	)
+	total_personnel = total_personnel_row[0].cnt if total_personnel_row else 0
+
+	# 2) Personnel that HAVE at least one Strength Returns row matching filters
+	# Join with Personnel to respect Personnel.category filter as well
+	total_with_returns_row = frappe.db.sql(
+		f"""
+		SELECT COUNT(DISTINCT srd.personnel) AS cnt
+		FROM `tabStrength Returns Details` srd
+		INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+		INNER JOIN `tabPersonnel` p ON p.service_number = srd.personnel
+		WHERE {sr_where_sql}
+		  AND {personnel_where_sql}
+		""",
+		tuple(sr_params + personnel_params),
+		as_dict=True,
+	)
+	total_with_returns = (
+		total_with_returns_row[0].cnt if total_with_returns_row else 0
+	)
+
+	# 3) Personnel WITHOUT any Strength Returns row matching the filters
+	total_without_returns = max(total_personnel - total_with_returns, 0)
+
+	# 4) By-category breakdown among personnel WITHOUT returns
+	by_category_rows = frappe.db.sql(
+		f"""
+		SELECT p.category, COUNT(*) AS cnt
+		FROM `tabPersonnel` p
+		WHERE {personnel_where_sql}
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM `tabStrength Returns Details` srd
+			INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+			WHERE {sr_where_sql}
+			  AND srd.personnel = p.service_number
+		  )
+		GROUP BY p.category
+		""",
+		tuple(personnel_params + sr_params),
+		as_dict=True,
+	)
+	by_category = {
+		(row.category or "Unknown"): row.cnt for row in by_category_rows
+	}
+
+	# 5) Paginated data – only personnel WITHOUT returns in this filter context
+	data_rows = frappe.db.sql(
+		f"""
+		SELECT
+			p.service_number,
+			p.personnel_name,
+			p.category,
+			p.current_rank,
+			p.current_unit,
+			p.current_deployment,
+			p.personnel_unit_from_returns,
+			p.dtos
+		FROM `tabPersonnel` p
+		WHERE {personnel_where_sql}
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM `tabStrength Returns Details` srd
+			INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+			WHERE {sr_where_sql}
+			  AND srd.personnel = p.service_number
+		  )
+		ORDER BY p.personnel_name
+		LIMIT %s OFFSET %s
+		""",
+		tuple(personnel_params + sr_params + [page_length, limit_start]),
+		as_dict=True,
+	)
+
+	formatted = []
+	for row in data_rows:
+		formatted.append(
+			{
+				"service_number": row.service_number,
+				"personnel_name": row.personnel_name,
+				"category": row.category,
+				"current_rank": row.current_rank,
+				"current_unit": row.current_unit,
+				"current_deployment": row.current_deployment,
+				"personnel_unit_from_returns": row.personnel_unit_from_returns,
+				"dtos": frappe.format_value(
+					row.dtos, {"fieldtype": "Date"}
+				)
+				if row.dtos
+				else "",
+			}
+		)
+
+	total_pages = (
+		(total_without_returns + page_length - 1) // page_length
+		if total_without_returns > 0
+		else 1
+	)
+
+	return {
+		"data": formatted,
+		"total_without_returns": total_without_returns,
+		"total_personnel": total_personnel,
+		"total_with_returns": total_with_returns,
+		"stats": {
+			"total_personnel": total_personnel,
+			"total_with_returns": total_with_returns,
+			"total_without_returns": total_without_returns,
+			"percent_without_returns": round(
+				(total_without_returns / total_personnel) * 100, 2
+			)
+			if total_personnel
+			else 0,
+			"by_category": by_category,
+		},
+		"page": page,
+		"page_length": page_length,
+		"total_pages": total_pages,
+	}

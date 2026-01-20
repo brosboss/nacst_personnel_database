@@ -213,3 +213,168 @@ class StrengthReturns(Document):
 		# Commit changes
 		if updated_count > 0 or cleared_count > 0:
 			frappe.db.commit()
+
+
+@frappe.whitelist()
+def get_personnel_multiple_strength_returns(
+	page=1,
+	page_length=50,
+	year=None,
+	quarter=None,
+	returns_originator_unit=None,
+	personnel_category=None,
+):
+	"""Get personnel that appear in multiple submitted Strength Returns documents
+	for the given filter context.
+
+	Filters apply to `tabStrength Returns`:
+	- year
+	- quarter
+	- returns_originator_unit
+	- personnel_category
+	"""
+	page = int(page) if page else 1
+	page_length = int(page_length) if page_length else 50
+	if page < 1:
+		page = 1
+	if page_length < 1:
+		page_length = 50
+	limit_start = (page - 1) * page_length
+
+	# Base filters on Strength Returns and Details
+	where = ["sr.docstatus = 1", "srd.personnel IS NOT NULL"]
+	params: list[object] = []
+
+	if year:
+		where.append("sr.year = %s")
+		params.append(year)
+	if quarter:
+		where.append("sr.quarter = %s")
+		params.append(quarter)
+	if returns_originator_unit:
+		where.append("sr.returns_originator_unit = %s")
+		params.append(returns_originator_unit)
+	if personnel_category:
+		where.append("sr.personnel_category = %s")
+		params.append(personnel_category)
+
+	where_sql = " AND ".join(where)
+
+	# Total duplicate personnel count
+	total_row = frappe.db.sql(
+		f"""
+		SELECT COUNT(*) AS cnt
+		FROM (
+			SELECT srd.personnel
+			FROM `tabStrength Returns Details` srd
+			INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+			WHERE {where_sql}
+			GROUP BY srd.personnel
+			HAVING COUNT(DISTINCT sr.name) > 1
+		) t
+		""",
+		tuple(params),
+		as_dict=True,
+	)
+	total_duplicates = total_row[0].cnt if total_row else 0
+
+	# Paginated duplicate personnel list with counts
+	dup_rows = frappe.db.sql(
+		f"""
+		SELECT
+			srd.personnel AS service_number,
+			COUNT(DISTINCT sr.name) AS returns_count
+		FROM `tabStrength Returns Details` srd
+		INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+		WHERE {where_sql}
+		GROUP BY srd.personnel
+		HAVING COUNT(DISTINCT sr.name) > 1
+		ORDER BY srd.personnel
+		LIMIT %s OFFSET %s
+		""",
+		tuple(params + [page_length, limit_start]),
+		as_dict=True,
+	)
+
+	if not dup_rows:
+		return {
+			"data": [],
+			"total_duplicates": 0,
+			"page": page,
+			"page_length": page_length,
+			"total_pages": 1,
+		}
+
+	service_numbers = [row.service_number for row in dup_rows if row.service_number]
+
+	# Fetch details for Strength Returns each duplicate personnel appears in
+	detail_rows = frappe.db.sql(
+		f"""
+		SELECT
+			srd.personnel AS service_number,
+			srd.personnel_name,
+			srd.rank,
+			sr.name AS strength_returns_doc,
+			sr.returns_reference,
+			sr.year,
+			sr.quarter,
+			sr.returns_originator_unit,
+			sr.personnel_category
+		FROM `tabStrength Returns Details` srd
+		INNER JOIN `tabStrength Returns` sr ON srd.parent = sr.name
+		WHERE {where_sql}
+		  AND srd.personnel IN %s
+		ORDER BY srd.personnel, sr.year, sr.quarter, sr.name
+		""",
+		tuple(params + [tuple(service_numbers)]),
+		as_dict=True,
+	)
+
+	# Group details by personnel
+	from collections import defaultdict
+
+	grouped: dict[str, list] = defaultdict(list)
+	for row in detail_rows:
+		grouped[row.service_number].append(row)
+
+	result = []
+	for dup in dup_rows:
+		svc = dup.service_number
+		rows = grouped.get(svc, [])
+		if not rows:
+			continue
+
+		first = rows[0]
+		result.append(
+			{
+				"service_number": svc,
+				"personnel_name": first.personnel_name,
+				"rank": first.rank,
+				"returns_count": dup.returns_count,
+				"returns": [
+					{
+						"docname": r.strength_returns_doc,
+						"returns_reference": r.returns_reference,
+						"year": r.year,
+						"quarter": r.quarter,
+						"returns_originator_unit": r.returns_originator_unit,
+						"personnel_category": r.personnel_category,
+					}
+					for r in rows
+				],
+			}
+		)
+
+	total_pages = (
+		(total_duplicates + page_length - 1) // page_length
+		if total_duplicates > 0
+		else 1
+	)
+
+	return {
+		"data": result,
+		"total_duplicates": total_duplicates,
+		"page": page,
+		"page_length": page_length,
+		"total_pages": total_pages,
+	}

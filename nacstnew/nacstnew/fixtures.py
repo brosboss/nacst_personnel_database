@@ -42,6 +42,7 @@ def install_fixtures():
 		("Grades", insert_grades),
 		("Module Profiles", insert_module_profiles),
 		("App Role List", insert_app_role_list),
+		("Attachment Types", insert_attachment_types),
 	]
 	
 	# Run each fixture function independently
@@ -1293,6 +1294,44 @@ def insert_app_role_list():
 			error_msg = f"Error inserting '{role_name}': {str(e)}"
 			error_details.append(error_msg)
 			error_count += 1
+	
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count,
+		"error_details": error_details
+	}
+
+
+def insert_attachment_types():
+	"""Insert default attachment types used in personnel attachments"""
+	
+	attachment_types = [
+		"Mission",
+		"Principal",
+	]
+	
+	inserted_count = 0
+	skipped_count = 0
+	error_count = 0
+	error_details = []
+	
+	for att_type in attachment_types:
+		# Check if attachment type already exists
+		if frappe.db.exists("Attachment Type", att_type):
+			skipped_count += 1
+			continue
+		
+		try:
+			att_doc = frappe.get_doc({
+				"doctype": "Attachment Type",
+				"attachment_type": att_type
+			})
+			att_doc.insert(ignore_permissions=True)
+			inserted_count += 1
+		except Exception as e:
+			error_count += 1
+			error_details.append(f"{att_type}: {str(e)}")
 	
 	return {
 		"inserted": inserted_count,
