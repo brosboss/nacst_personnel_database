@@ -44,19 +44,27 @@ if (typeof window.NAVIGATION_ITEMS === 'undefined') {
 			icon: 'fa-history'
 		},
 		{
+			route: 'postings-with-pengin',
+			label: 'Pending Part 2 Orders',
+			icon: 'fa-exclamation-circle'
+		},
+		{
 			route: 'personnel-unit-stati',
 			label: 'Unit Analysis',
-			icon: 'fa-exchange-alt'
+			// Use Font Awesome 4 icon (Frappe v15 ships FA4, not FA5)
+			icon: 'fa-exchange'
 		},
 		{
 			route: '#',
 			label: 'Reports',
-			icon: 'fa-chart-line'
+			// Use FA4 chart icon
+			icon: 'fa-bar-chart'
 		},
 		{
 			route: '#',
 			label: 'Documents',
-			icon: 'fa-file-alt'
+			// Use FA4 document icon
+			icon: 'fa-file-text-o'
 		},
 		{
 			route: '#',
