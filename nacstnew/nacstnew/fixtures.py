@@ -1237,6 +1237,13 @@ def insert_app_role_list():
 		{"app_role": "Strength Returns Editor", "owner_doctype": "Strength Returns"},
 		{"app_role": "Strength Returns Reader", "owner_doctype": "Strength Returns"},
 		{"app_role": "Strength Returns Submitter", "owner_doctype": "Strength Returns"},
+		{"app_role": "Atts and Dets Creator", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets  Amender", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Canceller", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Editor", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Reader", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Submitter", "owner_doctype": "Personnel Att and Dets Form"},
+		{"app_role": "Atts and Dets Deleter", "owner_doctype": "Personnel Att and Dets Form"},
 	]
 	
 	inserted_count = 0

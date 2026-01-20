@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class PersonnelUnitVerificationForm(Document):
+class ReferenceDataManager(Document):
 	pass

@@ -292,6 +292,10 @@ def get_realtime_activities(limit=50, since=None, doctype=None, module=None, fro
 	# Only use doctype_list if doctype is not directly specified
 	if doctype_list and not doctype:
 		version_filters["ref_doctype"] = ["in", doctype_list]
+
+	# For non-admin users, hide activities performed by Administrator
+	if not is_admin:
+		version_filters["owner"] = ["!=", "Administrator"]
 	
 	# Debug: Log the filters being used
 	if from_date or to_date:
@@ -515,6 +519,10 @@ def get_realtime_activities(limit=50, since=None, doctype=None, module=None, fro
 		else:
 			# No accessible doctypes, skip communications
 			pass  # Will be handled below
+
+	# For non-admin users, hide communications sent by Administrator
+	if not is_admin:
+		where_conditions.append("C.sender != 'Administrator'")
 	
 	# Build where clause and execute communications query
 	# Initialize communications list

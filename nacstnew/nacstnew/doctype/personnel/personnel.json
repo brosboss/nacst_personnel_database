@@ -44,7 +44,7 @@
   "dtos",
   "personnel_attachement_section",
   "current_personnel_attachment",
-  "personnel_attachment_type",
+  "type",
   "column_break_fjky",
   "personnel_attachment_unit",
   "personnel_attachment_remarks",
@@ -144,6 +144,7 @@
    "read_only": 1
   },
   {
+   "description": "** From Strength Returns**",
    "fieldname": "current_deployment",
    "fieldtype": "Data",
    "label": "Current Deployment",
@@ -372,13 +373,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "current_personnel_attachment.attachment_type",
-   "fieldname": "personnel_attachment_type",
-   "fieldtype": "Data",
-   "label": "Personnel Attachment Type",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_fjky",
    "fieldtype": "Column Break"
   },
@@ -405,6 +399,13 @@
    "fieldtype": "Data",
    "label": "Atts / Dets Type",
    "read_only": 1
+  },
+  {
+   "fetch_from": "current_personnel_attachment.type",
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -412,7 +413,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-19 20:17:46.307815",
+ "modified": "2026-01-20 10:19:16.763919",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",
