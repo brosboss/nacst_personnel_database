@@ -7,10 +7,14 @@
 import frappe
 import subprocess
 from pathlib import Path
+from datetime import datetime
+import socket
+import binascii
+from frappe.utils import now_datetime
 
 @frappe.whitelist()
 def backup_to_qnap():
-    if not frappe.has_permission("System Settings", "write"):
+    if not _has_backup_role():
         frappe.throw("Not permitted")
 
     site = frappe.local.site
@@ -59,7 +63,17 @@ def backup_to_qnap():
     if not nas_base:
         raise frappe.ValidationError("qnap_base_path is not set in site_config.json")
 
-    remote_backup_dir = f"{nas_base}/{site}/{latest_prefix}"
+    # Generate folder name in format: 2_jan_25_2000hrs_frappe_user
+    # where 2 = day of week (Monday=1, Tuesday=2, etc.)
+    now = datetime.now()
+    day_of_week = now.weekday() + 1  # Monday=1, Tuesday=2, ..., Sunday=7
+    month_abbr = now.strftime("%b").lower()  # jan, feb, mar, etc.
+    day_of_month = now.strftime("%d")  # 01-31
+    time_str = now.strftime("%H%M") + "hrs"  # 2000hrs format
+    frappe_username = frappe.session.user
+    
+    backup_folder_name = f"{day_of_week}_{month_abbr}_{day_of_month}_{time_str}_{frappe_username}"
+    remote_backup_dir = f"{nas_base}/{site}/{backup_folder_name}"
 
     # Create remote folder first
     subprocess.check_call([
@@ -79,9 +93,14 @@ def backup_to_qnap():
         f"{nas_user}@{nas_host}:{remote_backup_dir}/"
     ])
 
+    # Record last backup time on the single doctype
+    try:
+        frappe.db.set_single_value("Backup to NAS", "last_backup_at", now_datetime())
+    except Exception:
+        # Don't block backup completion on this write
+        pass
 
-
-
+    return f"Backup sent to NAS: {backup_folder_name}"
     # # 3) Prepare NAS destination
     # nas_user = frappe.conf.qnap_user
     # nas_host = frappe.conf.qnap_host
@@ -108,13 +127,10 @@ def backup_to_qnap():
     #     "-e", f"ssh -p {nas_port} -o StrictHostKeyChecking=accept-new",
     #     *files_to_send,
     #     f"{nas_user}@{nas_host}:{remote_site_dir}/"
-    # ])
-
-    return f"Backup sent to NAS: {latest_prefix}"
-
+    # 
 @frappe.whitelist()
 def list_nas_backups():
-    if not frappe.has_permission("System Settings", "read"):
+    if not _has_backup_role():
         frappe.throw("Not permitted")
 
     site = frappe.local.site
@@ -144,6 +160,138 @@ def list_nas_backups():
 
     backups = sorted(result.splitlines(), reverse=True)
     return backups
+
+@frappe.whitelist()
+def check_nas_connection():
+    """Check if NAS is reachable via SSH"""
+    if not _has_backup_role():
+        frappe.throw("Not permitted")
+    
+    try:
+        nas_user = frappe.conf.qnap_user
+        nas_host = frappe.conf.qnap_host
+        nas_port = int(frappe.conf.get("qnap_port") or 22)
+        
+        if not nas_user or not nas_host:
+            return {"connected": False, "message": "NAS configuration not set"}
+        
+        # Test SSH connection with a quick command
+        cmd = [
+            "ssh",
+            "-o", "ConnectTimeout=5",
+            "-o", "StrictHostKeyChecking=accept-new",
+            "-o", "BatchMode=yes",
+            "-p", str(nas_port),
+            f"{nas_user}@{nas_host}",
+            "echo 'connected'"
+        ]
+        
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            return {"connected": True, "message": "NAS is connected"}
+        else:
+            return {"connected": False, "message": "NAS connection failed"}
+            
+    except subprocess.TimeoutExpired:
+        return {"connected": False, "message": "Connection timeout"}
+    except Exception as e:
+        return {"connected": False, "message": str(e)}
+
+
+def _send_wol(mac: str, broadcast_ip: str = "192.168.88.255", port: int = 9):
+    mac_clean = mac.replace(":", "").replace("-", "").lower()
+    if len(mac_clean) != 12:
+        raise ValueError("Invalid MAC address")
+
+    mac_bytes = binascii.unhexlify(mac_clean)
+    packet = b"\xff" * 6 + mac_bytes * 16
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    s.sendto(packet, (broadcast_ip, port))
+    s.close()
+
+@frappe.whitelist()
+def power_on_nas():
+    if not _has_backup_role():
+        frappe.throw("Not permitted")
+
+    mac = frappe.conf.get("nas_mac")
+    bcast = frappe.conf.get("nas_broadcast_ip", "192.168.88.255")
+    port = int(frappe.conf.get("nas_wol_port") or 9)
+
+    if not mac:
+        frappe.throw("nas_mac is not set in site_config.json")
+
+    _send_wol(mac, bcast, port)
+    return "Wake-on-LAN packet sent"
+
+import subprocess
+
+@frappe.whitelist()
+def power_off_nas():
+    if not _has_backup_role():
+        frappe.throw("Not permitted")
+
+    nas_user = frappe.conf.get("nas_shutdown_user")
+    nas_host = frappe.conf.get("qnap_host")
+    nas_port = int(frappe.conf.get("qnap_port") or 22)
+
+    if not nas_user or not nas_host:
+        frappe.throw("qnap_user or qnap_host missing in site_config.json")
+
+    # Try commands without sudo (since sudo is not present)
+    shutdown_commands = [
+        "/sbin/poweroff",
+        "/bin/poweroff",
+        "poweroff",
+        "/sbin/shutdown -h now",
+        "/bin/shutdown -h now",
+        "shutdown -h now",
+        "/sbin/halt",
+        "/bin/halt",
+        "halt",
+    ]
+
+    last_stderr = None
+
+    for cmd_str in shutdown_commands:
+        try:
+            cmd = [
+                "ssh",
+                "-o", "StrictHostKeyChecking=accept-new",
+                "-p", str(nas_port),
+                f"{nas_user}@{nas_host}",
+                cmd_str
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+
+            if result.returncode == 0:
+                return "Shutdown command sent to NAS"
+
+            if result.stderr:
+                last_stderr = result.stderr.strip()
+
+        except subprocess.TimeoutExpired:
+            # Often means the NAS is already shutting down
+            return "Shutdown command sent to NAS (system may be shutting down)"
+
+    frappe.throw(
+        f"Failed to shut down NAS. Last error: {last_stderr or 'unknown error'}. "
+        "Use an admin-capable SSH user or enable the correct shutdown method on the NAS."
+    )
+
+
+def _has_backup_role():
+    """Allow access to System Manager or Can Backup NAS role."""
+    roles = frappe.get_roles()
+    return ("System Manager" in roles) or ("Can Backup NAS" in roles)
 
 
 # @frappe.whitelist()
