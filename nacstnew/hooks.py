@@ -143,6 +143,7 @@ doctype_js = {
 after_install = [
 	"nacstnew.nacstnew.fixtures.install_fixtures"
 ]
+fixtures = ["Custom Field", "Property Setter"]
 
 # Uninstallation
 # ------------

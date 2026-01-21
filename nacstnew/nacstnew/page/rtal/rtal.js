@@ -376,6 +376,17 @@ frappe.pages['rtal'].on_page_load = function(wrapper) {
 		// Function to handle date selection and conversion
 		function handleDateSelect(formattedDate, date, inst) {
 			if (formattedDate) {
+				// Air Datepicker passes the instance as `inst` and the input is available as `inst.$el`
+				// In older code this was referenced as `inst.input`, which is undefined and breaks the handler.
+				let inputId = null;
+				if (inst && inst.$el) {
+					// inst.$el is a jQuery object
+					inputId = $(inst.$el).attr('id');
+				}
+				if (!inputId) {
+					console.warn('RTAL: Could not determine input element for datepicker selection');
+				}
+				
 				// The formattedDate is in user format, convert to system format for backend
 				// formattedDate includes both date and time in user format
 				let systemDate = frappe.datetime.user_to_str(formattedDate, false); // false = not time only
@@ -389,18 +400,18 @@ frappe.pages['rtal'].on_page_load = function(wrapper) {
 				// If time is not included (only date), set appropriate defaults
 				if (systemDate && !systemDate.includes(' ')) {
 					// Only date, no time - add time component
-					if (inst.input.attr('id') === 'rtal-from-date') {
+					if (inputId === 'rtal-from-date') {
 						// For from_date, use start of day (00:00:00)
 						systemDate = systemDate + ' 00:00:00';
-					} else if (inst.input.attr('id') === 'rtal-to-date') {
+					} else if (inputId === 'rtal-to-date') {
 						// For to_date, use end of day (23:59:59)
 						systemDate = systemDate + ' 23:59:59';
 					}
 				}
 				
-				if (inst.input.attr('id') === 'rtal-from-date') {
+				if (inputId === 'rtal-from-date') {
 					selectedFromDate = systemDate;
-				} else if (inst.input.attr('id') === 'rtal-to-date') {
+				} else if (inputId === 'rtal-to-date') {
 					selectedToDate = systemDate;
 				}
 				// Reset activities and reload

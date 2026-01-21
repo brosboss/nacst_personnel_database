@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_events_in_timeline": 1,
- "allow_rename": 1,
  "autoname": "field:course",
  "creation": "2025-12-25 21:16:18.672080",
  "doctype": "DocType",
@@ -50,7 +49,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-31 15:16:55.383398",
+ "modified": "2026-01-20 16:40:11.853146",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Course",

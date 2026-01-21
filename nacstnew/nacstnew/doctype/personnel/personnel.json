@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "autoname": "field:service_number",
  "creation": "2025-12-25 17:12:12.851712",
  "doctype": "DocType",
@@ -413,7 +414,7 @@
  "image_field": "personnel_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-01-20 10:19:16.763919",
+ "modified": "2026-01-20 17:30:23.740157",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "Personnel",
@@ -614,6 +615,12 @@
   {
    "read": 1,
    "role": "Data Viewer"
+  },
+  {
+   "create": 1,
+   "import": 1,
+   "read": 1,
+   "role": "Can Import Data"
   }
  ],
  "row_format": "Dynamic",

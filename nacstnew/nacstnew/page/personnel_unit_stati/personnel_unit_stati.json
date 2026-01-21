@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2026-01-19 20:19:31.548093",
+ "modified": "2026-01-20 18:37:10.981991",
  "modified_by": "Administrator",
  "module": "Nacstnew",
  "name": "personnel-unit-stati",
@@ -13,6 +13,9 @@
  "roles": [
   {
    "role": "Administrator"
+  },
+  {
+   "role": "Can View Dashboard"
   }
  ],
  "script": null,
