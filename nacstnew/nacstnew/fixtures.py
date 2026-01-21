@@ -33,6 +33,8 @@ def install_fixtures():
 		("Nigeria States", insert_nigeria_states),
 		("Personnel Categories", ensure_personnel_categories),
 		("Ranks", insert_ranks),
+		("Managed Data Import Documents", insert_managed_data_import_documents),
+		("Role Permissions for Can Import Data", insert_role_permissions_can_import_data),
 		("Types of Commission", insert_types_of_commission),
 		("Courses", insert_courses),
 		("Course Names", insert_course_names),
@@ -1103,6 +1105,34 @@ def export_app_role_list_for_fixtures():
 
 
 @frappe.whitelist()
+def export_managed_data_import_documents_for_fixtures():
+	"""
+	Export current Managed Data Import Document entries in a format suitable for fixtures.
+	Run this on an instance where you've already configured the managed doctypes.
+	The printed Python list can be copied into insert_managed_data_import_documents().
+	"""
+	entries = frappe.get_all(
+		"Managed Data Import Document",
+		fields=["managed_doctype"],
+		order_by="managed_doctype",
+	)
+
+	fixture_data = [{"managed_doctype": e.managed_doctype} for e in entries]
+
+	print("\n=== Managed Data Import Document Fixture Data ===\n")
+	print("managed_data_import_entries = [")
+	for entry in fixture_data:
+		print(f'\t{{"managed_doctype": "{entry["managed_doctype"]}"}},')
+	print("]\n")
+
+	return {
+		"total": len(fixture_data),
+		"entries": fixture_data,
+		"python_code": fixture_data,
+	}
+
+
+@frappe.whitelist()
 def export_module_profiles_for_fixtures():
 	"""
 	Export current Module Profile entries in a format suitable for fixtures.
@@ -1174,6 +1204,176 @@ def insert_module_profiles():
 		"skipped": skipped_count,
 		"errors": error_count,
 		"error_details": error_details
+	}
+
+
+def insert_managed_data_import_documents():
+	"""Insert Managed Data Import Document records for managed doctypes.
+
+	The actual list of managed doctypes should mirror what you are currently using
+	on your main instance. To generate it, run:
+
+	    frappe.call("nacstnew.nacstnew.nacstnew.fixtures.export_managed_data_import_documents_for_fixtures")
+
+	on the configured site and copy the printed `managed_data_import_entries` list
+	into `managed_entries` below.
+	"""
+
+	managed_entries = [
+		{"managed_doctype": "Strength Returns"},
+		{"managed_doctype": "Personnel"},
+	]
+
+	inserted_count = 0
+	skipped_count = 0
+	error_count = 0
+	error_details = []
+
+	for entry in managed_entries:
+		managed_doctype = entry["managed_doctype"]
+
+		# Ensure the target DocType exists
+		if not frappe.db.exists("DocType", managed_doctype):
+			error_details.append(f"DocType '{managed_doctype}' not found; skipping.")
+			error_count += 1
+			continue
+
+		# Check if Managed Data Import Document already exists (autoname = managed_doctype)
+		if frappe.db.exists("Managed Data Import Document", managed_doctype):
+			skipped_count += 1
+			continue
+
+		try:
+			doc = frappe.get_doc(
+				{
+					"doctype": "Managed Data Import Document",
+					"managed_doctype": managed_doctype,
+				}
+			)
+			doc.insert(ignore_permissions=True)
+			inserted_count += 1
+		except Exception as e:
+			error_details.append(f"{managed_doctype}: {str(e)}")
+			error_count += 1
+
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count,
+		"error_details": error_details,
+	}
+
+
+def _ensure_role_permission(doctype, role, permlevel=0, **flags):
+	"""
+	Internal helper to ensure a DocType has a permission row for a given role.
+	If a row exists, it is updated with the provided flags; otherwise a new row is added.
+	"""
+	# Make sure the DocType exists
+	if not frappe.db.exists("DocType", doctype):
+		return False, f"DocType '{doctype}' not found"
+
+	dt = frappe.get_doc("DocType", doctype)
+
+	perm_row = None
+	for p in dt.permissions:
+		if p.role == role and int(p.permlevel or 0) == int(permlevel):
+			perm_row = p
+			break
+
+	created = False
+	if not perm_row:
+		perm_row = dt.append("permissions", {})
+		perm_row.role = role
+		perm_row.permlevel = permlevel
+		created = True
+
+	# Apply all provided flags (read, write, create, delete, report, export, etc.)
+	for key, val in flags.items():
+		if hasattr(perm_row, key):
+			setattr(perm_row, key, 1 if val else 0)
+
+	dt.save(ignore_permissions=True)
+	return created, None
+
+
+def insert_role_permissions_can_import_data():
+	"""
+	Ensure Role Permission Manager configuration for role 'Can Import Data'
+	on doctypes 'Data Import' and 'Error Log'.
+	"""
+
+	role_name = "Can Import Data"
+
+	# If role doesn't exist yet, skip gracefully (fixtures for Role/App Role List handle it)
+	if not frappe.db.exists("Role", role_name):
+		return {
+			"inserted": 0,
+			"skipped": 1,
+			"errors": 0,
+			"error_details": [f"Role '{role_name}' not found; skipped permission setup."],
+		}
+
+	inserted_count = 0
+	skipped_count = 0
+	error_count = 0
+	error_details = []
+
+	# Permissions for Data Import
+	# Allow this role to manage Data Import documents (no delete by default).
+	created, err = _ensure_role_permission(
+		"Data Import",
+		role_name,
+		permlevel=0,
+		read=True,
+		write=True,
+		create=True,
+		delete=False,
+		report=True,
+		export=True,
+		email=True,
+		print=True,
+		share=True,
+	)
+	if err:
+		error_details.append(err)
+		error_count += 1
+	else:
+		if created:
+			inserted_count += 1
+		else:
+			skipped_count += 1
+
+	# Permissions for Error Log
+	# Mirror what you already have in the DocType JSON: read/write/create, export, etc.
+	created, err = _ensure_role_permission(
+		"Error Log",
+		role_name,
+		permlevel=0,
+		read=True,
+		write=True,
+		create=True,
+		delete=False,
+		report=True,
+		export=True,
+		email=True,
+		print=True,
+		share=True,
+	)
+	if err:
+		error_details.append(err)
+		error_count += 1
+	else:
+		if created:
+			inserted_count += 1
+		else:
+			skipped_count += 1
+
+	return {
+		"inserted": inserted_count,
+		"skipped": skipped_count,
+		"errors": error_count,
+		"error_details": error_details,
 	}
 
 
